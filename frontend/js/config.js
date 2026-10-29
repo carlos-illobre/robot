@@ -49,6 +49,14 @@ export function resolveInitialServer(location = window.location) {
   return "http://localhost:8001";
 }
 
+/** Último backend real usado (para volver a él desde la simulación del navegador). */
+export function resolveBackendUrl(location = window.location) {
+  const saved = settings.get("backendUrl");
+  if (saved) return saved;
+  if (location.protocol.startsWith("http") && location.pathname.startsWith("/dashboard")) return location.origin;
+  return "http://localhost:8001";
+}
+
 export function resolveInitialTransport(location = window.location) {
   const q = new URLSearchParams(location.search).get("transport");
   if (q === "polling" || q === "websocket") return q;

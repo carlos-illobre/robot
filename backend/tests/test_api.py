@@ -125,3 +125,42 @@ def test_modo_real_sin_sdk_falla_con_un_mensaje_claro(monkeypatch):
     with pytest.raises(RuntimeError, match="unitree_sdk2py"):
         servidor.crear_lector("real", "go2", "eth0")
     assert servidor.main(["--real", "--robot", "go2"]) == 1
+
+
+def test_cambiar_la_fuente_en_caliente():
+    """POST /fuente cambia de Go2 a G1 sin reiniciar, y una fuente no disponible se rechaza."""
+    import servidor
+    from fuentes import crear_router
+    from fastapi import FastAPI
+
+    app = FastAPI()
+    lector = PaseoDemoReader("go2")
+    telemetry_server.configurar(lector, "go2", "demo")
+    estado = {"lector": lector, "modo": "demo", "robot": "go2", "interfaz": None}
+    app.include_router(crear_router(servidor.crear_lector, telemetry_server.configurar, estado))
+    app.mount("/api", telemetry_server.app)
+
+    with TestClient(app) as c:
+        assert c.get("/fuentes").json()["actual"]["robot"] == "go2"
+        r = c.post("/fuente", json={"modo": "demo", "robot": "g1"})
+        assert r.status_code == 200, r.text
+        assert c.get("/api/info").json()["n_motores"] == 29
+        assert len(c.get("/api/telemetria").json()["motores"]) == 29
+        disponibles = {f["modo"]: f["disponible"] for f in c.get("/fuentes").json()["fuentes"]}
+        if not disponibles["real"]:
+            assert c.post("/fuente", json={"modo": "real", "robot": "go2"}).status_code == 409
+        assert c.post("/fuente", json={"modo": "xyz"}).status_code == 400
+    estado["lector"].cerrar()
+
+
+def test_fuente_fija_no_se_puede_cambiar():
+    import servidor
+    from fuentes import crear_router
+    from fastapi import FastAPI
+
+    app = FastAPI()
+    estado = {"lector": None, "modo": "demo", "robot": "go2", "interfaz": None}
+    app.include_router(crear_router(servidor.crear_lector, telemetry_server.configurar, estado, cambiable=False))
+    with TestClient(app) as c:
+        assert c.get("/fuentes").json()["cambiable"] is False
+        assert c.post("/fuente", json={"modo": "demo", "robot": "g1"}).status_code == 403

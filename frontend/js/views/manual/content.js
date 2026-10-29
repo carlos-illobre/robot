@@ -80,6 +80,11 @@ export const SECTIONS = [
         kind: "info",
         html: "<b>El día del robot real</b> no cambia nada del dashboard: solo la dirección del servidor. Abrí <code>http://localhost:8001/?server=http://IP-DEL-ROBOT:8001</code> o escribila en el panel de conexión.",
       },
+      {
+        type: "callout",
+        kind: "tip",
+        html: "<b>¿Robot real o simulación?</b> La etiqueta junto al nombre del robot lo dice siempre: <b>REAL</b> en verde (datos medidos) o <b>SIMULADO</b> en violeta. Haciendo clic se elige la <b>fuente de datos</b>: <i>Robot real</i> (por DDS, en el laboratorio), <i>Simulador MuJoCo</i> de la cátedra, <i>Demo «paseo»</i> del servidor o <i>Simulación en el navegador</i> (sin servidor). Una fuente no disponible aparece gris con el motivo, por ejemplo: «Falta el SDK de Unitree». También se elige ahí el robot: Go2 o G1.",
+      },
       { type: "p", html: "<b>WebSocket o polling.</b> Son dos formas de recibir los datos. Con <b>WebSocket</b> el servidor <i>empuja</i> cada muestra apenas la tiene (10 por segundo, sin demora). Con <b>polling</b> el dashboard <i>pregunta</i> cada 100, 250 o 500 ms. WebSocket es mejor; polling sirve si una red bloquea WebSocket. Se cambia con <kbd>W</kbd>." },
     ],
   },

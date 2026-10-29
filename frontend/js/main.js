@@ -9,7 +9,7 @@
  *   TelemetryService ──"frame"──► EventBus ──► historial · grabación · alarmas
  *                                         └──► requestAnimationFrame ──► vista.update()
  */
-import { DEFAULTS, settings, resolveInitialServer, resolveInitialTransport } from "./config.js";
+import { DEFAULTS, settings, resolveInitialServer, resolveInitialTransport, resolveBackendUrl } from "./config.js";
 import { EventBus } from "./core/EventBus.js";
 import { RingBuffer } from "./core/RingBuffer.js";
 import { CaptureStore } from "./core/CaptureStore.js";
@@ -41,6 +41,9 @@ const alertTracker = new AlertTracker();
  */
 const state = {
   baseUrl: resolveInitialServer(),
+  backendUrl: resolveBackendUrl(),
+  /** Fuente de datos actual: { modo: "real"|"simulador"|"demo"|"demo-catedra"|"navegador", robot, medido } */
+  source: null,
   transport: resolveInitialTransport(),
   intervalMs: settings.get("intervalMs", DEFAULTS.intervalMs),
   torqueAlarm: settings.get("torqueAlarm", DEFAULTS.torqueAlarm),
@@ -160,10 +163,75 @@ const actions = {
       return;
     }
     settings.set("baseUrl", state.baseUrl);
-    appBar.togglePopover(false);
+    if (!isSimUrl(state.baseUrl)) {
+      state.backendUrl = state.baseUrl;
+      settings.set("backendUrl", state.backendUrl);
+    }
     history.clear();
-    logEvent("info", `Conectando a ${state.baseUrl}`);
+    logEvent("info", `Conectando a ${isSimUrl(state.baseUrl) ? "la simulación del navegador" : state.baseUrl}`);
     await service.connect({ baseUrl: state.baseUrl, transport: state.transport, intervalMs: state.intervalMs });
+    await actions.loadSources();
+  },
+
+  /**
+   * Fuentes de datos disponibles. Siempre incluye la simulación del navegador;
+   * las del backend se le preguntan al último servidor usado.
+   */
+  async loadSources() {
+    const navegador = {
+      modo: "navegador",
+      nombre: "Simulación en el navegador",
+      descripcion: "Sin servidor: los datos se generan en esta página. Ideal para probar el dashboard en cualquier lado.",
+      medido: false,
+      disponible: true,
+      motivo: "",
+    };
+    let backend = null;
+    let error = "";
+    try {
+      backend = await new ApiClient(state.backendUrl, { timeoutMs: 1500 }).fuentes();
+    } catch (err) {
+      error = /404/.test(err.message)
+        ? "Este servidor no permite elegir la fuente (es el backend original de la cátedra)."
+        : `No hay un servidor en ${state.backendUrl}.`;
+    }
+    const sim = isSimUrl(state.baseUrl);
+    const fuentes = backend
+      ? backend.fuentes
+      : ["real", "simulador", "demo"].map((modo) => ({ modo, nombre: { real: "Robot real", simulador: "Simulador MuJoCo", demo: "Demo «paseo»" }[modo], descripcion: "", disponible: false, motivo: error }));
+    state.source = sim
+      ? { modo: "navegador", robot: /g1$/.test(state.baseUrl) ? "g1" : "go2", medido: false }
+      : backend
+        ? { ...backend.actual, medido: backend.actual.modo === "real" }
+        : { modo: state.info?.modo ?? "desconocido", robot: state.info?.modelo, medido: state.info?.modo === "real" };
+    const result = { actual: state.source, cambiable: backend?.cambiable ?? false, fuentes: [...fuentes, navegador], backendUrl: state.backendUrl, error };
+    appBar.setSources(result);
+    view?.onSource?.(state.source);
+    return result;
+  },
+
+  /** Cambia la fuente de datos: del navegador, o del backend (POST /fuente). */
+  async setSource({ modo, robot = "go2", interfaz = null }) {
+    if (modo === "navegador") {
+      await actions.connect(robot === "g1" ? "demo-g1" : "demo");
+      toast(`Fuente: simulación en el navegador · ${robot.toUpperCase()}`, { kind: "ok" });
+      return true;
+    }
+    try {
+      await new ApiClient(state.backendUrl).cambiarFuente({ modo, robot, interfaz: interfaz || null });
+    } catch (err) {
+      toast(`No se pudo cambiar la fuente: ${err.message.replace(/^HTTP \d+: /, "")}`, { kind: "crit", timeout: 6000 });
+      logEvent("warn", `Cambio de fuente fallido (${modo}): ${err.message}`);
+      return false;
+    }
+    if (isSimUrl(state.baseUrl) || state.baseUrl !== state.backendUrl) await actions.connect(state.backendUrl);
+    else {
+      await service.refreshInfo();
+      await actions.loadSources();
+    }
+    logEvent("ok", `Fuente de datos: ${modo} · ${robot}`);
+    toast(`Fuente: ${modo === "real" ? "robot real" : modo} · ${robot.toUpperCase()}`, { kind: "ok" });
+    return true;
   },
 
   setTorqueAlarm(nm) {
@@ -376,7 +444,8 @@ const appBar = new AppBar(document.getElementById("appbar"), { state, actions })
 
 const initialView = new URLSearchParams(location.search).get("view") ?? settings.get("view") ?? VIEWS[0].id;
 await switchView(initialView);
-service.connect({ baseUrl: state.baseUrl, transport: state.transport, intervalMs: state.intervalMs });
+await service.connect({ baseUrl: state.baseUrl, transport: state.transport, intervalMs: state.intervalMs });
+actions.loadSources();
 
 // Para curiosear desde la consola del navegador (F12): tp05.state, tp05.history.tail(5)…
 window.tp05 = { state, history, captures, actions, service, bus };

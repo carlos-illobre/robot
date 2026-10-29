@@ -11,11 +11,12 @@ Uso rapido:
 y abrir  http://localhost:8001  en el navegador.
 
 Es el mismo backend FastAPI que provee la catedra (`api/telemetry_server.py`,
-sin modificaciones). Este archivo solo agrega dos cosas:
+sin modificaciones). Este archivo solo agrega tres cosas:
 
 1. Elige que *lector* (fuente de datos) se inyecta en el servidor: la API y el
    JSON son identicos en los tres modos. Ese es el punto de la arquitectura.
-2. Monta el frontend (`/frontend`) como archivos estaticos en `/dashboard`,
+2. Permite cambiar esa fuente desde el dashboard (`fuentes.py`).
+3. Monta el frontend (`/frontend`) como archivos estaticos en `/dashboard`,
    para que alcance con un solo comando y no haya problemas de CORS ni de
    modulos ES abiertos desde `file://`.
 """
@@ -88,6 +89,8 @@ def main(argv=None) -> int:
                        help="robot real por DDS (requiere unitree_sdk2py y cable al robot)")
     ap.add_argument("--interfaz", default=None,
                     help="interfaz de red conectada al robot, p. ej. eth0 o enp3s0 (solo con --real)")
+    ap.add_argument("--fuente-fija", action="store_true",
+                    help="no permitir cambiar la fuente de datos desde el dashboard")
     args = ap.parse_args(argv)
 
     import uvicorn
@@ -113,6 +116,11 @@ def main(argv=None) -> int:
 
     # El servidor de la catedra reporta "demo" en /info; los dos demos lo son.
     configurar(lector, args.robot, "demo" if modo.startswith("demo") else modo)
+
+    # Rutas para elegir la fuente desde el dashboard (GET /fuentes, POST /fuente)
+    from fuentes import crear_router
+    estado = {"lector": lector, "modo": modo, "robot": args.robot, "interfaz": args.interfaz}
+    app.include_router(crear_router(crear_lector, configurar, estado, cambiable=not args.fuente_fija))
     montar_dashboard(app)
     ip = ip_de_la_maquina()
 

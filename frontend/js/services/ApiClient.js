@@ -24,12 +24,26 @@ export class ApiClient {
     return u.toString();
   }
 
-  async get(path, { signal } = {}) {
+  get(path, opts) {
+    return this.request(path, opts);
+  }
+
+  post(path, body, opts = {}) {
+    return this.request(path, { ...opts, method: "POST", body });
+  }
+
+  async request(path, { signal, method = "GET", body, timeoutMs = this.timeoutMs } = {}) {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(new DOMException("Timeout", "TimeoutError")), this.timeoutMs);
+    const timer = setTimeout(() => ctrl.abort(new DOMException("Timeout", "TimeoutError")), timeoutMs);
     signal?.addEventListener("abort", () => ctrl.abort(signal.reason), { once: true });
     try {
-      const res = await fetch(`${this.baseUrl}${path}`, { signal: ctrl.signal, cache: "no-store" });
+      const res = await fetch(`${this.baseUrl}${path}`, {
+        method,
+        signal: ctrl.signal,
+        cache: "no-store",
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
       if (!res.ok) {
         let detail = res.statusText;
         try {
@@ -49,5 +63,15 @@ export class ApiClient {
 
   telemetria(opts) {
     return this.get("/telemetria", opts);
+  }
+
+  /** Fuentes de datos del backend (ruta agregada por backend/fuentes.py). */
+  fuentes(opts) {
+    return this.get("/fuentes", opts);
+  }
+
+  /** Cambia la fuente del backend. Puede tardar: espera el primer dato (hasta 5 s). */
+  cambiarFuente(pedido) {
+    return this.post("/fuente", pedido, { timeoutMs: 9000 });
   }
 }

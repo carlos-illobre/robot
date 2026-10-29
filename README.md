@@ -273,6 +273,29 @@ Opciones del servidor:
 | `--demo-catedra` | — | Demo original de la cátedra |
 | `--real` | — | Robot real por DDS (necesita `unitree_sdk2py`) |
 | `--interfaz NOMBRE` | automática | Placa de red conectada al robot (`eth0`, `enp3s0`…), solo con `--real` |
+| `--fuente-fija` | — | No permitir cambiar la fuente desde el dashboard |
+
+### 🔀 Elegir la fuente de datos desde el dashboard
+
+La etiqueta junto al nombre del robot (arriba a la izquierda) dice siempre **de dónde vienen los
+datos**: `REAL` en verde (medidos) o `SIMULADO` en violeta. Haciendo clic se abre el selector:
+
+| Fuente | Qué es | Requisito |
+|---|---|---|
+| **Robot real** | El backend lee el robot por DDS | Notebook con cable al robot y `unitree_sdk2py` |
+| **Simulador MuJoCo** | El simulador 3D de la cátedra | Simulador de la cátedra abierto en la máquina del backend |
+| **Demo «paseo»** | Simulación coherente del backend | Nada |
+| **Demo de la cátedra** | El `DemoReader` original | Nada |
+| **Simulación en el navegador** | Los datos se generan en la página, sin servidor | Nada (es lo que usa GitHub Pages) |
+
+…y el robot: **Go2** (12 motores) o **G1** (29). El cambio es **en caliente** (sin reiniciar nada) y
+**transaccional**: el backend solo cambia si la fuente nueva entrega datos en 5 s; si no, sigue con
+la anterior y el dashboard muestra el motivo. Las fuentes que no están disponibles aparecen grises
+con la razón (por ejemplo: *«Falta el SDK de Unitree en la máquina del backend»*).
+
+Por detrás son dos rutas que agrega `backend/fuentes.py` sin modificar la API de la cátedra:
+`GET /fuentes` y `POST /fuente`. Como el cambio afecta a **todos** los dashboards conectados a ese
+servidor, el día de la visita se puede bloquear con `--fuente-fija`.
 
 ### 🤖 Usar el dashboard con el robot real
 
