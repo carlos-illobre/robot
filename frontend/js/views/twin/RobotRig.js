@@ -36,17 +36,27 @@ function download(url, onProgress) {
     entry.promise = (async () => {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`No se pudo descargar el modelo (${res.status})`);
+      // Ojo: si el servidor comprime (GitHub Pages manda gzip), Content-Length es
+      // el tamaño COMPRIMIDO y lo que se lee es más grande. Por eso no se reserva
+      // un buffer de ese tamaño: se juntan los pedazos y se unen al final, y el
+      // total solo se usa para estimar el progreso.
       const total = Number(res.headers.get("content-length")) || 0;
       if (!res.body || !total) return res.arrayBuffer();
       const reader = res.body.getReader();
-      const out = new Uint8Array(total);
+      const chunks = [];
       let loaded = 0;
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        out.set(value, loaded);
+        chunks.push(value);
         loaded += value.length;
-        for (const fn of entry.listeners) fn(loaded / total);
+        for (const fn of entry.listeners) fn(Math.min(0.99, loaded / total));
+      }
+      const out = new Uint8Array(loaded);
+      let offset = 0;
+      for (const c of chunks) {
+        out.set(c, offset);
+        offset += c.length;
       }
       return out.buffer;
     })();
