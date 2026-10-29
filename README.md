@@ -155,8 +155,12 @@ GitHub Actions · scripts de arranque en un paso · visor de maquetas publicado 
 |---|---|---|:---:|
 | [Python](https://www.python.org/downloads/) | 3.10 o superior | Backend FastAPI | ✅ |
 | Navegador moderno | Chrome, Edge o Firefox actuales | Dashboard | ✅ |
-| [Node.js](https://nodejs.org/) | 18 o superior | Solo para correr las pruebas del frontend | ➖ |
+| [Node.js](https://nodejs.org/) | 18 o superior | Solo para **desarrollar**: pruebas del frontend y E2E, y la conversión de los modelos 3D | ➖ |
 | [Git](https://git-scm.com/) | cualquiera | Clonar el repositorio (o bajar el ZIP) | ➖ |
+
+> **Para usar el dashboard alcanza con Python y un navegador.** El frontend es JavaScript que
+> ejecuta el navegador tal cual (sin compilar ni empaquetar), así que Node no es necesario para
+> correr el proyecto: solo para las herramientas de desarrollo.
 
 ### 1. Obtener el código
 
