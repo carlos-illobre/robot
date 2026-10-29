@@ -2,6 +2,7 @@
 **
 !backend/**
 !frontend/**
+!docker/entrypoint.py
 backend/tests/**
 frontend/tests/**
 **/__pycache__/**

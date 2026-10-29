@@ -11,6 +11,7 @@
 | Python 3.10 | La versión que recomienda Unitree para su SDK |
 | CycloneDDS 0.10.x | La librería de comunicación del robot, **compilada** (el SDK lo exige) |
 | SDK de Unitree (`unitree_sdk2py`) | Ya instalado: en el panel de fuentes, **Robot real** aparece habilitado |
+| Simulador MuJoCo de la cátedra | Se descarga de su repositorio al construir la imagen y arranca **sin ventana** dentro del contenedor: en el panel, **Simulador MuJoCo** aparece habilitado |
 | Backend + dashboard | Los mismos de siempre (`backend/` y `frontend/`) |
 
 Se arma en dos etapas: la primera compila CycloneDDS y el SDK; la imagen final solo copia lo
@@ -34,11 +35,19 @@ Todos los comandos se corren desde la **carpeta raíz** del proyecto.
 docker compose -f docker/docker-compose.yml up --build demo
 ```
 
-Abrir **http://localhost:8001**. Con el G1:
+Abrir **http://localhost:8001**. En el panel de fuentes (clic en *Simulado ▾*) están las tres
+opciones: **Demo**, **Simulador MuJoCo** (el de la cátedra, corriendo sin ventana dentro del
+contenedor) y **Robot real** (ver más abajo).
+
+Con el G1:
 
 ```bash
 ROBOT=g1 docker compose -f docker/docker-compose.yml up --build demo
 ```
+
+> **El simulador de la cátedra simula un solo robot**, el que se elige al arrancar (`ROBOT`, por
+> defecto Go2). Para usarlo con el G1, arrancar con `ROBOT=g1`. Para no levantarlo (ahorra CPU):
+> `SIMULADOR= docker compose -f docker/docker-compose.yml up demo`.
 
 ### Robot real (Linux, en la notebook conectada al robot)
 
@@ -85,12 +94,17 @@ Todo lo que va después del nombre de la imagen son opciones de `backend/servido
 | «No llegan datos del robot por DDS» | El contenedor no ve al robot: ¿se usó la red del equipo (`--network host` / servicio `robot`)? ¿Es Linux? ¿La placa es la correcta y tiene IP `192.168.123.x`? |
 | En Windows/macOS «Robot real» no recibe datos | Es esperable: Docker Desktop no comparte la placa del cable. Usar `python iniciar.py` en esa máquina, o una notebook con Linux |
 | La primera construcción tarda | Compila CycloneDDS (unos minutos). Las siguientes reutilizan la caché |
+| «Simulador MuJoCo» aparece gris | El simulador no arrancó o se arrancó con `SIMULADOR=` vacío. Su salida queda en `/tmp/simulador.log` dentro del contenedor: `docker compose -f docker/docker-compose.yml exec demo cat /tmp/simulador.log` |
+| Con el simulador, el G1 muestra datos raros | El simulador está corriendo el Go2: arrancar con `ROBOT=g1` |
 
 ## Qué se probó y qué no
 
 - ✅ La imagen se construye y el SDK queda instalado (`import unitree_sdk2py, cyclonedds`).
 - ✅ Modo demo: el backend responde, sirve el dashboard y **Robot real** aparece habilitado en el
   panel.
+- ✅ El simulador de la cátedra arranca sin ventana en el contenedor; desde el panel se cambia a
+  **Simulador MuJoCo** y llegan sus datos (patas alternando en diagonal, yaw girando).
+- ✅ El WebSocket con Python 3.10: 30 muestras en 3 s, sin errores.
 - ✅ Modo real **sin robot conectado**: inicializa DDS sobre la placa elegida, espera y avisa que no
   llegan datos (sin colgarse).
 - ⚠️ **No se probó con un robot real** (no había uno disponible al prepararla): conviene hacer una
