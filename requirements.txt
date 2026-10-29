@@ -1,0 +1,5 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+# solo para correr las pruebas
+pytest>=8
+httpx>=0.27

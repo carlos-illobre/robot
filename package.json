@@ -1,0 +1,11 @@
+{
+  "name": "tp05-dashboard-telemetria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard web de telemetría para robots Unitree (TP05 · Desarrollo de Aplicaciones II · UADE)",
+  "type": "module",
+  "scripts": {
+    "test": "node --test frontend/tests/*.test.js"
+  },
+  "engines": { "node": ">=18" }
+}

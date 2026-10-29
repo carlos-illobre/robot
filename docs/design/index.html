@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visor de maquetas · Dashboard TP05</title>
+<style>
+  :root { --bg:#f4f5f7; --surface:#fff; --text:#16181d; --muted:#667085; --border:#e4e7ec; --accent:#0e7490; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1016; --surface:#151a22; --text:#e7eaf0; --muted:#98a2b3; --border:#262d38; --accent:#22d3ee; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; padding:16px 24px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:1; }
+  h1 { font-size:16px; margin:0; }
+  nav { display:flex; gap:6px; flex-wrap:wrap; }
+  button { font:inherit; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:6px 14px; cursor:pointer; }
+  button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  main { padding:24px; display:grid; gap:24px; grid-template-columns: minmax(0, 1fr) auto; align-items:start; }
+  figure { margin:0; }
+  figcaption { color:var(--muted); margin-bottom:8px; display:flex; gap:12px; }
+  figcaption a { color:var(--accent); }
+  .desk { width:100%; aspect-ratio:1366/768; position:relative; overflow:hidden; border:1px solid var(--border); border-radius:12px; background:#000; }
+  .desk iframe { width:1366px; height:768px; border:0; transform-origin:0 0; position:absolute; inset:0; }
+  .phone { width:390px; height:844px; border:10px solid #111; border-radius:44px; overflow:hidden; background:#000; }
+  .phone iframe { width:100%; height:100%; border:0; }
+  .empty { padding:48px; color:var(--muted); }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Visor de maquetas</h1>
+  <nav id="screens" aria-label="Pantallas"></nav>
+  <nav id="variants" aria-label="Variantes"></nav>
+</header>
+<main id="stage"><p class="empty">Cargando…</p></main>
+<script>
+  const $ = (s) => document.querySelector(s);
+  const params = new URLSearchParams(location.search);
+  let data, screen, variant;
+
+  function button(text, pressed, onClick) {
+    const b = document.createElement("button");
+    b.textContent = text;
+    b.setAttribute("aria-pressed", String(pressed));
+    b.onclick = onClick;
+    return b;
+  }
+
+  function render() {
+    $("#screens").replaceChildren(...data.screens.map((s) => button(s.title, s === screen, () => { screen = s; variant = s.variants[0]; sync(); })));
+    $("#variants").replaceChildren(...(screen?.variants ?? []).map((v) => button(v.name, v === variant, () => { variant = v; sync(); })));
+    const stage = $("#stage");
+    if (!variant) { stage.innerHTML = '<p class="empty">Todavía no hay maquetas.</p>'; return; }
+    stage.replaceChildren();
+    if (variant.desktop) stage.append(frame("Computadora · 1366×768", "mockups/" + variant.desktop, "desk"));
+    if (variant.phone) stage.append(frame("Celular · 390 px", "mockups/" + variant.phone, "phone"));
+    fit();
+  }
+
+  function frame(label, src, cls) {
+    const fig = document.createElement("figure");
+    fig.innerHTML = `<figcaption><span>${label}</span><a href="${src}" target="_blank" rel="noopener">abrir sola ↗</a></figcaption><div class="${cls}"><iframe title="${label}" src="${src}"></iframe></div>`;
+    return fig;
+  }
+
+  function fit() {
+    for (const box of document.querySelectorAll(".desk")) {
+      box.querySelector("iframe").style.transform = `scale(${box.clientWidth / 1366})`;
+    }
+  }
+
+  function sync() {
+    const q = new URLSearchParams({ screen: screen?.id ?? "", variant: variant?.id ?? "" });
+    history.replaceState(null, "", "?" + q);
+    render();
+  }
+
+  addEventListener("resize", fit);
+  fetch("mockups/index.json").then((r) => r.json()).then((json) => {
+    data = json;
+    screen = data.screens.find((s) => s.id === params.get("screen")) ?? data.screens[0];
+    variant = screen?.variants.find((v) => v.id === params.get("variant")) ?? screen?.variants[0];
+    render();
+  }).catch(() => { $("#stage").innerHTML = '<p class="empty">Abrí el visor con un servidor: <code>python3 -m http.server -d docs/design</code></p>'; });
+</script>
+</body>
+</html>
