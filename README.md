@@ -15,9 +15,22 @@ por **WebSocket** o **polling**.
 ![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?logo=chartdotjs&logoColor=white)
 ![Sin internet](https://img.shields.io/badge/funciona-sin%20internet-success)
 
-<!-- CAPTURA PRINCIPAL: se agrega cuando esté elegido el diseño final -->
+### 👉 [**Probalo ahora, sin instalar nada**](https://carlos-illobre.github.io/robot/app/) 👈
+
+<sub>(versión publicada en GitHub Pages, con el robot simulado en el navegador)</sub>
+
+<img src="docs/img/hero-consola.png" alt="Vista Consola del dashboard" width="100%">
+
+<table>
+<tr>
+<td width="33%"><img src="frontend/assets/manual/body-desktop.png" alt="Vista Cuerpo"><br><b>② Cuerpo</b> · el robot es la interfaz</td>
+<td width="33%"><img src="frontend/assets/manual/pilot-desktop.png" alt="Vista Piloto"><br><b>③ Piloto</b> · instrumental de cabina</td>
+<td width="33%"><img src="frontend/assets/manual/twin-desktop.png" alt="Vista Gemelo 3D"><br><b>④ Gemelo 3D</b> · el modelo real de Unitree</td>
+</tr>
+</table>
 
 [**Empezar en 1 minuto**](#-empezar-en-1-minuto) ·
+[Las vistas](#-las-cuatro-vistas-y-el-manual) ·
 [Instalación](#-instalación-paso-a-paso) ·
 [Guía de uso](#-guía-de-uso) ·
 [Arquitectura](#-arquitectura) ·
@@ -36,19 +49,20 @@ por **WebSocket** o **polling**.
 2. [Empezar en 1 minuto](#-empezar-en-1-minuto)
 3. [Cumplimiento de la consigna](#-cumplimiento-de-la-consigna)
 4. [Instalación paso a paso](#-instalación-paso-a-paso)
-5. [Guía de uso](#-guía-de-uso)
-6. [Arquitectura](#-arquitectura)
-7. [Patrones de diseño aplicados](#-patrones-de-diseño-aplicados)
-8. [El modo demo "paseo": física de juguete, coherente](#-el-modo-demo-paseo-física-de-juguete-coherente)
-9. [Contrato de la API](#-contrato-de-la-api)
-10. [Formato del CSV exportado](#-formato-del-csv-exportado)
-11. [Hallazgos: errores en el material de la cátedra](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)
-12. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
-13. [Pruebas y calidad](#-pruebas-y-calidad)
-14. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
-15. [Estructura del repositorio](#-estructura-del-repositorio)
-16. [Problemas frecuentes](#-problemas-frecuentes)
-17. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
+5. [Las cuatro vistas (y el manual)](#-las-cuatro-vistas-y-el-manual)
+6. [Guía de uso](#-guía-de-uso)
+7. [Arquitectura](#-arquitectura)
+8. [Patrones de diseño aplicados](#-patrones-de-diseño-aplicados)
+9. [El modo demo "paseo": física de juguete, coherente](#-el-modo-demo-paseo-física-de-juguete-coherente)
+10. [Contrato de la API](#-contrato-de-la-api)
+11. [Formato del CSV exportado](#-formato-del-csv-exportado)
+12. [Hallazgos: errores en el material de la cátedra](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)
+13. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
+14. [Pruebas y calidad](#-pruebas-y-calidad)
+15. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
+16. [Estructura del repositorio](#-estructura-del-repositorio)
+17. [Problemas frecuentes](#-problemas-frecuentes)
+18. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
 
 ---
 
@@ -131,7 +145,7 @@ Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde e
 | Levantar el servidor FastAPI de la cátedra y verificar los endpoints | ✅ | `backend/api/telemetry_server.py` sin modificar; `backend/tests/test_api.py` prueba **todos** los endpoints y el WebSocket con Go2 y G1 |
 | **Panel de motores**: temperatura con semáforo (verde < 40 °C, amarillo 40–60 °C, rojo > 60 °C), ángulo, velocidad, torque | ✅ | `tempLevel()` en `frontend/js/core/telemetryModel.js` (umbrales idénticos a electroSim, con prueba unitaria de los bordes 40 y 60) |
 | 12 motores para Go2, **29 para G1** | ✅ | El dashboard se arma con `GET /info` ("consultá /info en vez de asumir"); `python backend/servidor.py --demo --robot g1` |
-| **Panel IMU**: roll, pitch, yaw numéricos + gráfico histórico de **≥ 60 muestras** | ✅ | Ventana configurable de 60, 150 o 300 muestras; historial en un buffer circular de 600 |
+| **Panel IMU**: roll, pitch, yaw numéricos + gráfico histórico de **≥ 60 muestras** | ✅ | Consola: 150 muestras (≈ 15 s) con Chart.js · Cuerpo: 300 (30 s) en la línea de tiempo · Piloto: 120 en el osciloscopio. Historial en un buffer circular de 600 |
 | **Panel BMS**: carga (%), corriente (mA), temperatura, voltajes de celda | ✅ | Además: tensión de pack, potencia y desbalance entre celdas (Δ mV) |
 | **Panel de patas**: contacto FR, FL, RR, RL | ✅ | Vista superior del robot + diagrama de marcha (qué pata apoya en cada instante) |
 | Actualización automática: polling a `/telemetria` (**≤ 500 ms**) **o** WebSocket | ✅ | Los dos, intercambiables en caliente. Polling de 100/250/500 ms (tope forzado en el código: `MAX_POLL_INTERVAL_MS = 500`) |
@@ -141,10 +155,23 @@ Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde e
 | *Extensión*: reemplazar polling por **WebSocket** | ✅ | `WebSocketTransport.js`, con reconexión automática (backoff exponencial con jitter) |
 | *Objetivo general*: patrones **Adapter, Observer, Facade** | ✅ | Ver [Patrones de diseño aplicados](#-patrones-de-diseño-aplicados) (más Strategy y Factory Method) |
 
-**Extras que no pedía la consigna:** alarmas de temperatura, torque y batería con historial de
-eventos · tema claro y oscuro · atajos de teclado · diseño adaptable a celular · funciona sin
-internet (Chart.js incluido en el repo) · pruebas automáticas en Python y JavaScript con CI en
-GitHub Actions · scripts de arranque en un paso · visor de maquetas publicado en GitHub Pages.
+**Extras que no pedía la consigna:**
+
+- **Cuatro vistas** de los mismos datos (Consola, Cuerpo, Piloto y **Gemelo 3D**) y un **manual
+  de uso** con capturas anotadas, todo en una misma barra (teclas <kbd>1</kbd> a <kbd>5</kbd>).
+- **Gemelo digital 3D**: el modelo oficial de Unitree movido por los ángulos reales de los motores;
+  botón **«Esquema | 3D real»** en las otras vistas (tecla <kbd>G</kbd>).
+- **Fuente de datos elegible desde el dashboard**: robot real, simulador MuJoCo, demo o
+  simulación en el navegador; Go2 o G1; en caliente.
+- **Funciona sin servidor** (simulación en el navegador) → publicado en
+  [GitHub Pages](https://carlos-illobre.github.io/robot/app/).
+- Alarmas de temperatura, torque y batería **con histéresis** · tema claro y oscuro · atajos de
+  teclado · adaptable a celular · **funciona sin internet** (fuentes, Chart.js, Three.js y modelos
+  incluidos).
+- **Dos errores del material de la cátedra** encontrados, corregidos y documentados
+  ([Hallazgos](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)).
+- **48 pruebas automáticas** (unitarias de Python y JavaScript + E2E con navegador real) y CI.
+- Arranque en un paso multiplataforma (`python iniciar.py`).
 
 ---
 
@@ -266,6 +293,54 @@ raíz hacia ahí: un solo proceso, un solo puerto, cero problemas de CORS.
 
 ---
 
+## 🖥 Las cuatro vistas (y el manual)
+
+Las cuatro vistas muestran **los mismos datos de la misma conexión**: cambiar de vista no corta la
+conexión ni pierde el historial ni las capturas. Se cambian con la barra de arriba o con las teclas
+<kbd>1</kbd> a <kbd>5</kbd>. Por dentro es el patrón **Strategy**: cada vista es una estrategia de
+presentación que cumple el mismo contrato ([`frontend/js/views/README.md`](frontend/js/views/README.md)).
+
+| | Vista | Para qué | Lo distintivo |
+|:-:|---|---|---|
+| <kbd>1</kbd> | **Consola** | Analizar y corregir | Los **cuatro paneles de la consigna**, numerados y con un color cada uno; tabla con semáforo triple (punto, barra y número); gráficos Chart.js; umbral de torque editable |
+| <kbd>2</kbd> | **Cuerpo** | Entender de un vistazo | El robot **es** la interfaz: cada temperatura en su articulación, el apoyo en el pie, la batería en el cuerpo; línea de tiempo de 30 s con las capturas como alfileres |
+| <kbd>3</kbd> | **Piloto** | Proyectar en clase | Instrumental de cabina a pantalla completa: horizonte artificial, cinta de rumbo, anillo de motores, **sonido** opcional del trote y de las alarmas |
+| <kbd>4</kbd> | **Gemelo 3D** | Ver el robot de verdad | El **modelo 3D oficial de Unitree** moviéndose con los ángulos reales, anillos de semáforo en cada articulación, cámara orbitable |
+| <kbd>5</kbd> | **Manual** | Aprender a leerlo | Guía con conceptos (IMU, BMS, marcha), diagramas y **capturas anotadas** de cada vista |
+
+<p align="center"><img src="docs/img/hero-cuerpo-3d.png" alt="Vista Cuerpo con el modelo 3D real" width="85%"><br>
+<sub>Vista <b>Cuerpo</b> con el botón <b>«Esquema | 3D real»</b> en 3D: el modelo de Unitree en lugar del dibujo.</sub></p>
+
+### Esquema o 3D real
+
+En Consola, Cuerpo y Piloto el robot se puede ver como un **esquema** (SVG liviano) o como el
+**modelo 3D real** (botón «Esquema | 3D» o tecla <kbd>G</kbd>; la preferencia vale para todas las
+vistas y se recuerda). Es el mismo componente `RobotScene` del Gemelo 3D, con fondo transparente.
+Three.js y los modelos se descargan **recién la primera vez que alguien elige 3D**.
+
+### Cómo se hizo el Gemelo 3D
+
+1. **Modelos**: los oficiales de Unitree que trae el simulador de la cátedra (BSD-3), convertidos
+   a glTF binario y optimizados con meshoptimizer: el Go2 pasó de 28 MB y 197 k triángulos a
+   **655 KB**; el G1, de 18 MB a **1,35 MB** ([`tools/convert_robot_models.mjs`](tools/convert_robot_models.mjs)).
+2. **Cinemática**: la jerarquía de piezas, la posición de cada articulación y su eje de giro salen
+   del archivo MJCF de MuJoCo. Cada motor de la telemetría gira su articulación **por nombre**
+   (`FR_calf` → `FR_calf_joint`).
+3. **Suavizado**: los datos llegan a 10 Hz y se dibuja a la frecuencia de la pantalla, interpolando.
+4. **Calidad adaptativa**: mide cuánto tarda cada cuadro y baja la resolución, las sombras y los
+   cuadros por segundo si la máquina no da (por ejemplo, sin placa de video), para que el resto del
+   dashboard siga recibiendo los 10 datos por segundo.
+
+### El manual
+
+La quinta opción del menú es un **manual dentro del dashboard**: cómo arrancar, qué significa cada
+dato (motores y articulaciones, ángulo, velocidad, torque y temperatura, roll/pitch/yaw, SOC y
+celdas, la marcha al trote), qué es real y qué es simulado, y **cada vista con una captura
+anotada**: al pasar el mouse por una referencia se marca en la imagen. Las capturas y la posición
+de las marcas se regeneran con `node tools/capturas_manual.mjs`.
+
+---
+
 ## 📖 Guía de uso
 
 ### Elegir la fuente de datos
@@ -357,6 +432,19 @@ lectura, **todos los grupos pueden conectarse a la vez**.
 > las fuerzas van a ser otros. Los umbrales del semáforo son los de electroSim; el de alarma de
 > torque se puede ajustar en la vista Consola.
 
+### 🌐 GitHub Pages vs. robot real
+
+La versión publicada en **https://carlos-illobre.github.io/robot/app/** funciona **sin servidor**:
+genera los datos en el navegador (un port a JavaScript del demo «paseo»). Sirve para mirar y
+evaluar el dashboard sin instalar nada, pero **no puede conectarse al robot real**: GitHub Pages
+sirve la página por `https`, el backend del laboratorio es `http://` en la red local, y los
+navegadores **bloquean** que una página segura se conecte a un servidor no seguro (*mixed content*).
+
+| Dónde se abre | Datos posibles |
+|---|---|
+| GitHub Pages | Simulación en el navegador |
+| `python iniciar.py` (local) | Demo, simulador MuJoCo **y robot real** |
+
 ### Conectar el dashboard a otro servidor
 
 Tres formas, de la más cómoda a la más manual:
@@ -446,7 +534,8 @@ sequenceDiagram
 |---|---|---|---|
 | **Servicios** | `js/services/` | Hablar con el backend: REST, WebSocket, polling, reconexión | HTTP, WebSocket |
 | **Núcleo** | `js/core/` | Modelo de datos, historial, capturas, CSV, alarmas. **Sin DOM** → testeable en Node | solo datos |
-| **UI** | `js/ui/`, `js/panels/` | Dibujar. Cada panel recibe la muestra normalizada y el historial | DOM, Chart.js |
+| **UI común** | `js/ui/`, `js/shell/` | Barra, ayuda, avisos, tema, gráficos, `FigureSwitch` | DOM, Chart.js |
+| **Vistas** | `js/views/<vista>/` | Una estrategia de presentación cada una (contrato en `js/views/README.md`) | DOM, SVG, Canvas, Three.js |
 | **Composición** | `js/main.js` | Crear todo y conectarlo (único lugar que conoce a todos) | todo |
 
 ---
@@ -534,6 +623,18 @@ const TRANSPORTS = { websocket: WebSocketTransport, polling: PollingTransport };
 const Transport = TRANSPORTS[this.options.transport];
 this.#transport = new Transport({ baseUrl, intervalMs, onData, onState });
 ```
+
+Y otra vez en las **vistas**: Consola, Cuerpo, Piloto, Gemelo 3D y Manual cumplen el mismo
+contrato (`mount`, `setInfo`, `update`, `destroy` y hooks opcionales). `main.js` cambia de
+estrategia en caliente, y cada vista se carga recién cuando se usa (`import()` dinámico):
+
+```js
+// frontend/js/views/registry.js
+{ id: "twin", label: "Gemelo 3D", key: "4", load: () => import("./twin/TwinView.js") }
+```
+
+Y en el **origen de los datos**: el transporte `SimTransport` (simulación en el navegador)
+implementa la misma interfaz que WebSocket y polling.
 
 ### 🏭 Factory Method — del lado del servidor
 
@@ -689,6 +790,11 @@ nombre**; con datos reales o del simulador saltan a la vista.
 | Gráficos con `animation: false` y `parsing: false` | Valores por defecto de Chart.js | A 10 Hz las animaciones solo agregan retraso visual; los datos ya llegan como `{x, y}` |
 | Sparklines en `<canvas>` propio | Un Chart.js por fila | 29 instancias de Chart.js a 10 Hz es demasiado para una notebook del laboratorio |
 | Lógica en `js/core/` **sin DOM** | Mezclar lógica y DOM | Se prueba en Node, sin navegador |
+| **Three.js y modelos locales**, cargados con `import()` solo al usar 3D | Cargar todo al inicio | ~700 kB que quien no usa 3D nunca descarga; funciona sin internet |
+| Modelos glTF + meshoptimizer | Los OBJ/STL originales (46 MB) | 2 MB en total: el Gemelo 3D aparece en menos de un segundo |
+| Descarga del modelo **sin confiar en `Content-Length`** | Reservar el buffer con ese tamaño | GitHub Pages comprime con gzip y el encabezado indica el tamaño comprimido (bug real encontrado al publicar) |
+| Alarmas con **histéresis** (60 °C → 58 °C) | Un umbral simple | Un motor que oscila en 60 °C no prende y apaga el aviso sin parar, como un termostato |
+| Scripts de uso en **Python** (`iniciar.py`) | `.sh` + `.bat` | Un solo script, igual en Windows, macOS y Linux |
 
 ---
 
@@ -702,12 +808,17 @@ python -m pytest backend/tests -q
 npm test
 ```
 
-| Suite | Qué verifica |
-|---|---|
-| **Backend** (`backend/tests/test_api.py`, pytest) | Todos los endpoints y el WebSocket respetan el contrato, con **Go2 y G1** · errores 400/409 · el paseo recorre los **tres colores del semáforo** · con el robot quieto apoya las **cuatro patas** y al trotar no · el yaw cambia al girar |
-| **Frontend** (`frontend/tests/core.test.js`, `node:test`, sin dependencias) | Bordes del semáforo (40 y 60 °C) · normalización tolerante a datos rotos · buffer circular · EventBus aísla errores · CSV (columnas, RFC 4180, formato Excel) · las alarmas solo avisan cambios · backoff de reconexión · URLs `http→ws` / `https→wss` |
+```bash
+npm run test:e2e
+```
 
-**Integración continua:** cada push corre las dos suites en GitHub Actions
+| Suite | Cantidad | Qué verifica |
+|---|:-:|---|
+| **Backend** (`backend/tests/test_api.py`, pytest) | 18 | Todos los endpoints y el WebSocket respetan el contrato, con **Go2 y G1** · errores 400/409 · el paseo recorre los **tres colores del semáforo** · con el robot quieto apoya las **cuatro patas** y al trotar no · el yaw cambia al girar · cambio de fuente en caliente y fuente fija · `--real` sin SDK falla con un mensaje claro · los dos errores de la cátedra corregidos |
+| **Frontend unitarias** (`frontend/tests/*.test.js`, `node:test`, sin dependencias) | 24 | Bordes del semáforo (40 y 60 °C) · normalización tolerante a datos rotos · buffer circular · EventBus aísla errores · CSV (columnas, RFC 4180, formato Excel) · las alarmas solo avisan cambios · backoff de reconexión · URLs `http→ws` / `https→wss` · el polling nunca supera 500 ms ni superpone pedidos y se recupera de errores · la Facade normaliza y detecta cuando dejan de llegar datos · la simulación del navegador cumple el contrato y la marcha · histéresis de alarmas |
+| **E2E** (`e2e/dashboard.e2e.js`, Playwright) | 6 | Solo lo que una unitaria no puede: backend real ↔ navegador real (WebSocket y polling), las cinco vistas sin errores conservando historial y capturas, la descarga del CSV, el cambio de fuente Go2 ↔ G1, **la reconexión cuando el servidor se cae y vuelve**, y que nada se desborde a 390 px. Comparten un único navegador: corren en ~35 s |
+
+**Integración continua:** cada push corre las tres suites en GitHub Actions
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ---
@@ -728,7 +839,9 @@ definido como *skill* y agente de Claude Code en [`.claude/`](.claude):
    visual documentado en `docs/design/visual-language.md`.
 4. Recién entonces se lleva al dashboard real (`frontend/`).
 
-<!-- VARIANTE ELEGIDA Y LENGUAJE VISUAL: se completa al elegir -->
+**Resultado:** las tres variantes gustaron tanto que se implementaron **las tres** como vistas
+intercambiables (Consola = la evolución, Cuerpo = la reinvención, Piloto = la audaz), más una cuarta
+que surgió después, el Gemelo 3D. Las maquetas originales siguen en el visor como referencia.
 
 ---
 
@@ -739,32 +852,44 @@ robot/
 ├── iniciar.py                   ← arranque en un paso, multiplataforma (entorno + dependencias + navegador)
 ├── requirements.txt
 ├── backend/
-│   ├── servidor.py              ← lanzador: elige la fuente de datos y sirve el dashboard
+│   ├── servidor.py              ← lanzador: elige la fuente de datos (Factory), sirve el dashboard
+│   ├── fuentes.py               ← GET /fuentes y POST /fuente: cambiar la fuente desde el dashboard
 │   ├── api/
 │   │   ├── telemetry_server.py  ← API REST + WebSocket (cátedra, sin modificar)
 │   │   ├── telemetry_adapter.py ← crudo del robot → JSON del contrato (cátedra)
 │   │   ├── telemetry_reader*.py ← lectores: simulador por socket, robot por DDS, demo (cátedra)
 │   │   ├── demo_paseo.py        ← NUEVO: demo con marcha, modelo térmico y batería
-│   │   └── config.py            ← robots, nombres de motores, puertos (cátedra)
+│   │   └── config.py            ← robots y nombres de motores (cátedra, con el error del G1 corregido)
 │   └── tests/test_api.py
-├── frontend/
+├── frontend/                    ← se sirve tal cual: sin compilar ni empaquetar
 │   ├── index.html
-│   ├── css/
+│   ├── css/                     ← base.css, shell.css y views/<vista>.css
+│   ├── fonts/                   ← Inter, JetBrains Mono, Manrope, IBM Plex Mono, Space Grotesk (locales)
 │   ├── js/
-│   │   ├── main.js              ← raíz de composición
+│   │   ├── main.js              ← raíz de composición: estado, acciones, atajos, gestor de vistas
 │   │   ├── config.js            ← preferencias y dirección del servidor
-│   │   ├── core/                ← EventBus, RingBuffer, modelo, capturas, CSV, alarmas (sin DOM)
-│   │   ├── services/            ← ApiClient, TelemetryService (Facade), transportes (Strategy)
-│   │   ├── ui/                  ← helpers de DOM, íconos, tema, gráficos, avisos
-│   │   └── panels/              ← un archivo por panel
-│   ├── vendor/chart.umd.min.js  ← Chart.js 4.4.1 (licencia MIT), para funcionar sin internet
-│   └── tests/core.test.js
+│   │   ├── core/                ← EventBus, RingBuffer, modelo, capturas, CSV, alarmas, simulador (sin DOM)
+│   │   ├── services/            ← ApiClient, TelemetryService (Facade), transportes WS/polling/sim (Strategy)
+│   │   ├── shell/               ← barra común y ayuda
+│   │   ├── ui/                  ← DOM, íconos, tema, gráficos, avisos, FigureSwitch (esquema | 3D)
+│   │   └── views/               ← una carpeta por vista + registry.js + README.md (el contrato)
+│   │       ├── console/  body/  pilot/
+│   │       ├── twin/            ← RobotScene (componente 3D), Stage3D, RobotRig, perfiles de robot
+│   │       └── manual/          ← contenido, diagramas SVG y figuras anotadas
+│   ├── assets/
+│   │   ├── robots/              ← modelos 3D de Unitree optimizados (.glb) + licencia BSD-3
+│   │   └── manual/              ← capturas del manual y posición de sus marcas
+│   ├── vendor/                  ← Chart.js 4.4.1 y Three.js r169 (MIT), para funcionar sin internet
+│   └── tests/                   ← pruebas unitarias (node:test)
+├── e2e/                         ← pruebas de punta a punta (Playwright)
+├── tools/                       ← conversión de modelos 3D y capturas del manual (Node, solo desarrollo)
 ├── docs/
 │   ├── consigna.md              ← el enunciado
 │   ├── API.md                   ← el contrato de la cátedra
-│   └── design/                  ← visor de maquetas (GitHub Pages) y lenguaje visual
+│   ├── img/                     ← capturas del README
+│   └── design/                  ← visor de maquetas (GitHub Pages) y las maquetas del director de arte
 ├── .claude/                     ← skill de director de arte y agente maquetador
-└── .github/workflows/           ← CI (pruebas) y publicación del visor
+└── .github/workflows/           ← CI (pruebas) y publicación en GitHub Pages
 ```
 
 ---
@@ -812,6 +937,21 @@ backend (`http://localhost:8001`) o con cualquier servidor estático:
 </details>
 
 <details>
+<summary><b>El Gemelo 3D (o el botón «3D real») no aparece o se ve pixelado</b></summary>
+
+Hace falta WebGL. Si el navegador no lo tiene, el dashboard lo avisa y sigue con el esquema. Sin
+placa de video (máquinas virtuales, escritorio remoto) el 3D baja solo su calidad para no frenar al
+resto: se ve más pixelado. Para forzar la calidad: `?calidad=alta` en la URL.
+</details>
+
+<details>
+<summary><b>En GitHub Pages veo una versión vieja</b></summary>
+
+GitHub Pages guarda los archivos en caché hasta 10 minutos. Recargar forzando:
+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.
+</details>
+
+<details>
 <summary><b>Todos los gráficos están planos</b></summary>
 
 El robot está quieto. En el demo "paseo" hay tramos quietos de 5 a 7 s: esperar unos segundos. Con
@@ -834,14 +974,15 @@ La consigna sugiere tres roles. Así se reparte este repositorio:
 
 | Rol | Alcance en el código |
 |---|---|
-| **Backend** | `backend/` — servidor FastAPI, modo demo "paseo", lanzador, pruebas de la API |
-| **Frontend** | `frontend/css`, `frontend/js/ui`, `frontend/js/panels` — paneles, gráficos, diseño |
-| **Integración y CSV** | `frontend/js/services`, `frontend/js/core` — transportes, Facade, capturas, exportación |
+| **Backend** | `backend/` — servidor FastAPI, demo «paseo», fuentes de datos, correcciones de la cátedra, pruebas de la API |
+| **Frontend** | `frontend/css`, `frontend/js/shell`, `frontend/js/ui`, `frontend/js/views` — las cinco vistas, gráficos, 3D, diseño |
+| **Integración y CSV** | `frontend/js/services`, `frontend/js/core`, `e2e/` — transportes, Facade, capturas, exportación, pruebas de punta a punta |
 
 **Créditos**
 
 - Backend de telemetría, contrato de la API y simulador: cátedra de Desarrollo de Aplicaciones II
   (UADE), repositorio [`tsamaan/UadeRobotLab`](https://github.com/tsamaan/UadeRobotLab/tree/main/05LaboratoriosTPs/TP05_Desarrollo_de_Aplicaciones_II).
-- [Chart.js](https://www.chartjs.org/) 4.4.1 — licencia MIT (`frontend/vendor/CHARTJS-LICENSE.md`).
+- Modelos 3D del Go2 y del G1: [Unitree Robotics](https://github.com/unitreerobotics/unitree_mujoco), licencia BSD-3 (`frontend/assets/robots/*/LICENSE`).
+- [Chart.js](https://www.chartjs.org/) 4.4.1 y [Three.js](https://threejs.org/) r169 — licencia MIT (`frontend/vendor/`).
+- Tipografías Inter, JetBrains Mono, Manrope, IBM Plex Mono y Space Grotesk — SIL Open Font License.
 - Íconos con trazos estilo [Lucide](https://lucide.dev/) — licencia ISC.
-- Robots [Unitree](https://www.unitree.com/) Go2 y G1.

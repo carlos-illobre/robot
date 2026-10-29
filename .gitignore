@@ -1,8 +1,8 @@
-__pycache__/
+*.csv
 *.pyc
+.DS_Store
 .pytest_cache/
 .venv/
-venv/
+__pycache__/
 node_modules/
-.DS_Store
-*.csv
+venv/
