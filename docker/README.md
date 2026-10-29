@@ -50,7 +50,8 @@ Después, indicando el modelo y la placa de red:
 ROBOT=go2 INTERFAZ=enp3s0 docker compose -f docker/docker-compose.yml --profile robot up --build robot
 ```
 
-(`ip -br addr` muestra el nombre de la placa; es la que tiene una IP `192.168.123.x`.)
+(`ip -br addr` muestra el nombre de la placa; es la que tiene una IP `192.168.123.x`. Si no se
+indica `INTERFAZ`, la elige el SDK automáticamente.)
 
 Abrir **http://localhost:8001**: la etiqueta de arriba dice **Real**, en verde. Las otras
 computadoras del aula usan `http://IP-DE-LA-NOTEBOOK:8001`.
