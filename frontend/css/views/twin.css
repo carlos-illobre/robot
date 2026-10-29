@@ -2,7 +2,7 @@
    Vista 4 · Gemelo 3D
    El robot ocupa toda la vista; los paneles flotan encima con vidrio
    esmerilado. Los colores de la escena 3D también salen de acá
-   (--tw-scene-*): TwinView los lee con getComputedStyle.
+   (--r3d-scene-*): TwinView los lee con getComputedStyle.
    ===================================================================== */
 
 .view-twin {
@@ -18,12 +18,12 @@
   --tw-gutter: 16px;
 
   /* Escena 3D */
-  --tw-scene-bg: #0b0e14;
-  --tw-scene-floor: #10141b;
-  --tw-scene-grid: #1a2029;
-  --tw-scene-grid-major: #2a3342;
-  --tw-scene-sky: #dfe9ff;
-  --tw-scene-ground: #1a1e26;
+  --r3d-scene-bg: #0b0e14;
+  --r3d-scene-floor: #10141b;
+  --r3d-scene-grid: #1a2029;
+  --r3d-scene-grid-major: #2a3342;
+  --r3d-scene-sky: #dfe9ff;
+  --r3d-scene-ground: #1a1e26;
 }
 
 :root[data-theme="light"] .view-twin {
@@ -36,12 +36,12 @@
   --tw-hover: rgba(15, 23, 42, .05);
   --tw-shadow: 0 10px 30px rgba(15, 23, 42, .12);
 
-  --tw-scene-bg: #e7ebf1;
-  --tw-scene-floor: #f1f3f7;
-  --tw-scene-grid: #d4dae3;
-  --tw-scene-grid-major: #b3bccb;
-  --tw-scene-sky: #ffffff;
-  --tw-scene-ground: #aab2c0;
+  --r3d-scene-bg: #e7ebf1;
+  --r3d-scene-floor: #f1f3f7;
+  --r3d-scene-grid: #d4dae3;
+  --r3d-scene-grid-major: #b3bccb;
+  --r3d-scene-sky: #ffffff;
+  --r3d-scene-ground: #aab2c0;
 }
 
 .view-twin .tw {
@@ -49,14 +49,14 @@
   height: calc(100dvh - var(--appbar-h));
   min-height: 420px;
   overflow: hidden;
-  background: var(--tw-scene-bg);
+  background: var(--r3d-scene-bg);
   color: var(--tw-text);
   isolation: isolate;
 }
 
-/* ---- Lienzo ---- */
+/* ---- Lienzo (el robot 3D es el componente .r3d, estilado al final) ---- */
 .view-twin .tw-stage { position: absolute; inset: 0; }
-.view-twin .tw-canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.view-twin .tw-error { position: absolute; inset: auto 16px 50% 16px; text-align: center; color: var(--tw-muted); }
 
 /* ---- Vidrio común ---- */
 .view-twin .tw-glass {
@@ -204,42 +204,6 @@
 }
 @keyframes tw-pulse { 50% { opacity: .35; } }
 
-/* ---- Etiqueta flotante ---- */
-.view-twin .tw-tip {
-  position: absolute; z-index: 5; top: 0; left: 0; width: max-content; max-width: min(300px, calc(100% - 16px));
-  padding: 10px 12px; border-radius: 12px; pointer-events: none;
-  background: var(--tw-panel-solid); border: 1px solid var(--tw-border); box-shadow: var(--tw-shadow);
-  display: grid; gap: 2px; will-change: transform;
-}
-.view-twin .tw-tip[hidden] { display: none; }
-.view-twin .tw-tip strong { font-size: 13px; }
-.view-twin .tw-tip__sub { font: 500 11px/1.3 var(--font-mono); color: var(--tw-muted); margin-bottom: 6px; }
-.view-twin .tw-tip dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 4px 14px; font-size: 12px; }
-.view-twin .tw-tip dt { color: var(--tw-muted); }
-.view-twin .tw-tip dd { margin: 0; font-family: var(--font-mono); text-align: right; }
-.view-twin .tw-tip dd[data-level="ok"] { color: var(--sem-ok); }
-.view-twin .tw-tip dd[data-level="warn"] { color: var(--sem-warn); }
-.view-twin .tw-tip dd[data-level="crit"] { color: var(--sem-crit); }
-
-/* ---- Carga / errores ---- */
-.view-twin .tw-overlay {
-  position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px;
-  background: radial-gradient(ellipse at center, transparent, color-mix(in srgb, var(--tw-scene-bg) 80%, transparent));
-  transition: opacity .35s var(--ease);
-}
-.view-twin .tw-overlay[hidden] { display: none; }
-.view-twin .tw-overlay.is-out { opacity: 0; pointer-events: none; }
-.view-twin .tw-overlay__card { width: min(380px, 100%); padding: 22px; display: grid; justify-items: center; gap: 12px; text-align: center; }
-.view-twin .tw-overlay__icon { color: var(--tw-accent); }
-.view-twin .tw-overlay[data-kind="error"] .tw-overlay__icon { color: var(--sem-warn); }
-.view-twin .tw-overlay__title { margin: 0; font-weight: 700; }
-.view-twin .tw-overlay__text { margin: 0; font-size: 12.5px; color: var(--tw-muted); }
-.view-twin .tw-progress { width: 100%; height: 6px; border-radius: 6px; overflow: hidden; background: var(--tw-hover); border: 1px solid var(--tw-border); }
-.view-twin .tw-progress[hidden] { display: none; }
-.view-twin .tw-progress i { display: block; height: 100%; background: var(--tw-accent); transform: scaleX(0); transform-origin: left; transition: transform .15s linear; }
-.view-twin .tw-overlay[data-kind="boot"] .tw-progress i { width: 30%; transform: none; animation: tw-indet 1.1s ease-in-out infinite; }
-@keyframes tw-indet { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
-
 /* ---- Tablet ---- */
 @media (max-width: 1100px) {
   .view-twin .tw-dock__group:first-child .tw-btn span { display: none; }
@@ -267,4 +231,84 @@
 
 @media (prefers-reduced-motion: reduce) {
   .view-twin .tw-att__marker, .view-twin .tw-compass svg { transition: none; }
+}
+
+/* =====================================================================
+   Componente RobotScene (.r3d)
+   Va FUERA de .view-twin a propósito: es un componente reutilizable que
+   otras vistas pueden embeber (botón "Esquema | 3D"). Toma sus colores de
+   variables --r3d-* con valores por defecto para los dos temas; una vista
+   puede sobrescribirlas (como hace .view-twin arriba).
+   ===================================================================== */
+
+.r3d {
+  --r3d-text: var(--shell-text);
+  --r3d-muted: var(--shell-muted);
+  --r3d-surface: var(--shell-surface);
+  --r3d-border: var(--shell-border);
+  --r3d-accent: #22d3ee;
+  --r3d-scene-bg: #0b0e14;
+  --r3d-scene-floor: #10141b;
+  --r3d-scene-grid: #1a2029;
+  --r3d-scene-grid-major: #2a3342;
+  --r3d-scene-sky: #dfe9ff;
+  --r3d-scene-ground: #1a1e26;
+  position: relative; width: 100%; height: 100%; min-height: 160px; overflow: hidden;
+  color: var(--r3d-text);
+}
+:root[data-theme="light"] .r3d {
+  --r3d-accent: #0e7490;
+  --r3d-scene-bg: #e7ebf1;
+  --r3d-scene-floor: #f1f3f7;
+  --r3d-scene-grid: #d4dae3;
+  --r3d-scene-grid-major: #b3bccb;
+  --r3d-scene-sky: #ffffff;
+  --r3d-scene-ground: #aab2c0;
+}
+/* Dentro del Gemelo 3D manda la paleta de la vista */
+.view-twin .r3d { --r3d-accent: var(--tw-accent); --r3d-surface: var(--tw-panel-solid); --r3d-border: var(--tw-border); --r3d-text: var(--tw-text); --r3d-muted: var(--tw-muted); }
+
+.r3d-canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.r3d[data-bg="transparent"] .r3d-canvas { touch-action: pan-y; }
+
+/* Etiqueta flotante */
+.r3d-tip {
+  position: absolute; z-index: 5; top: 0; left: 0; width: max-content; max-width: min(300px, calc(100% - 16px));
+  padding: 10px 12px; border-radius: 12px; pointer-events: none;
+  background: var(--r3d-surface); border: 1px solid var(--r3d-border); box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+  display: grid; gap: 2px; will-change: transform; font-size: 12px;
+}
+.r3d-tip[hidden] { display: none; }
+.r3d-tip strong { font-size: 13px; }
+.r3d-tip__sub { font: 500 11px/1.3 var(--font-mono); color: var(--r3d-muted); margin-bottom: 6px; }
+.r3d-tip dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 4px 14px; }
+.r3d-tip dt { color: var(--r3d-muted); }
+.r3d-tip dd { margin: 0; font-family: var(--font-mono); text-align: right; }
+.r3d-tip dd[data-level="ok"] { color: var(--sem-ok); }
+.r3d-tip dd[data-level="warn"] { color: var(--sem-warn); }
+.r3d-tip dd[data-level="crit"] { color: var(--sem-crit); }
+
+/* Carga / errores */
+.r3d-overlay {
+  position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px;
+  transition: opacity .35s var(--ease);
+}
+.r3d-overlay[hidden] { display: none; }
+.r3d-overlay.is-out { opacity: 0; pointer-events: none; }
+.r3d-overlay__card {
+  width: min(380px, 100%); padding: 22px; display: grid; justify-items: center; gap: 12px; text-align: center;
+  background: var(--r3d-surface); border: 1px solid var(--r3d-border); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+}
+.r3d-overlay__icon { color: var(--r3d-accent); }
+.r3d-overlay[data-kind="error"] .r3d-overlay__icon { color: var(--sem-warn); }
+.r3d-overlay__title { margin: 0; font-weight: 700; }
+.r3d-overlay__text { margin: 0; font-size: 12.5px; color: var(--r3d-muted); }
+.r3d-progress { width: 100%; height: 6px; border-radius: 6px; overflow: hidden; border: 1px solid var(--r3d-border); }
+.r3d-progress[hidden] { display: none; }
+.r3d-progress i { display: block; height: 100%; background: var(--r3d-accent); transform: scaleX(0); transform-origin: left; transition: transform .15s linear; }
+.r3d-overlay[data-kind="boot"] .r3d-progress i { width: 30%; transform: none; animation: r3d-indet 1.1s ease-in-out infinite; }
+@keyframes r3d-indet { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+.r3d-btn {
+  height: 34px; padding: 0 14px; border-radius: 9px; border: 0; font-weight: 600;
+  background: var(--shell-accent); color: #fff;
 }
