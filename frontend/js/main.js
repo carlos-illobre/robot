@@ -17,6 +17,7 @@ import { toCsv, csvFilename, downloadText } from "./core/csv.js";
 import { evaluateAlerts, AlertTracker } from "./core/alerts.js";
 import { TelemetryService } from "./services/TelemetryService.js";
 import { ApiClient } from "./services/ApiClient.js";
+import { isSimUrl } from "./services/SimTransport.js";
 import { applyTheme, currentTheme, themeForView, rememberTheme } from "./ui/theme.js";
 import { toast } from "./ui/toast.js";
 import { AppBar } from "./shell/AppBar.js";
@@ -153,7 +154,7 @@ const actions = {
 
   async connect(url) {
     try {
-      state.baseUrl = ApiClient.normalizeBaseUrl(url);
+      state.baseUrl = isSimUrl(url) ? url.trim().toLowerCase() : ApiClient.normalizeBaseUrl(url);
     } catch (err) {
       toast(err.message, { kind: "warn" });
       return;

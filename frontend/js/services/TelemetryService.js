@@ -17,6 +17,7 @@
 import { ApiClient } from "./ApiClient.js";
 import { WebSocketTransport } from "./WebSocketTransport.js";
 import { PollingTransport } from "./PollingTransport.js";
+import { SimTransport, isSimUrl } from "./SimTransport.js";
 import { normalizeFrame } from "../core/telemetryModel.js";
 
 const TRANSPORTS = { websocket: WebSocketTransport, polling: PollingTransport };
@@ -50,20 +51,24 @@ export class TelemetryService {
   async connect(options = {}) {
     this.disconnect();
     this.options = { ...this.options, ...options };
-    this.#api = new ApiClient(this.options.baseUrl);
-    this.#setState("connecting", this.#api.baseUrl);
+    const sim = isSimUrl(this.options.baseUrl);
+    this.#api = sim ? null : new ApiClient(this.options.baseUrl);
+    const baseUrl = sim ? this.options.baseUrl : this.#api.baseUrl;
 
-    // /info primero: el dashboard se arma según el robot ("consultá /info en vez de asumir").
-    await this.refreshInfo();
-
-    const Transport = TRANSPORTS[this.options.transport] ?? WebSocketTransport;
+    // Strategy: el transporte se elige en tiempo de ejecución. "demo" como
+    // dirección usa el simulador del navegador (sin servidor).
+    const Transport = sim ? SimTransport : TRANSPORTS[this.options.transport] ?? WebSocketTransport;
     this.#transport = new Transport({
-      baseUrl: this.#api.baseUrl,
+      baseUrl,
       intervalMs: this.options.intervalMs,
       onState: (state, detail) => this.#setState(state, detail),
       onData: (raw, meta) => this.#onData(raw, meta),
     });
-    this.#transport.start();
+    this.#setState("connecting", baseUrl);
+
+    // /info primero: el dashboard se arma según el robot ("consultá /info en vez de asumir").
+    await this.refreshInfo();
+    this.#transport?.start();
     this.#staleTimer = setInterval(() => this.#checkStale(), 500);
   }
 
@@ -85,7 +90,7 @@ export class TelemetryService {
 
   async refreshInfo() {
     try {
-      const info = await this.#api.info();
+      const info = this.#transport?.info ? this.#transport.info() : await this.#api.info();
       this.#infoModel = info.modelo;
       this.#bus.emit("info", info);
       return info;
@@ -138,7 +143,7 @@ export class TelemetryService {
       rttMs: this.rttMs,
       frames: this.frames,
       errors: this.errors,
-      transport: this.options.transport,
+      transport: this.#transport?.name ?? this.options.transport,
     };
   }
 
@@ -157,7 +162,7 @@ export class TelemetryService {
       state,
       changed,
       detail,
-      transport: this.options.transport,
+      transport: this.#transport?.name ?? this.options.transport,
       baseUrl: this.#api?.baseUrl ?? this.options.baseUrl,
     });
   }

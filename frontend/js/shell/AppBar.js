@@ -126,7 +126,7 @@ export class AppBar {
         h("div", { class: "stat" }, this.statGap, h("span", {}, "entre muestras")),
         h("div", { class: "stat" }, this.statFrames, h("span", {}, "recibidas")),
       ),
-      h("p", {}, "Tip: ", h("code", {}, "?server=http://IP:8001"), " en la URL apunta el dashboard a otro robot."),
+      h("p", {}, "Tip: ", h("code", {}, "?server=http://IP:8001"), " en la URL apunta el dashboard a otro robot. Con ", h("code", {}, "demo"), " o ", h("code", {}, "demo-g1"), " como servidor, los datos se simulan en el navegador."),
     );
   }
 
@@ -159,8 +159,10 @@ export class AppBar {
 
   setConnection({ state, detail, transport }) {
     this.pill.dataset.state = state;
-    setText(this.pillLabel, `${STATE_LABEL[state] ?? state} · ${transport === "polling" ? "Polling" : "WS"}`);
-    setText(this.detailEl, detail || `${STATE_LABEL[state] ?? state} por ${transport === "polling" ? "polling HTTP" : "WebSocket"}.`);
+    const short = { polling: "Polling", sim: "Simulado", websocket: "WS" }[transport] ?? transport;
+    const long = { polling: "polling HTTP", sim: "el simulador del navegador (sin servidor)", websocket: "WebSocket" }[transport] ?? transport;
+    setText(this.pillLabel, `${STATE_LABEL[state] ?? state} · ${short}`);
+    setText(this.detailEl, detail && state !== "live" ? detail : `${STATE_LABEL[state] ?? state} por ${long}.`);
     this.transportSeg.set(transport);
     this.intervalField.hidden = transport !== "polling";
     this.intervalSeg.set(this.state.intervalMs);

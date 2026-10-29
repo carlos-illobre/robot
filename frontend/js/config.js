@@ -5,7 +5,8 @@
  *   1. ?server=http://10.0.0.5:8001  en la URL (ideal para el día del robot real)
  *   2. lo último que se usó (localStorage)
  *   3. el mismo origen, si el dashboard lo sirve el propio backend
- *   4. http://localhost:8001
+ *   4. "demo" (simulador en el navegador) si está publicado en GitHub Pages
+ *   5. http://localhost:8001
  */
 const STORAGE_KEY = "tp05-dashboard";
 
@@ -44,6 +45,7 @@ export function resolveInitialServer(location = window.location) {
   if (location.protocol.startsWith("http") && location.pathname.startsWith("/dashboard")) {
     return location.origin;
   }
+  if (location.hostname.endsWith("github.io")) return "demo";
   return "http://localhost:8001";
 }
 
