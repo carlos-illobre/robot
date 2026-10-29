@@ -78,7 +78,7 @@ export const SECTIONS = [
       {
         type: "callout",
         kind: "info",
-        html: "<b>El día del robot real</b> no cambia nada del dashboard: solo la dirección del servidor. Abrí <code>http://localhost:8001/?server=http://IP-DEL-ROBOT:8001</code> o escribila en el panel de conexión.",
+        html: "<b>El día del robot real</b> no cambia nada del dashboard: solo la dirección del servidor. Abrí <code>http://localhost:8001/?server=http://IP-DEL-ROBOT:8001</code> o escribila en el panel de conexión. <br><b>Ojo:</b> la versión publicada en GitHub Pages solo puede usar la simulación del navegador. Como la página es <code>https</code> y el robot está en <code>http</code>, el navegador bloquea la conexión por seguridad. Con el robot real, el dashboard se abre localmente con <code>python iniciar.py</code>.",
       },
       {
         type: "callout",
