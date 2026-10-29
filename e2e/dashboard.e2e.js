@@ -148,7 +148,9 @@ test("si el servidor se cae, el dashboard lo muestra y reconecta solo cuando vue
   await stopServer(server);
   await until(() => /Reconectando|Sin datos/.test(document.querySelector(".pill").textContent));
   server = await startServer();
-  await until(() => /En vivo/.test(document.querySelector(".pill").textContent), undefined, 15000);
+  // Peor caso: el reintento con backoff llega a 8 s (+25 % de azar) más lo que tarde el
+  // backend en levantar en una máquina cargada (CI). 30 s cubre eso con margen.
+  await until(() => /En vivo/.test(document.querySelector(".pill").textContent), undefined, 30000);
   const f0 = await frames();
   await until((n) => window.tp05.state.stats.frames > n, f0);
 });
