@@ -84,6 +84,7 @@ function glowTexture() {
 
 const _q = new THREE.Quaternion();
 const _v = new THREE.Vector3();
+const _w = new THREE.Vector3();
 const _e = new THREE.Euler();
 const _c = new THREE.Color();
 const Z_UP_FIX = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
@@ -275,17 +276,20 @@ export class RobotRig {
 
   /** Halo y brillo de cada pata según `frame.fuerzas` (1 = apoyada). */
   updateFeet(fuerzas, dt) {
-    this.root.updateMatrixWorld(true);
+    // Las matrices ya las actualizó ground() en este mismo cuadro.
     for (const [leg, f] of this.feet) {
       const on = fuerzas?.[leg] ? 1 : 0;
       f.level += (on - f.level) * Math.min(1, dt * 14);
       // Halo debajo del punto de apoyo más bajo de esa pata
-      let lowest = null;
+      let lowestY = Infinity;
       for (const c of f.contacts) {
         _v.copy(c.local).applyMatrix4(c.body.matrixWorld);
-        if (!lowest || _v.y < lowest.y) lowest = _v.clone();
+        if (_v.y < lowestY) {
+          lowestY = _v.y;
+          _w.copy(_v);
+        }
       }
-      if (lowest) f.pad.position.set(lowest.x, 0.002, lowest.z);
+      if (lowestY < Infinity) f.pad.position.set(_w.x, 0.002, _w.z);
       f.pad.material.opacity = 0.9 * f.level;
       f.pad.visible = f.level > 0.01;
       const g = f.level * (this.profile.footGlow ?? 1);
