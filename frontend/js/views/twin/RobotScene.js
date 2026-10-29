@@ -16,7 +16,7 @@
  * su propio bucle (rAF, adaptativo, pausado si la pestaña está oculta) que
  * interpola a la frecuencia de la pantalla los datos que llegan a 10 Hz.
  */
-import { h, setText, fmt, clamp } from "../../ui/dom.js";
+import { h, s as svg, setText, fmt, clamp } from "../../ui/dom.js";
 import { icon } from "../../ui/icons.js";
 import { tempLevel, jointLabel, motorGroup } from "../../core/telemetryModel.js";
 import { Stage3D, probeWebGL } from "./Stage3D.js";
@@ -200,6 +200,7 @@ export class RobotScene {
     this.rig = null;
     this.stage?.dispose();
     this.stage = null;
+    this.portal?.remove();
     this.el.remove();
   }
 
@@ -425,7 +426,48 @@ export class RobotScene {
     this.tipSub = h("span", { class: "r3d-tip__sub" });
     this.tipRows = h("dl", {});
     this.tip = h("div", { class: "r3d-tip", role: "tooltip", hidden: true }, this.tipTitle, this.tipSub, this.tipRows);
-    this.el.append(this.tip);
+    // Línea guía: une la articulación con la etiqueta, que va al costado del robot.
+    this.leadLine = svg("line", { class: "r3d-lead__line" });
+    this.leadDot = svg("circle", { class: "r3d-lead__dot", r: 4.5 });
+    this.lead = svg("svg", { class: "r3d-lead", "aria-hidden": "true" }, this.leadLine, this.leadDot);
+    this.lead.style.display = "none";
+    if (this.opts.background === "transparent") {
+      // Incrustado en otra vista (botón "Esquema | 3D"): el recuadro es chico, así que
+      // la etiqueta va en una capa sobre toda la página para poder salir AL COSTADO del robot.
+      this.portal = h("div", { class: "r3d r3d-portal", "aria-hidden": "false" }, this.lead, this.tip);
+      document.body.append(this.portal);
+    } else {
+      this.el.append(this.lead, this.tip);
+    }
+  }
+
+  /**
+   * Rectángulo que ocupa el robot en pantalla (px), a partir de sus
+   * articulaciones y apoyos proyectados, con un margen. Sirve para ubicar la
+   * etiqueta AL COSTADO del robot y no encima.
+   */
+  #robotScreenBox(W, H) {
+    const cam = this.stage.camera;
+    const v = (this._boxV ??= cam.position.clone());
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    const add = () => {
+      v.project(cam);
+      const x = ((v.x + 1) / 2) * W;
+      const y = ((1 - v.y) / 2) * H;
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    };
+    for (const jt of this.rig?.joints.values() ?? []) {
+      jt.body.getWorldPosition(v);
+      add();
+    }
+    for (const c of this.rig?.allContacts ?? []) {
+      v.copy(c.local).applyMatrix4(c.body.matrixWorld);
+      add();
+    }
+    if (!Number.isFinite(minX)) return null;
+    const pad = Math.max(24, (maxX - minX) * 0.12); // las piezas sobresalen de las articulaciones
+    return { minX: minX - pad, maxX: maxX + pad, minY: minY - pad, maxY: maxY + pad };
   }
 
   #paintTip() {
@@ -433,6 +475,7 @@ export class RobotScene {
     const j = this.#active;
     if (!j || !this.frame) {
       this.tip.hidden = true;
+      this.lead.style.display = "none";
       return;
     }
     const rows = [];
@@ -468,24 +511,74 @@ export class RobotScene {
       else delete dd.dataset.level;
     });
     this.tip.hidden = false;
+    this.lead.dataset.level = j.motor && this.frame.motores[j.motor.index] ? tempLevel(this.frame.motores[j.motor.index].temperatura) : "base";
   }
 
-  /** Ubica la etiqueta junto a la articulación (proyección 3D → pantalla), cada cuadro. */
+  /**
+   * Ubica la etiqueta AL COSTADO del robot (del lado de la articulación), con
+   * una línea guía hasta ella. Si a los costados no entra (contenedores chicos,
+   * como el centro del anillo del Piloto), va arriba o abajo del robot; y si
+   * tampoco, lo más cerca posible. Se recalcula en cada cuadro.
+   */
   #placeTip() {
     const j = this.#active;
     if (!j || !this.tip || this.tip.hidden || !this.stage) return;
     this._tmpV ??= this.stage.camera.position.clone();
     const v = j.body.getWorldPosition(this._tmpV).project(this.stage.camera);
-    const W = this.el.clientWidth;
-    const H = this.el.clientHeight;
+    let W = this.el.clientWidth;
+    let H = this.el.clientHeight;
     const tw = this.tip.offsetWidth;
     const th = this.tip.offsetHeight;
-    let x = ((v.x + 1) / 2) * W + 16;
-    let y = ((1 - v.y) / 2) * H - th / 2;
-    if (x + tw > W - 8) x -= tw + 32;
-    x = clamp(x, 8, Math.max(8, W - tw - 8));
-    y = clamp(y, 8, Math.max(8, H - th - 8));
+    // Coordenadas del componente → coordenadas de la capa de la etiqueta (la ventana
+    // entera si está incrustado; el propio componente en el Gemelo 3D).
+    const r = this.portal ? this.el.getBoundingClientRect() : { left: 0, top: 0 };
+    const ox = r.left;
+    const oy = r.top;
+    const jx = ((v.x + 1) / 2) * W + ox;
+    const jy = ((1 - v.y) / 2) * H + oy;
+    const b0 = this.#robotScreenBox(W, H);
+    const box = b0 ? { minX: b0.minX + ox, maxX: b0.maxX + ox, minY: b0.minY + oy, maxY: b0.maxY + oy } : { minX: jx, maxX: jx, minY: jy, maxY: jy };
+    if (this.portal) {
+      W = window.innerWidth;
+      H = window.innerHeight;
+    }
+    const M = 8;  // margen con el borde
+    const G = 28; // separación entre el robot y la etiqueta
+    const midX = (box.minX + box.maxX) / 2;
+
+    const fitsRight = box.maxX + G + tw <= W - M;
+    const fitsLeft = box.minX - G - tw >= M;
+    const preferRight = jx >= midX;
+    let x, y, side;
+    if ((preferRight && fitsRight) || (!fitsLeft && fitsRight)) {
+      side = "right"; x = box.maxX + G;
+    } else if (fitsLeft) {
+      side = "left"; x = box.minX - G - tw;
+    } else if (box.minY - G - th >= M) {
+      side = "top"; y = box.minY - G - th;
+    } else if (box.maxY + G + th <= H - M) {
+      side = "bottom"; y = box.maxY + G;
+    } else {
+      side = jx >= W / 2 ? "left" : "right"; // no entra en ningún lado: lo mejor posible
+      x = side === "right" ? jx + G : jx - G - tw;
+    }
+    if (side === "left" || side === "right") y = jy - th / 2;
+    else x = jx - tw / 2;
+    x = clamp(x, M, Math.max(M, W - tw - M));
+    y = clamp(y, M, Math.max(M, H - th - M));
     this.tip.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+
+    // Punto de la etiqueta donde llega la línea: el borde que mira al robot.
+    const ex = side === "right" ? x : side === "left" ? x + tw : clamp(jx, x + 12, x + tw - 12);
+    const ey = side === "top" ? y + th : side === "bottom" ? y : clamp(jy, y + 14, y + th - 14);
+    this.lead.style.display = "";
+    this.lead.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    this.leadLine.setAttribute("x1", jx.toFixed(1));
+    this.leadLine.setAttribute("y1", jy.toFixed(1));
+    this.leadLine.setAttribute("x2", ex.toFixed(1));
+    this.leadLine.setAttribute("y2", ey.toFixed(1));
+    this.leadDot.setAttribute("cx", jx.toFixed(1));
+    this.leadDot.setAttribute("cy", jy.toFixed(1));
   }
 
   /* ================================================================ */

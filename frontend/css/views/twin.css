@@ -312,3 +312,20 @@
   height: 34px; padding: 0 14px; border-radius: 9px; border: 0; font-weight: 600;
   background: var(--shell-accent); color: #fff;
 }
+
+/* Línea guía de la etiqueta: de la articulación a la etiqueta, al costado del robot */
+.r3d-lead { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: visible; }
+.r3d-lead { --lead: var(--r3d-accent, #5b8cff); }
+.r3d-lead[data-level="ok"] { --lead: var(--sem-ok); }
+.r3d-lead[data-level="warn"] { --lead: var(--sem-warn); }
+.r3d-lead[data-level="crit"] { --lead: var(--sem-crit); }
+.r3d-lead__line { stroke: var(--lead); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.r3d-lead__dot { fill: var(--lead); stroke: #fff; stroke-width: 2; }
+.r3d-tip { z-index: 5; }
+
+/* Capa de la etiqueta cuando el 3D está incrustado en otra vista: cubre la ventana,
+   no recibe clics y deja que la etiqueta salga del recuadro del robot. */
+.r3d.r3d-portal {
+  position: fixed; inset: 0; width: auto; height: auto; min-height: 0;
+  overflow: visible; pointer-events: none; z-index: 60; background: none;
+}
