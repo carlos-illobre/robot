@@ -57,12 +57,32 @@ def verificar_python() -> None:
         )
 
 
+def ver_paquetes_del_sistema() -> None:
+    """Hace que .venv vea también los paquetes instalados en el Python del sistema.
+
+    Así, si el SDK de Unitree ya estaba instalado en la notebook (por ejemplo, la
+    preparó la cátedra), el modo «Robot real» lo detecta sin reinstalarlo. Las
+    dependencias del proyecto, instaladas dentro de .venv, siguen teniendo
+    prioridad. También corrige entornos creados con versiones anteriores de
+    este script.
+    """
+    cfg = VENV / "pyvenv.cfg"
+    if not cfg.exists():
+        return
+    lineas = cfg.read_text().splitlines()
+    nuevas = [l for l in lineas if not l.strip().startswith("include-system-site-packages")]
+    nuevas.append("include-system-site-packages = true")
+    if nuevas != lineas:
+        cfg.write_text("\n".join(nuevas) + "\n")
+
+
 def preparar_entorno() -> Path:
     """Crea .venv e instala dependencias solo si hace falta."""
     py = python_del_venv()
     if not py.exists():
         paso("Creando el entorno virtual (.venv), solo la primera vez…")
-        venv.EnvBuilder(with_pip=True).create(VENV)
+        venv.EnvBuilder(with_pip=True, system_site_packages=True).create(VENV)
+    ver_paquetes_del_sistema()
 
     huella = hashlib.sha256(REQUISITOS.read_bytes()).hexdigest()
     if not MARCA.exists() or MARCA.read_text().strip() != huella:

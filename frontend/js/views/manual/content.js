@@ -55,7 +55,7 @@ export const SECTIONS = [
         type: "steps",
         items: [
           "<b>Instalar el proyecto:</b> en la carpeta del proyecto, <code>python iniciar.py</code>. Si se ve el robot paseando, está bien; cerrar con <kbd>Ctrl</kbd>+<kbd>C</kbd>.",
-          "<b>Instalar el SDK de Unitree</b>, lo que permite leer el robot por el cable: <code>python iniciar.py --instalar-sdk</code>. (Si falla compilando CycloneDDS, usar Python 3.10).",
+          "<b>Instalar el SDK de Unitree</b>, lo que permite leer el robot por el cable: <code>python iniciar.py --instalar-sdk</code>. <b>Solo si hace falta:</b> si la notebook ya lo tiene, se detecta solo (en el panel de fuentes, <i>Robot real</i> no aparece gris). Si falla compilando CycloneDDS, usar Python 3.10.",
         ],
       },
       { type: "p", html: "<b>El día del laboratorio:</b>" },

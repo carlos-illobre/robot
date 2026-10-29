@@ -80,7 +80,10 @@ python iniciar.py
 La primera vez instala todo y abre el dashboard en modo demo. Si se ve el robot paseando, está
 bien: cerrar con <kbd>Ctrl</kbd>+<kbd>C</kbd>.
 
-**2. Instalar el SDK de Unitree** (es lo que permite leer el robot por el cable):
+**2. Instalar el SDK de Unitree** (es lo que permite leer el robot por el cable). **Solo si hace
+falta:** si la notebook ya lo tiene instalado (por ejemplo, la preparó la cátedra), el dashboard lo
+detecta solo y este paso se saltea. Para saberlo, abrir el panel de fuentes (paso 6): si **Robot
+real** no está gris, ya está.
 
 ```bash
 python iniciar.py --instalar-sdk
