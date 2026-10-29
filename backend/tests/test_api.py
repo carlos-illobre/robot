@@ -106,3 +106,22 @@ def test_quieto_apoya_las_cuatro_patas_y_caminando_no():
 def test_yaw_cambia_al_girar():
     yaws = [t["imu"]["yaw"] for tramo, t in _simular("go2", 40) if "curva" in tramo]
     assert max(yaws) - min(yaws) > 20
+
+
+def test_modo_real_sin_sdk_falla_con_un_mensaje_claro(monkeypatch):
+    """Sin unitree_sdk2py, --real no se cuelga: avisa qué falta y sale con error."""
+    import builtins
+
+    import servidor
+
+    original = builtins.__import__
+
+    def sin_sdk(nombre, *args, **kwargs):
+        if nombre.startswith("unitree_sdk2py"):
+            raise ImportError(nombre)
+        return original(nombre, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", sin_sdk)
+    with pytest.raises(RuntimeError, match="unitree_sdk2py"):
+        servidor.crear_lector("real", "go2", "eth0")
+    assert servidor.main(["--real", "--robot", "go2"]) == 1

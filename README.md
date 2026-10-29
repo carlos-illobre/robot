@@ -260,7 +260,7 @@ El backend es siempre el mismo; lo que cambia es **de dónde lee**. El dashboard
 | `python backend/servidor.py --demo --robot g1` | Paseo simulado (G1, 29 motores) | Ver el dashboard con el humanoide |
 | `python backend/servidor.py --demo-catedra` | `DemoReader` original de la cátedra | Comparar con el demo provisto |
 | `python backend/servidor.py` | Simulador MuJoCo de la cátedra (socket local) | Con el entorno `UadeRobotLab/TP05` corriendo |
-| (notebook del laboratorio) | **Robot real** por DDS | El día de la visita: solo se cambia la IP en el dashboard |
+| `python backend/servidor.py --real --interfaz eth0` | **Robot real** por DDS | En el laboratorio, con la notebook conectada al robot por cable |
 
 Opciones del servidor:
 
@@ -271,8 +271,52 @@ Opciones del servidor:
 | `--host IP` | `0.0.0.0` | Interfaz donde escuchar (`127.0.0.1` para que no se vea en la red) |
 | `--demo` | — | Paseo simulado sin MuJoCo |
 | `--demo-catedra` | — | Demo original de la cátedra |
+| `--real` | — | Robot real por DDS (necesita `unitree_sdk2py`) |
+| `--interfaz NOMBRE` | automática | Placa de red conectada al robot (`eth0`, `enp3s0`…), solo con `--real` |
 
-### Conectar el dashboard a otro servidor (por ejemplo, el robot real)
+### 🤖 Usar el dashboard con el robot real
+
+El dashboard **no cambia nada** para el robot real: lo único distinto es de dónde lee el backend.
+Hay dos escenarios, según quién levante el backend en el laboratorio:
+
+```mermaid
+flowchart LR
+  R["Robot Go2 / G1"] -- "DDS · cable RJ-45" --> B["Backend FastAPI<br/>(notebook del laboratorio)"]
+  B -- "WebSocket / HTTP · WiFi o LAN" --> D1["Dashboard<br/>notebook del grupo 1"]
+  B --> D2["Dashboard<br/>notebook del grupo 2"]
+  B --> D3["…"]
+```
+
+**A. El backend de la cátedra ya está corriendo** (lo habitual en la visita). La cátedra levanta su
+backend en la notebook conectada al robot y anuncia su IP. Cada grupo solo apunta su dashboard ahí:
+
+```bash
+python backend/servidor.py --demo
+```
+
+y en el navegador: `http://localhost:8001/?server=http://IP-DEL-BACKEND:8001` (o escribir la
+dirección en el panel de conexión, haciendo clic en el indicador de estado). Como la API es de solo
+lectura, **todos los grupos pueden conectarse a la vez**.
+
+**B. Levantar este mismo backend contra el robot** (en la notebook conectada por cable):
+
+1. Instalar el SDK de Unitree (incluye CycloneDDS):
+   ```bash
+   python -m pip install git+https://github.com/unitreerobotics/unitree_sdk2_python.git
+   ```
+2. Averiguar la placa de red conectada al robot (`ip -br addr` en Linux; la que tiene una IP de la
+   red del robot, normalmente `192.168.123.x`).
+3. Levantar el backend:
+   ```bash
+   python backend/servidor.py --real --robot go2 --interfaz eth0
+   ```
+4. Abrir `http://localhost:8001`. Las demás notebooks se conectan con la IP que imprime la consola.
+
+> ⚠️ Con el robot real los números son **medidos**, no simulados: las temperaturas, los torques y
+> las fuerzas van a ser otros. Los umbrales del semáforo son los de electroSim; el de alarma de
+> torque se puede ajustar en la vista Consola.
+
+### Conectar el dashboard a otro servidor
 
 Tres formas, de la más cómoda a la más manual:
 

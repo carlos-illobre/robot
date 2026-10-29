@@ -6,6 +6,7 @@ Uso rapido:
     python backend/servidor.py --demo --robot g1      # humanoide G1 (29 motores)
     python backend/servidor.py --demo-catedra         # DemoReader original de la catedra
     python backend/servidor.py                        # lee del simulador MuJoCo de la catedra
+    python backend/servidor.py --real --interfaz eth0 # ROBOT REAL por DDS (laboratorio)
 
 y abrir  http://localhost:8001  en el navegador.
 
@@ -42,7 +43,7 @@ def ip_de_la_maquina() -> str:
         return "127.0.0.1"
 
 
-def crear_lector(modo: str, robot: str):
+def crear_lector(modo: str, robot: str, interfaz: str | None = None):
     """Fabrica (Factory Method) del lector segun el modo elegido."""
     if modo == "demo":
         from api.demo_paseo import PaseoDemoReader
@@ -50,6 +51,11 @@ def crear_lector(modo: str, robot: str):
     if modo == "demo-catedra":
         from api.telemetry_reader_dds import DemoReader
         return DemoReader(robot)
+    if modo == "real":
+        # Lector DDS de la catedra: se suscribe al LowState del robot por la
+        # interfaz de red conectada al robot (RJ-45). Requiere unitree_sdk2py.
+        from api.telemetry_reader_dds import TelemetryReader as LectorDDS
+        return LectorDDS(robot, network_interface=interfaz)
     from api.telemetry_reader import TelemetryReader
     return TelemetryReader(robot, network_interface="lo")
 
@@ -78,17 +84,31 @@ def main(argv=None) -> int:
                        help="paseo simulado sin robot ni MuJoCo (recomendado)")
     grupo.add_argument("--demo-catedra", action="store_true",
                        help="DemoReader original de la catedra (senoidales)")
+    grupo.add_argument("--real", action="store_true",
+                       help="robot real por DDS (requiere unitree_sdk2py y cable al robot)")
+    ap.add_argument("--interfaz", default=None,
+                    help="interfaz de red conectada al robot, p. ej. eth0 o enp3s0 (solo con --real)")
     args = ap.parse_args(argv)
 
     import uvicorn
     from api.telemetry_server import app, configurar
 
-    modo = "demo" if args.demo else "demo-catedra" if args.demo_catedra else "simulador"
-    lector = crear_lector(modo, args.robot)
-    if modo == "simulador" and not lector.esperar_primer_dato(timeout=8.0):
-        print("\n  No llegan datos del simulador MuJoCo de la catedra.")
-        print("  Fijate que la ventana del simulador siga abierta,")
-        print("  o proba sin simulador con:  python backend/servidor.py --demo\n")
+    modo = ("demo" if args.demo else "demo-catedra" if args.demo_catedra
+            else "real" if args.real else "simulador")
+    try:
+        lector = crear_lector(modo, args.robot, args.interfaz)
+    except RuntimeError as exc:          # p. ej. falta unitree_sdk2py
+        print(f"\n  {exc}\n")
+        return 1
+    if modo in ("simulador", "real") and not lector.esperar_primer_dato(timeout=8.0):
+        if modo == "real":
+            print("\n  No llegan datos del robot por DDS.")
+            print("  Verifica el cable, que el robot este encendido y la interfaz")
+            print(f"  ({args.interfaz or 'automatica'}): ip -br addr  muestra las interfaces.\n")
+        else:
+            print("\n  No llegan datos del simulador MuJoCo de la catedra.")
+            print("  Fijate que la ventana del simulador siga abierta,")
+            print("  o proba sin simulador con:  python backend/servidor.py --demo\n")
         return 1
 
     # El servidor de la catedra reporta "demo" en /info; los dos demos lo son.
