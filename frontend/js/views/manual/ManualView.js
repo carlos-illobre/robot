@@ -157,7 +157,7 @@ export default class ManualView {
       case "list":
         return h(b.ordered ? "ol" : "ul", { class: "man-list" }, ...b.items.map((i) => h("li", { html: i })));
       case "steps":
-        return h("ol", { class: "man-steps" }, ...b.items.map((i) => h("li", { html: i })));
+        return h("ol", { class: "man-steps", start: b.start, style: { counterReset: `step ${(b.start ?? 1) - 1}` } }, ...b.items.map((i) => h("li", { html: i })));
       case "table":
         return h(
           "div",

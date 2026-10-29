@@ -29,7 +29,8 @@ por **WebSocket** o **polling**.
 </tr>
 </table>
 
-[**Empezar en 1 minuto**](#-empezar-en-1-minuto) ·
+[**🤖 Con el robot real (paso a paso)**](#-usar-el-dashboard-con-el-robot-real--paso-a-paso) ·
+[Empezar en 1 minuto](#-empezar-en-1-minuto) ·
 [Las vistas](#-las-cuatro-vistas-y-el-manual) ·
 [Instalación](#-instalación-paso-a-paso) ·
 [Guía de uso](#-guía-de-uso) ·
@@ -43,8 +44,136 @@ por **WebSocket** o **polling**.
 
 ---
 
+## 🤖 Usar el dashboard con el robot real — paso a paso
+
+> Esta es la parte más importante: el dashboard se hizo para **mirar el robot de verdad** en el
+> laboratorio. Todo lo demás (demo, simulador) es para practicar sin robot.
+
+**Lo que hace falta:** el robot (Go2 o G1) encendido, **una notebook con Linux** conectada al robot
+por **cable de red** (es la que corre el backend) y este proyecto descargado en esa notebook.
+Las demás computadoras (o el proyector, o un celular) solo necesitan un navegador.
+
+```mermaid
+flowchart LR
+  R["🤖 Robot"] -- "cable de red · DDS" --> N["💻 Notebook del laboratorio<br/>python iniciar.py"]
+  N -- "WiFi / red del aula · http://IP:8001" --> A["Notebook de un alumno"]
+  N --> P["Proyector"]
+  N --> C["Celular"]
+```
+
+### Antes del día (una sola vez, con internet)
+
+**1. Descargar el proyecto e instalarlo** en la notebook que se va a conectar al robot:
+
+```bash
+git clone https://github.com/carlos-illobre/robot.git
+```
+
+```bash
+cd robot
+```
+
+```bash
+python iniciar.py
+```
+
+La primera vez instala todo y abre el dashboard en modo demo. Si se ve el robot paseando, está
+bien: cerrar con <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+
+**2. Instalar el SDK de Unitree** (es lo que permite leer el robot por el cable):
+
+```bash
+python iniciar.py --instalar-sdk
+```
+
+> Si falla al compilar CycloneDDS, usar Python 3.10 (la versión que recomienda Unitree) o seguir la
+> guía de [unitree_sdk2_python](https://github.com/unitreerobotics/unitree_sdk2_python). Si la
+> notebook del laboratorio ya la preparó la cátedra, este paso puede no hacer falta.
+
+### El día del laboratorio
+
+**3. Conectar el cable** de red entre la notebook y el robot, y encender el robot.
+
+**4. Darle a la notebook una IP de la red del robot.** El robot vive en la red `192.168.123.x`; la
+placa de red del cable tiene que tener una IP fija libre de esa red, por ejemplo
+`192.168.123.222` con máscara `255.255.255.0` (la que sugiere la documentación de Unitree). En
+Linux, desde *Configuración → Red → Cableada → IPv4 → Manual*, o por terminal (dura hasta reiniciar):
+
+```bash
+sudo ip addr add 192.168.123.222/24 dev enp3s0
+```
+
+(`enp3s0` es el nombre de la placa del cable; `ip -br addr` muestra cuáles hay.) Para comprobar que
+el robot responde: `ping 192.168.123.161` (la placa principal del robot; si no responde, revisar la
+IP de cada modelo en la [documentación de Unitree](https://support.unitree.com/home/en/developer)).
+
+**5. Arrancar el backend:**
+
+```bash
+python iniciar.py
+```
+
+Se abre el dashboard. Arranca en modo demo: arriba a la izquierda dice **Simulado**.
+
+<p align="center"><img src="docs/img/real-paso-1.png" alt="La etiqueta Simulado junto al nombre del robot" width="480"></p>
+
+**6. Elegir el robot real desde el dashboard.** Hacer clic en **Simulado ▾** y, en el panel:
+
+1. elegir **Robot real**;
+2. elegir el modelo: **Go2** o **G1** (tiene que ser el que está conectado);
+3. revisar la **placa de red**: el dashboard la detecta sola y marca la que está en la red del robot
+   con **(red del robot)**;
+4. apretar **Usar esta fuente**.
+
+<p align="center"><img src="docs/img/real-paso-2.png" alt="Panel de fuente de datos con Robot real elegido" width="380"><br>
+<sub>Captura ilustrativa: el nombre de la placa y su IP dependen de cada notebook.</sub></p>
+
+En unos segundos la etiqueta cambia a **Real** en verde y los números pasan a ser los del robot.
+Si en 5 segundos no llegan datos, el dashboard lo avisa y sigue en el modo anterior (ver la tabla
+de abajo).
+
+**7. Mirarlo desde otras computadoras.** La consola del backend muestra una línea *«desde otra
+maquina de la red: http://…:8001»*: esa dirección, abierta en el navegador de cualquier
+computadora del aula, muestra el mismo dashboard. Ojo: tiene que ser la IP de la **WiFi o red del
+aula**, no la del cable del robot (`192.168.123.x`). Detalles y firewall en
+[Ver el dashboard desde otra computadora](#-ver-el-dashboard-desde-otra-computadora).
+
+### ¿Qué son las opciones del panel y por qué algunas aparecen grises?
+
+| Opción | Qué es | Aparece gris cuando… |
+|---|---|---|
+| **Robot real** · *datos medidos* | Lee el robot por el cable de red (DDS) | Falta el SDK de Unitree en la notebook del backend (paso 2) |
+| **Simulador MuJoCo** | El simulador 3D de la cátedra, corriendo en la notebook del backend | Ese simulador no está abierto (se abre con `INICIAR_TP05` del repositorio de la cátedra) |
+| **Demo «paseo»** | Simulación de este proyecto: el robot pasea y los datos son coherentes | Nunca: siempre disponible |
+| **Demo de la cátedra** | El generador original de la cátedra: senoidales | Nunca |
+| **Simulación en el navegador** | La misma simulación, calculada en la página, sin servidor | Nunca |
+
+Gris no quiere decir roto: quiere decir que **en esa máquina** falta algo para esa fuente, y el
+motivo está escrito debajo del nombre. Más detalle en el Manual del dashboard
+(<kbd>5</kbd> → *Fuentes de datos*).
+
+### Si algo no anda
+
+| Qué pasa | Causa probable | Qué hacer |
+|---|---|---|
+| **Robot real** está gris | Falta el SDK | Paso 2 |
+| «La fuente no envió datos en 5 s» | Cable, IP o placa | Revisar el cable y el paso 4 (`ping` al robot); elegir en el panel la placa marcada *(red del robot)* |
+| Ninguna placa dice *(red del robot)* | La placa del cable no tiene IP `192.168.123.x` | Paso 4 |
+| Llegan datos pero los motores no coinciden | Se eligió G1 con un Go2 conectado (o al revés) | Elegir el modelo correcto en el panel |
+| Los números están quietos | El robot está quieto: el dashboard es **solo lectura**, no lo mueve | Normal. Moverlo con su control remoto |
+| Las otras computadoras no cargan el dashboard | Firewall o redes distintas | [Ver el dashboard desde otra computadora](#-ver-el-dashboard-desde-otra-computadora) |
+
+También se puede arrancar directamente en modo real, sin pasar por el panel:
+
+```bash
+python iniciar.py --real --robot go2 --interfaz enp3s0
+```
+
+---
+
 ## 📑 Índice
 
+0. [**Usar el dashboard con el robot real — paso a paso**](#-usar-el-dashboard-con-el-robot-real--paso-a-paso)
 1. [Qué es y por qué existe](#-qué-es-y-por-qué-existe)
 2. [Empezar en 1 minuto](#-empezar-en-1-minuto)
 3. [Cumplimiento de la consigna](#-cumplimiento-de-la-consigna)
@@ -390,47 +519,10 @@ Por detrás son dos rutas que agrega `backend/fuentes.py` sin modificar la API d
 `GET /fuentes` y `POST /fuente`. Como el cambio afecta a **todos** los dashboards conectados a ese
 servidor, el día de la visita se puede bloquear con `--fuente-fija`.
 
-### 🤖 Usar el dashboard con el robot real
+### 🤖 Con el robot real
 
-El dashboard **no cambia nada** para el robot real: lo único distinto es de dónde lee el backend.
-Hay dos escenarios, según quién levante el backend en el laboratorio:
-
-```mermaid
-flowchart LR
-  R["Robot Go2 / G1"] -- "DDS · cable RJ-45" --> B["Backend FastAPI<br/>(notebook del laboratorio)"]
-  B -- "WebSocket / HTTP · WiFi o LAN" --> D1["Dashboard<br/>notebook del grupo 1"]
-  B --> D2["Dashboard<br/>notebook del grupo 2"]
-  B --> D3["…"]
-```
-
-**A. El backend de la cátedra ya está corriendo** (lo habitual en la visita). La cátedra levanta su
-backend en la notebook conectada al robot y anuncia su IP. Cada grupo solo apunta su dashboard ahí:
-
-```bash
-python backend/servidor.py --demo
-```
-
-y en el navegador: `http://localhost:8001/?server=http://IP-DEL-BACKEND:8001` (o escribir la
-dirección en el panel de conexión, haciendo clic en el indicador de estado). Como la API es de solo
-lectura, **todos los grupos pueden conectarse a la vez**.
-
-**B. Levantar este mismo backend contra el robot** (en la notebook conectada por cable):
-
-1. Instalar el SDK de Unitree (incluye CycloneDDS):
-   ```bash
-   python -m pip install git+https://github.com/unitreerobotics/unitree_sdk2_python.git
-   ```
-2. Averiguar la placa de red conectada al robot (`ip -br addr` en Linux; la que tiene una IP de la
-   red del robot, normalmente `192.168.123.x`).
-3. Levantar el backend:
-   ```bash
-   python backend/servidor.py --real --robot go2 --interfaz eth0
-   ```
-4. Abrir `http://localhost:8001`. Las demás notebooks se conectan con la IP que imprime la consola.
-
-> ⚠️ Con el robot real los números son **medidos**, no simulados: las temperaturas, los torques y
-> las fuerzas van a ser otros. Los umbrales del semáforo son los de electroSim; el de alarma de
-> torque se puede ajustar en la vista Consola.
+Está explicado paso a paso al principio:
+[Usar el dashboard con el robot real — paso a paso](#-usar-el-dashboard-con-el-robot-real--paso-a-paso).
 
 ### 💻 Ver el dashboard desde otra computadora
 

@@ -214,7 +214,15 @@ const actions = {
       : backend
         ? { ...backend.actual, medido: backend.actual.modo === "real" }
         : { modo: state.info?.modo ?? "desconocido", robot: state.info?.modelo, medido: state.info?.modo === "real" };
-    const result = { actual: state.source, cambiable: backend?.cambiable ?? false, fuentes: [...fuentes, navegador], backendUrl: state.backendUrl, error };
+    const result = {
+      actual: state.source,
+      cambiable: backend?.cambiable ?? false,
+      fuentes: [...fuentes, navegador],
+      interfaces: backend?.interfaces ?? [],
+      interfazSugerida: backend?.interfaz_sugerida ?? null,
+      backendUrl: state.backendUrl,
+      error,
+    };
     appBar.setSources(result);
     view?.onSource?.(state.source);
     return result;

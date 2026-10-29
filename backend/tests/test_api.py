@@ -194,3 +194,14 @@ def test_simulador_go2_se_reordena_al_orden_del_sdk():
     assert patas == ["FR"] * 3 + ["FL"] * 3 + ["RR"] * 3 + ["RL"] * 3
     assert [m["id"] for m in snap["motor_state"]] == list(range(12))
     assert OrdenSimulador(LectorFalso()).mensajes_leidos == 7
+
+
+def test_fuentes_lista_las_placas_de_red_y_sugiere_la_del_robot(monkeypatch):
+    """El dashboard ofrece un desplegable de placas y preselecciona la red 192.168.123.x."""
+    import config
+    import fuentes
+
+    monkeypatch.setattr(config, "interfaces_ipv4", lambda: {"wlp2s0": "10.0.0.7", "enp3s0": "192.168.123.99"})
+    placas = fuentes.interfaces_de_red()
+    assert placas[0] == {"nombre": "enp3s0", "ip": "192.168.123.99", "robot": True}
+    assert [p["nombre"] for p in placas] == ["enp3s0", "wlp2s0"]

@@ -5,6 +5,7 @@
     python iniciar.py --robot g1       # demo con el humanoide G1
     python iniciar.py --real --interfaz eth0
     python iniciar.py --sin-navegador  # no abrir el navegador
+    python iniciar.py --instalar-sdk   # instala el SDK de Unitree (para el robot real) y sale
 
 La primera vez crea un entorno virtual (.venv) e instala las dependencias de
 requirements.txt; las veces siguientes arranca directo (no necesita internet).
@@ -32,6 +33,7 @@ VENV = RAIZ / ".venv"
 REQUISITOS = RAIZ / "requirements.txt"
 MARCA = VENV / ".requisitos.sha256"   # para no reinstalar si no cambió nada
 PYTHON_MINIMO = (3, 10)
+SDK_UNITREE = "git+https://github.com/unitreerobotics/unitree_sdk2_python.git"
 
 
 def python_del_venv() -> Path:
@@ -94,9 +96,31 @@ def abrir_navegador_cuando_responda(url: str) -> None:
     threading.Thread(target=esperar, daemon=True).start()
 
 
+def instalar_sdk(py: Path) -> int:
+    """Instala el SDK de Unitree (y CycloneDDS) DENTRO de .venv: lo necesita el modo robot real."""
+    paso("Instalando el SDK de Unitree (necesita internet, una sola vez)…")
+    r = subprocess.run([str(py), "-m", "pip", "install", "--disable-pip-version-check", SDK_UNITREE])
+    if r.returncode != 0:
+        print(
+            "\nNo se pudo instalar el SDK. Lo más común es que falle CycloneDDS:\n"
+            "  · en Linux, probá con Python 3.10 (la versión que recomienda Unitree), o\n"
+            "  · seguí la guía de https://github.com/unitreerobotics/unitree_sdk2_python\n"
+            "El resto del dashboard (demo, simulador) funciona igual sin el SDK."
+        )
+        return 1
+    paso("SDK instalado. Ya podés elegir «Robot real» en el dashboard.")
+    return 0
+
+
 def main() -> int:
     verificar_python()
     args = sys.argv[1:]
+    if "--instalar-sdk" in args:
+        try:
+            return instalar_sdk(preparar_entorno())
+        except subprocess.CalledProcessError:
+            print("\nNo se pudieron instalar las dependencias. ¿Hay conexión a internet?")
+            return 1
     abrir = "--sin-navegador" not in args
     args = [a for a in args if a != "--sin-navegador"]
     if not any(a in args for a in ("--demo", "--demo-catedra", "--real", "--simulador")):

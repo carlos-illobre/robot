@@ -125,13 +125,18 @@ export class AppBar {
     // ---- Fuente de datos ----
     this.sourceList = h("div", { class: "sources", role: "radiogroup", "aria-label": "Fuente de datos" });
     this.robotSeg = mkSeg([["go2", "Go2 · 12 motores"], ["g1", "G1 · 29 motores"]], "go2", (r) => { this.pickedRobot = r; this.#syncSourceForm(); }, "Robot");
-    this.ifaceInput = h("input", { class: "input", placeholder: "automática (p. ej. eth0, enp3s0)", spellcheck: "false" });
-    this.ifaceField = h("label", { class: "field", hidden: true }, h("span", {}, "Placa de red conectada al robot"), this.ifaceInput);
+    // Placa de red hacia el robot: desplegable con las que detecta el backend
+    // (preselecciona la de la red 192.168.123.x); si no detecta ninguna, texto libre.
+    this.ifaceSelect = h("select", { class: "input" });
+    this.ifaceInput = h("input", { class: "input", placeholder: "p. ej. eth0, enp3s0", spellcheck: "false" });
+    this.ifaceHint = h("small", { class: "field__hint" }, "");
+    this.ifaceSelect.addEventListener("change", () => (this.ifaceInput.hidden = this.ifaceSelect.value !== "__otra"));
+    this.ifaceField = h("label", { class: "field", hidden: true }, h("span", {}, "Placa de red conectada al robot"), this.ifaceSelect, this.ifaceInput, this.ifaceHint);
     this.applyBtn = h("button", { type: "button", class: "btn btn--primary" }, "Usar esta fuente");
     this.applyBtn.addEventListener("click", async () => {
       this.applyBtn.disabled = true;
       setText(this.applyBtn, this.pickedSource === "real" ? "Conectando con el robot…" : "Cambiando…");
-      const ok = await actions.setSource({ modo: this.pickedSource, robot: this.pickedRobot ?? this.sources?.actual?.robot ?? "go2", interfaz: this.ifaceInput.value.trim() });
+      const ok = await actions.setSource({ modo: this.pickedSource, robot: this.pickedRobot ?? this.sources?.actual?.robot ?? "go2", interfaz: this.#interfaz() });
       if (ok) this.pickedRobot = null;
       this.#syncSourceForm();
     });
@@ -256,8 +261,38 @@ export class AppBar {
   }
 
   /** Pinta el selector de fuentes con lo que devolvió actions.loadSources(). */
-  setSources({ actual, cambiable, fuentes, backendUrl, error }) {
+  /** La placa elegida: la del desplegable, o la escrita a mano ("" = automática). */
+  #interfaz() {
+    const v = this.ifaceSelect.hidden ? "__otra" : this.ifaceSelect.value;
+    return v === "__otra" ? this.ifaceInput.value.trim() : v === "__auto" ? "" : v;
+  }
+
+  #paintInterfaces(interfaces = [], sugerida = null) {
+    const prev = this.ifaceSelect.value;
+    const opts = interfaces.map((p) =>
+      h("option", { value: p.nombre }, `${p.nombre} · ${p.ip}${p.robot ? "  (red del robot)" : ""}`),
+    );
+    this.ifaceSelect.replaceChildren(
+      ...opts,
+      h("option", { value: "__auto" }, "Automática (que elija el SDK)"),
+      h("option", { value: "__otra" }, "Otra (escribir el nombre)…"),
+    );
+    this.ifaceSelect.value = interfaces.some((p) => p.nombre === prev) || prev?.startsWith("__") ? prev : sugerida ?? (interfaces.length ? "__auto" : "__otra");
+    this.ifaceSelect.hidden = !interfaces.length;
+    this.ifaceInput.hidden = interfaces.length > 0 && this.ifaceSelect.value !== "__otra";
+    setText(
+      this.ifaceHint,
+      sugerida
+        ? `Detectada la red del robot (192.168.123.x) en ${sugerida}.`
+        : interfaces.length
+          ? "Ninguna placa está en la red del robot (192.168.123.x): ¿está conectado el cable?"
+          : "",
+    );
+  }
+
+  setSources({ actual, cambiable, fuentes, backendUrl, error, interfaces, interfazSugerida }) {
     this.sources = { actual, cambiable, fuentes };
+    this.#paintInterfaces(interfaces, interfazSugerida);
     this.#paintChip(actual);
     const pick = this.pickedSource && fuentes.some((f) => f.modo === this.pickedSource && f.disponible) ? this.pickedSource : actual.modo;
     this.pickedSource = pick;

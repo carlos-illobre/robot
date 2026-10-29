@@ -44,6 +44,72 @@ export const SECTIONS = [
 
   /* ---------------------------------------------------------------- */
   {
+    id: "robot-real",
+    toc: "★ Con el robot real",
+    kicker: "Lo más importante",
+    title: "Usar el dashboard con el robot real, paso a paso",
+    lead: "Hace falta el robot encendido, <b>una notebook con Linux conectada al robot por cable</b> (corre el servidor) y, para mirar desde otras máquinas, solo un navegador.",
+    blocks: [
+      { type: "p", html: "<b>Antes del día</b> (una sola vez, con internet), en la notebook que se va a conectar al robot:" },
+      {
+        type: "steps",
+        items: [
+          "<b>Instalar el proyecto:</b> en la carpeta del proyecto, <code>python iniciar.py</code>. Si se ve el robot paseando, está bien; cerrar con <kbd>Ctrl</kbd>+<kbd>C</kbd>.",
+          "<b>Instalar el SDK de Unitree</b>, lo que permite leer el robot por el cable: <code>python iniciar.py --instalar-sdk</code>. (Si falla compilando CycloneDDS, usar Python 3.10).",
+        ],
+      },
+      { type: "p", html: "<b>El día del laboratorio:</b>" },
+      {
+        type: "steps",
+        start: 3,
+        items: [
+          "<b>Conectar el cable</b> entre la notebook y el robot, y encender el robot.",
+          "<b>Darle a la notebook una IP de la red del robot</b>: la placa del cable con IP fija <code>192.168.123.222</code>, máscara <code>255.255.255.0</code> (Configuración → Red → Cableada → IPv4 → Manual). Comprobar con <code>ping 192.168.123.161</code>.",
+          "<b>Arrancar:</b> <code>python iniciar.py</code>. Se abre el dashboard en modo demo: arriba dice <b>Simulado</b>.",
+          "<b>Clic en «Simulado ▾»</b> → elegir <b>Robot real</b> → el modelo (<b>Go2</b> o <b>G1</b>, el que está conectado) → revisar la <b>placa de red</b> (se detecta sola y aparece marcada <i>(red del robot)</i>) → <b>Usar esta fuente</b>. En unos segundos la etiqueta cambia a <b>Real</b>, en verde.",
+          "<b>Desde otras computadoras:</b> abrir la dirección que muestra la consola (<i>«desde otra maquina de la red: http://…:8001»</i>). Tiene que ser la IP de la WiFi del aula, no la del cable del robot.",
+        ],
+      },
+      {
+        type: "figure",
+        src: `${A}/real-paso-1.png`,
+        alt: "La etiqueta Simulado en la barra",
+        strip: true,
+        caption: "Paso 6: la etiqueta junto al nombre del robot. Haciendo clic se abre el panel.",
+        markers: [[63, 50]],
+        legend: [["Fuente de datos", "Dice <b>Simulado</b> (violeta) o <b>Real</b> (verde). Hacé clic para elegir otra fuente."]],
+      },
+      {
+        type: "figure",
+        src: `${A}/real-paso-2.png`,
+        alt: "Panel de fuente de datos con Robot real elegido",
+        ratio: "570 / 1077",
+        phone: true,
+        caption: "Captura ilustrativa: el nombre de la placa y su IP dependen de cada notebook.",
+        markers: [[12, 9.5], [50, 68], [50, 79], [50, 88]],
+        legend: [
+          ["Robot real", "La fuente que lee el robot por el cable. Si aparece gris, falta el SDK (paso 2)."],
+          ["Modelo", "Go2 o G1: tiene que ser el robot conectado."],
+          ["Placa de red", "Se detecta sola. La marcada <i>(red del robot)</i> es la del cable."],
+          ["Usar esta fuente", "El servidor cambia solo si llegan datos en 5 s; si no, avisa y sigue con la fuente anterior."],
+        ],
+      },
+      {
+        type: "table",
+        head: ["Qué pasa", "Qué hacer"],
+        rows: [
+          ["<b>Robot real</b> está gris", "Falta el SDK: paso 2."],
+          ["«La fuente no envió datos en 5 s»", "Revisar el cable, la IP (paso 4, <code>ping</code>) y elegir la placa marcada <i>(red del robot)</i>."],
+          ["Los números están quietos", "El robot está quieto: el dashboard es solo lectura, no lo mueve. Es normal."],
+          ["Los motores no coinciden", "Se eligió G1 con un Go2 conectado (o al revés)."],
+        ],
+      },
+      { type: "callout", kind: "info", html: "<b>¿Por qué algunas opciones del panel aparecen grises?</b> Gris no quiere decir roto: en <b>esa máquina</b> falta algo para usar esa fuente, y el motivo está escrito debajo del nombre. Robot real necesita el SDK de Unitree; Simulador MuJoCo, que el simulador de la cátedra esté abierto. Las demos y la simulación en el navegador siempre están disponibles. Ver <a href='#man-fuentes'>Fuentes de datos</a>." },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
     id: "primeros-pasos",
     toc: "Primeros pasos",
     kicker: "1",

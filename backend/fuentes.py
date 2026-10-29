@@ -77,6 +77,27 @@ def disponibilidad(modo: str) -> tuple[bool, str]:
     return True, ""
 
 
+RED_DEL_ROBOT = "192.168.123."  # red por cable de los robots Unitree
+
+
+def interfaces_de_red() -> list[dict]:
+    """Placas de red con IPv4, marcando la que está en la red del robot.
+
+    Usa la función de la cátedra (`config.interfaces_ipv4`), que funciona en
+    Linux, el sistema de la notebook del laboratorio. En otros sistemas
+    devuelve una lista vacía y el dashboard muestra un campo de texto.
+    """
+    try:
+        from config import interfaces_ipv4
+        placas = interfaces_ipv4()
+    except Exception:  # noqa: BLE001 - sin lista, se escribe a mano
+        return []
+    return sorted(
+        ({"nombre": n, "ip": ip, "robot": ip.startswith(RED_DEL_ROBOT)} for n, ip in placas.items()),
+        key=lambda p: (not p["robot"], p["nombre"]),
+    )
+
+
 def crear_router(crear_lector, configurar, estado: dict, cambiable: bool = True) -> APIRouter:
     """Arma las rutas. Recibe las dependencias por parámetro (inyección)."""
     router = APIRouter(tags=["fuente de datos"])
@@ -88,11 +109,15 @@ def crear_router(crear_lector, configurar, estado: dict, cambiable: bool = True)
         for modo, meta in FUENTES.items():
             ok, motivo = disponibilidad(modo)
             lista.append({"modo": modo, **meta, "disponible": ok, "motivo": motivo})
+        placas = interfaces_de_red()
+        sugerida = next((p["nombre"] for p in placas if p["robot"]), None)
         return {
             "actual": {k: estado[k] for k in ("modo", "robot", "interfaz")},
             "cambiable": cambiable,
             "fuentes": lista,
             "robots": ["go2", "g1"],
+            "interfaces": placas,
+            "interfaz_sugerida": sugerida,
         }
 
     @router.post("/fuente")
