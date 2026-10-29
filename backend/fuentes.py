@@ -71,7 +71,8 @@ def _simulador_abierto() -> bool:
 def disponibilidad(modo: str) -> tuple[bool, str]:
     """(disponible, motivo legible si no lo está)."""
     if modo == "real" and not _sdk_instalado():
-        return False, "Falta el SDK de Unitree (unitree_sdk2py) en la máquina del backend."
+        return False, ("Falta el SDK de Unitree en la máquina del backend. Instalalo con "
+                       "«python iniciar.py --instalar-sdk» y volvé a arrancar el backend.")
     if modo == "simulador" and not _simulador_abierto():
         return False, "El simulador MuJoCo de la cátedra no está abierto en esta máquina."
     return True, ""
