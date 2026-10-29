@@ -48,6 +48,8 @@ const state = {
   intervalMs: settings.get("intervalMs", DEFAULTS.intervalMs),
   torqueAlarm: settings.get("torqueAlarm", DEFAULTS.torqueAlarm),
   excel: settings.get("excel", false),
+  /** Ilustración del robot en las vistas: "esquema" (SVG) o "3d" (modelo real de Unitree). Tecla G. */
+  figure: settings.get("figure", "esquema"),
   info: null,
   latest: null,
   paused: false,
@@ -239,6 +241,17 @@ const actions = {
     settings.set("torqueAlarm", state.torqueAlarm);
   },
 
+  setFigureMode(mode) {
+    state.figure = mode === "3d" ? "3d" : "esquema";
+    settings.set("figure", state.figure);
+    view?.onFigureMode?.(state.figure);
+  },
+
+  toggleFigure() {
+    actions.setFigureMode(state.figure === "3d" ? "esquema" : "3d");
+    toast(state.figure === "3d" ? "Ilustración: modelo 3D real" : "Ilustración: esquema", { kind: "info", timeout: 1400 });
+  },
+
   toggleTheme() {
     const next = currentTheme() === "dark" ? "light" : "dark";
     applyTheme(next);
@@ -303,6 +316,7 @@ async function switchView(id) {
     view.onConnection?.(state.connection);
     view.onRecording?.(state.recording);
     view.onPause?.(state.paused);
+    view.onFigureMode?.(state.figure);
     if (state.latest) view.update(state.latest);
   })();
   await switching;
@@ -426,6 +440,7 @@ document.addEventListener("keydown", (e) => {
     e: () => actions.exportCsv(),
     " ": () => actions.togglePause(),
     w: () => actions.toggleTransport(),
+    g: () => actions.toggleFigure(),
     t: () => actions.toggleTheme(),
     "?": () => (helpDialog.open ? helpDialog.close() : actions.openHelp()),
   };

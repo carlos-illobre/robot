@@ -35,13 +35,15 @@ constructor(ctx)
 | `events` | bitácora, la más nueva primero `[{ at: Date, level, message }]` |
 | `torqueAlarm` | umbral de alarma de torque en N·m |
 | `excel` | si el CSV se exporta en formato Excel en castellano |
+| `figure` | ilustración del robot: `"esquema"` (SVG de la vista) o `"3d"` (modelo real); tecla **G** |
 | `transport`, `intervalMs`, `baseUrl` | configuración de la conexión |
 
 ### `actions`
 
 `capture()` · `toggleRecording()` · `exportCsv({ excel })` · `exportJson()` · `clearCaptures()` ·
 `setExcel(bool)` · `togglePause()` · `setTransport("websocket"|"polling", ms)` ·
-`toggleTransport()` · `setTorqueAlarm(nm)` · `toggleTheme()` · `openHelp()` · `switchView(id)`.
+`toggleTransport()` · `setTorqueAlarm(nm)` · `setFigureMode("esquema"|"3d")` · `toggleFigure()` ·
+`toggleTheme()` · `openHelp()` · `switchView(id)`.
 
 Las teclas globales (**C** capturar, **R** grabar, **E** exportar, **Espacio** pausar, **W**
 transporte, **T** tema, **1–4** vistas, **?** ayuda) ya las maneja `main.js`. Una vista **no** las
@@ -61,6 +63,7 @@ vuelve a registrar.
 | `onRecording(bool)`, `onPause(bool)` | | |
 | `onEvent(ev)` | | nueva entrada en la bitácora |
 | `onTheme(theme)` | | cambió el tema (`"dark"` / `"light"`, en `<html data-theme>`) |
+| `onFigureMode(mode)` | | cambió la ilustración: `"esquema"` o `"3d"` (ver `ui/FigureSwitch.js`) |
 | `onKey(event)` → `true` si la consumió | | teclas propias de la vista (antes que las globales) |
 | `static id`, `static shortcuts = [["M", "Abrir tabla"], …]` | | para la ayuda |
 
@@ -83,6 +86,20 @@ Helpers disponibles: `tempLevel(°C)` → `"ok"|"warn"|"crit"` y `socLevel`, `mo
 `jointLabel(nombre)`, `LEG_LABELS` (en `core/telemetryModel.js`); `h()`, `s()`, `setText()`,
 `fmt()`, `clamp()` (en `ui/dom.js`); `icon(nombre)` (en `ui/icons.js`); `createLineChart()`,
 `drawSparkline()` (en `ui/charts.js`, Chart.js local en `globalThis.Chart`); `toast()`.
+
+## Esquema | 3D real
+
+`ui/FigureSwitch.js` permite que una vista muestre su dibujo SVG del robot **o** el modelo 3D
+real de Unitree (el mismo componente `RobotScene` del Gemelo 3D, con fondo transparente):
+
+```js
+this.fig = new FigureSwitch(ctx, { host, schematic, preset: "arriba" });
+header.append(figureToggle(ctx));          // botón "Esquema | 3D real"
+// setInfo → this.fig.setInfo(info) · update → this.fig.update(frame)
+// onFigureMode(m) → this.fig.setMode(m); toggle.set(m) · destroy → this.fig.destroy()
+```
+
+El módulo 3D se descarga recién la primera vez que alguien elige "3D real".
 
 ## Reglas
 

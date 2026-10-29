@@ -40,10 +40,14 @@ ROBOTS = {
         "topic_lowstate": "rt/lf/lowstate",
         "msg_type": "unitree_hg",
         "patas": ["R_foot", "L_foot"],
+        # CORREGIDO respecto del original de la catedra, que nombraba la cadera
+        # como yaw/roll/pitch. El orden real de motores del G1 (SDK de Unitree,
+        # actuadores de g1_29dof.xml y robots.py: G1_L_HIP_P = 0) es
+        # hip_pitch, hip_roll, hip_yaw. Ver "Hallazgos" en el README.
         "motores_nombres": [
-            "L_hip_yaw", "L_hip_roll", "L_hip_pitch",
+            "L_hip_pitch", "L_hip_roll", "L_hip_yaw",
             "L_knee", "L_ankle_pitch", "L_ankle_roll",
-            "R_hip_yaw", "R_hip_roll", "R_hip_pitch",
+            "R_hip_pitch", "R_hip_roll", "R_hip_yaw",
             "R_knee", "R_ankle_pitch", "R_ankle_roll",
             "torso_yaw", "torso_roll", "torso_pitch",
             "L_shoulder_pitch", "L_shoulder_roll", "L_shoulder_yaw",

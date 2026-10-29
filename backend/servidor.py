@@ -58,7 +58,37 @@ def crear_lector(modo: str, robot: str, interfaz: str | None = None):
         from api.telemetry_reader_dds import TelemetryReader as LectorDDS
         return LectorDDS(robot, network_interface=interfaz)
     from api.telemetry_reader import TelemetryReader
-    return TelemetryReader(robot, network_interface="lo")
+    lector = TelemetryReader(robot, network_interface="lo")
+    return OrdenSimulador(lector) if robot == "go2" else lector
+
+
+# Orden de patas del Go2: el simulador MuJoCo de la catedra publica qpos en el
+# orden de cuerpos de go2.xml (FL, FR, RL, RR: lineas 78/112/147/182), pero el
+# contrato de la API y el robot real usan el orden del SDK (FR, FL, RR, RL). Sin
+# corregirlo, con el simulador las patas izquierda y derecha llegan cruzadas.
+# Indice en el contrato -> indice en lo que publica el simulador:
+ORDEN_SIM_GO2 = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+
+
+class OrdenSimulador:
+    """Adapter: reordena los motores del Go2 que publica el simulador al orden del SDK.
+
+    Envuelve al lector del simulador sin modificarlo y expone su misma
+    interfaz, asi que el servidor no se entera (como el resto de los lectores).
+    """
+
+    def __init__(self, lector):
+        self._lector = lector
+
+    def obtener_snapshot(self):
+        snap = self._lector.obtener_snapshot()
+        motores = (snap or {}).get("motor_state") or []
+        if len(motores) == len(ORDEN_SIM_GO2):
+            snap["motor_state"] = [dict(motores[j], id=i) for i, j in enumerate(ORDEN_SIM_GO2)]
+        return snap
+
+    def __getattr__(self, nombre):  # esperar_primer_dato, mensajes_leidos, cerrar
+        return getattr(self._lector, nombre)
 
 
 def montar_dashboard(app) -> None:

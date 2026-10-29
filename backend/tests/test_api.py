@@ -164,3 +164,33 @@ def test_fuente_fija_no_se_puede_cambiar():
     with TestClient(app) as c:
         assert c.get("/fuentes").json()["cambiable"] is False
         assert c.post("/fuente", json={"modo": "demo", "robot": "g1"}).status_code == 403
+
+
+def test_g1_nombra_la_cadera_en_el_orden_real_de_unitree():
+    """El SDK y g1_29dof.xml ordenan la cadera pitch, roll, yaw (config.py original: yaw, roll, pitch)."""
+    from config import ROBOTS
+
+    nombres = ROBOTS["g1"]["motores_nombres"]
+    assert nombres[:3] == ["L_hip_pitch", "L_hip_roll", "L_hip_yaw"]
+    assert nombres[6:9] == ["R_hip_pitch", "R_hip_roll", "R_hip_yaw"]
+    assert len(nombres) == len(set(nombres)) == 29
+
+
+def test_simulador_go2_se_reordena_al_orden_del_sdk():
+    """El simulador publica FL, FR, RL, RR; el contrato espera FR, FL, RR, RL."""
+    from servidor import OrdenSimulador
+
+    orden_mjcf = ["FL", "FR", "RL", "RR"]
+    publicado = [{"id": i, "q": float(i)} for i in range(12)]   # q = índice en el simulador
+
+    class LectorFalso:
+        def obtener_snapshot(self):
+            return {"motor_state": [dict(m) for m in publicado]}
+
+        mensajes_leidos = 7
+
+    snap = OrdenSimulador(LectorFalso()).obtener_snapshot()
+    patas = [orden_mjcf[int(m["q"]) // 3] for m in snap["motor_state"]]
+    assert patas == ["FR"] * 3 + ["FL"] * 3 + ["RR"] * 3 + ["RL"] * 3
+    assert [m["id"] for m in snap["motor_state"]] == list(range(12))
+    assert OrdenSimulador(LectorFalso()).mensajes_leidos == 7

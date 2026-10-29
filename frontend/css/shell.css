@@ -196,3 +196,11 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
   .mode-chip { font-size: 0; padding: 6px; gap: 0; }
   .mode-chip__dot { width: 8px; height: 8px; }
 }
+
+/* ---- Esquema | 3D real (FigureSwitch) ---- */
+.fig3d { position: absolute; inset: 0; z-index: 1; }
+.fig3d[hidden] { display: none; }
+.fig-toggle { display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; border: 1px solid var(--shell-border); background: var(--shell-surface-2); flex: none; }
+.fig-toggle button { border: 0; background: transparent; color: var(--shell-muted); font: 600 11.5px/1 var(--font-ui); padding: 5px 9px; border-radius: 6px; white-space: nowrap; }
+.fig-toggle button[aria-checked="true"] { background: var(--shell-accent); color: var(--shell-accent-text); }
+.fig-toggle--compact button { padding: 4px 7px; font-size: 11px; }

@@ -10,6 +10,7 @@ export const GLOBAL_SHORTCUTS = [
   ["Espacio", "Pausar / reanudar la vista"],
   ["W", "Cambiar WebSocket ↔ polling"],
   ["T", "Tema claro / oscuro"],
+  ["G", "Ilustración del robot: esquema ↔ modelo 3D real"],
   ["1 2 3 4 5", "Cambiar de vista (5 = manual)"],
   ["?", "Esta ayuda"],
 ];

@@ -44,7 +44,8 @@ por **WebSocket** o **polling**.
 10. [Formato del CSV exportado](#-formato-del-csv-exportado)
 11. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
 12. [Pruebas y calidad](#-pruebas-y-calidad)
-13. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
+13. [Hallazgos: errores en el material de la cátedra](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)
+14. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
 14. [Estructura del repositorio](#-estructura-del-repositorio)
 15. [Problemas frecuentes](#-problemas-frecuentes)
 16. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
@@ -649,6 +650,28 @@ import pandas as pd
 df = pd.read_csv("telemetria_go2_2026-10-29_17-30-05.csv")
 df.filter(like="_temperatura_C").max().sort_values(ascending=False).head(3)  # los 3 motores más calientes
 ```
+
+---
+
+## 🔎 Hallazgos: dos errores en el material de la cátedra
+
+Al mover el **modelo 3D oficial de Unitree** con la telemetría (vista Gemelo 3D) aparecieron dos
+inconsistencias en el código provisto. El modo demo las ocultaba porque genera cada ángulo **por
+nombre**; con datos reales o del simulador saltan a la vista.
+
+| # | Qué | Evidencia (repositorio de la cátedra, `TP05/entorno/`) | Efecto | Corrección en este repo |
+|---|---|---|---|---|
+| 1 | **G1: los nombres de la cadera están invertidos.** `config.py` dice `hip_yaw, hip_roll, hip_pitch`; el orden real es `hip_pitch, hip_roll, hip_yaw` | `api/config.py:44` vs. actuadores de `sim/unitree_mujoco/unitree_robots/g1/g1_29dof.xml:387-399` y `sim/robots.py:115` (`G1_L_HIP_P = 0`) | Con el G1 real o el simulador, el dato rotulado *guiñada* de cadera es el *cabeceo* y viceversa (6 de 29 motores) | `backend/api/config.py` corregido, con comentario; prueba `test_g1_nombra_la_cadera_en_el_orden_real_de_unitree` |
+| 2 | **Go2 con el simulador: patas izquierda y derecha cruzadas.** El simulador publica `qpos` en el orden de cuerpos del modelo (FL, FR, RL, RR); el contrato es FR, FL, RR, RL | `sim/simulador.py:80,91` publica `qpos[7:]`; `go2.xml:78,112,147,182` declara FL, FR, RL, RR; `api/config.py:30` y los actuadores (`go2.xml:223`) usan FR, FL, RR, RL | Solo con el simulador: lo que se muestra como "delantera derecha" es la izquierda. **Con el robot real (DDS) no pasa** | Adapter `OrdenSimulador` en `backend/servidor.py` que reordena sin tocar el lector de la cátedra; prueba `test_simulador_go2_se_reordena_al_orden_del_sdk` |
+
+> **Alcance:** verificado leyendo y cruzando los archivos (configuración, modelo oficial y código
+> del simulador coinciden entre sí y contradicen a `config.py`). No se pudo probar con un G1 real
+> ni con el simulador MuJoCo corriendo. Para confirmarlo en el laboratorio: con el G1 parado,
+> mover a mano solo la cadera hacia adelante y ver qué motor cambia.
+>
+> Si el dashboard se usa contra el **backend original** de la cátedra (sin esta corrección), la
+> vista Gemelo 3D acepta `?mapeo=indice` en la URL para mover el modelo por posición (orden del
+> SDK) en vez de por nombre.
 
 ---
 
