@@ -1,9 +1,11 @@
-name: Visor de maquetas (GitHub Pages)
+name: GitHub Pages (dashboard + visor de maquetas)
 
-# Publica docs/design en la rama gh-pages cada vez que cambia.
+# Publica en la rama gh-pages:
+#   /       visor de maquetas (docs/design)
+#   /app/   el dashboard real, con la simulación del navegador (sin servidor)
 on:
   push:
-    paths: ["docs/design/**", ".github/workflows/pages.yml"]
+    paths: ["docs/design/**", "frontend/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -18,13 +20,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Publicar docs/design en gh-pages
+      - name: Armar el sitio
         run: |
-          touch docs/design/.nojekyll
-          cd docs/design
+          mkdir -p _site
+          cp -r docs/design/. _site/
+          mkdir -p _site/app
+          cp -r frontend/. _site/app/
+          rm -rf _site/app/tests
+          touch _site/.nojekyll
+      - name: Publicar en gh-pages
+        run: |
+          cd _site
           git init -q -b gh-pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -q -m "Visor de maquetas desde ${GITHUB_SHA::7}"
+          git commit -q -m "Sitio desde ${GITHUB_SHA::7}"
           git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
