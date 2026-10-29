@@ -325,6 +325,10 @@
 .view-console .cv-figure { position: relative; align-self: stretch; display: grid; place-items: center; min-height: 0; }
 .view-console .cv-figure__svg { width: 100%; display: grid; place-items: center; }
 .view-console .cv-ph .fig-toggle { margin-left: auto; }
+/* En la cabecera de Patas el subtítulo se recorta antes que el botón Esquema | 3D */
+.view-console .cv-feet .cv-ph .cv-sub { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* El modelo 3D necesita más ancho que el esquema para leerse */
+.view-console .cv-feet__body:has(.cv-figure.is-3d) { grid-template-columns: 150px minmax(0, 1fr); }
 .view-console .cv-robot { width: 100%; max-height: 100%; }
 .view-console .cv-robot__leg { fill: none; stroke: var(--cv-text-3); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .view-console .cv-robot__joint circle { fill: var(--cv-panel); stroke: var(--cv-text-3); stroke-width: 2; }
