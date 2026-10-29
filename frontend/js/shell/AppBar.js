@@ -170,7 +170,7 @@ export class AppBar {
         h("div", { class: "stat" }, this.statGap, h("span", {}, "entre muestras")),
         h("div", { class: "stat" }, this.statFrames, h("span", {}, "recibidas")),
       ),
-      h("p", {}, "Para conectarte a un backend que corre en ", h("b", {}, "otra computadora"), ": escribí su dirección, por ejemplo ", h("code", {}, "http://192.168.0.23:8001"), " (la consola del backend la muestra al arrancar). ", h("code", {}, "demo"), " o ", h("code", {}, "demo-g1"), " simulan los datos en el navegador, sin servidor."),
+      h("p", {}, "Para conectarte a un backend que corre en ", h("b", {}, "otra computadora"), ": escribí su dirección, por ejemplo ", h("code", {}, "http://192.168.0.23:8001"), " (la consola del backend la muestra al arrancar)."),
     );
   }
 
@@ -251,7 +251,9 @@ export class AppBar {
   }
 
   #paintChip(actual) {
-    const label = { real: "Robot real", simulador: "MuJoCo", demo: "Demo", "demo-catedra": "Demo cátedra", navegador: "Navegador" }[actual?.modo] ?? actual?.modo ?? "";
+    const label = actual?.enNavegador
+      ? "Demo (en el navegador)"
+      : { real: "Robot real", simulador: "Simulador MuJoCo", demo: "Demo", "demo-catedra": "Demo de la cátedra" }[actual?.modo] ?? actual?.modo ?? "";
     this.modeEl.hidden = !label;
     this.modeEl.dataset.mode = actual?.medido ? "real" : "demo";
     // Corta a propósito: "Real" o "Simulado". La fuente exacta, al pasar el mouse y en el panel.
@@ -299,9 +301,8 @@ export class AppBar {
     this.robotSeg.set(this.pickedRobot ?? actual.robot ?? "go2");
     this.sourceList.replaceChildren(
       ...fuentes.map((f) => {
-        const backendSource = f.modo !== "navegador";
-        const enabled = f.disponible && (!backendSource || cambiable || f.modo === actual.modo);
-        const motivo = !f.disponible ? f.motivo : backendSource && !cambiable && f.modo !== actual.modo ? "Este servidor tiene la fuente fija." : "";
+        const enabled = f.disponible && (cambiable || f.modo === actual.modo);
+        const motivo = !f.disponible ? f.motivo : !cambiable && f.modo !== actual.modo ? "Este servidor tiene la fuente fija." : "";
         const input = h("input", { type: "radio", name: "fuente", value: f.modo, checked: f.modo === pick, disabled: !enabled, onchange: () => { this.pickedSource = f.modo; this.#syncSourceForm(); } });
         return h(
           "label",
@@ -313,7 +314,7 @@ export class AppBar {
         );
       }),
     );
-    setText(this.sourceNote, error && !fuentes.some((f) => f.disponible && f.modo !== "navegador") ? `Servidor: ${backendUrl}. ${error}` : `Servidor: ${backendUrl}. Cambiar la fuente del servidor afecta a todos los dashboards conectados a él.`);
+    setText(this.sourceNote, error ? error : `Servidor: ${backendUrl}. Cambiar la fuente del servidor afecta a todos los dashboards conectados a él.`);
     this.#syncSourceForm();
   }
 

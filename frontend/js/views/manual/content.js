@@ -83,10 +83,10 @@ export const SECTIONS = [
         type: "figure",
         src: `${A}/real-paso-2.png`,
         alt: "Panel de fuente de datos con Robot real elegido",
-        ratio: "570 / 1077",
+        ratio: "570 / 855",
         phone: true,
         caption: "Captura ilustrativa: el nombre de la placa y su IP dependen de cada notebook.",
-        markers: [[12, 9.5], [50, 68], [50, 79], [50, 88]],
+        markers: [[4, 9], [4, 58.5], [4, 71], [4, 85.5]],
         legend: [
           ["Robot real", "La fuente que lee el robot por el cable. Si aparece gris, falta el SDK (paso 2)."],
           ["Modelo", "Go2 o G1: tiene que ser el robot conectado."],
@@ -104,7 +104,7 @@ export const SECTIONS = [
           ["Los motores no coinciden", "Se eligió G1 con un Go2 conectado (o al revés)."],
         ],
       },
-      { type: "callout", kind: "info", html: "<b>¿Por qué algunas opciones del panel aparecen grises?</b> Gris no quiere decir roto: en <b>esa máquina</b> falta algo para usar esa fuente, y el motivo está escrito debajo del nombre. Robot real necesita el SDK de Unitree; Simulador MuJoCo, que el simulador de la cátedra esté abierto. Las demos y la simulación en el navegador siempre están disponibles. Ver <a href='#man-fuentes'>Fuentes de datos</a>." },
+      { type: "callout", kind: "info", html: "<b>¿Por qué algunas opciones del panel aparecen grises?</b> Gris no quiere decir roto: en <b>esa máquina</b> falta algo para usar esa fuente, y el motivo está escrito debajo del nombre. Robot real necesita el SDK de Unitree; Simulador MuJoCo, que el simulador de la cátedra esté abierto. La Demo siempre está disponible. Ver <a href='#man-fuentes'>Fuentes de datos</a>." },
     ],
   },
 
@@ -149,7 +149,7 @@ export const SECTIONS = [
       {
         type: "callout",
         kind: "tip",
-        html: "<b>¿Robot real o simulación?</b> La etiqueta junto al nombre del robot lo dice siempre: <b>REAL</b> en verde (datos medidos) o <b>SIMULADO</b> en violeta. Haciendo clic se elige la <b>fuente de datos</b>: <i>Robot real</i> (por DDS, en el laboratorio), <i>Simulador MuJoCo</i> de la cátedra, <i>Demo «paseo»</i> del servidor o <i>Simulación en el navegador</i> (sin servidor). Una fuente no disponible aparece gris con el motivo, por ejemplo: «Falta el SDK de Unitree». También se elige ahí el robot: Go2 o G1.",
+        html: "<b>¿Robot real o simulación?</b> La etiqueta junto al nombre del robot lo dice siempre: <b>REAL</b> en verde (datos medidos) o <b>SIMULADO</b> en violeta. Haciendo clic se elige la <b>fuente de datos</b>: <i>Robot real</i> (por DDS, en el laboratorio), <i>Simulador MuJoCo</i> de la cátedra o <i>Demo</i> (el robot pasea solo). Una fuente no disponible aparece gris con el motivo, por ejemplo: «Falta el SDK de Unitree». También se elige ahí el robot: Go2 o G1.",
       },
       {
         type: "callout",
@@ -167,22 +167,20 @@ export const SECTIONS = [
     toc: "Fuentes de datos (modos)",
     title: "Fuentes de datos: ¿de dónde vienen los números?",
     blocks: [
-      { type: "p", html: "El dashboard siempre muestra lo mismo, pero los datos pueden venir de cinco <b>fuentes</b>. La etiqueta junto al nombre del robot dice cuál se está usando: <b>REAL</b> en verde (datos medidos) o <b>SIMULADO</b> en violeta. Al hacer clic en el nombre del robot (o en esa etiqueta) se elige otra fuente y otro robot, sin reiniciar nada." },
+      { type: "p", html: "El dashboard siempre muestra lo mismo, pero los datos pueden venir de tres <b>fuentes</b>. La etiqueta junto al nombre del robot dice cuál se está usando: <b>REAL</b> en verde (datos medidos) o <b>SIMULADO</b> en violeta. Al hacer clic en el nombre del robot (o en esa etiqueta) se elige otra fuente y otro robot, sin reiniciar nada." },
       {
         type: "table",
         head: ["Fuente", "Qué es", "Cuándo usarla", "Qué necesita"],
         rows: [
           ["<b>Robot real</b> <span style='color:var(--sem-ok)'>● medido</span>", "El servidor lee el robot por DDS, a través del cable de red.", "En el laboratorio, con el robot.", "Notebook conectada al robot por cable y el SDK de Unitree (<code>unitree_sdk2py</code>)."],
           ["<b>Simulador MuJoCo</b>", "El simulador 3D de la cátedra, corriendo en la misma máquina que el servidor. Mueve el robot de verdad (sin física completa).", "Practicar con datos parecidos a los del robot.", "El simulador de la cátedra abierto (<code>INICIAR_TP05</code>)."],
-          ["<b>Demo «paseo»</b>", "Simulación de este proyecto: el robot pasea (camina, trota, gira, frena) y los datos son coherentes entre sí: si trota, suben el torque y la temperatura.", "Desarrollar, corregir y presentar. <b>Es la recomendada.</b>", "Nada."],
-          ["<b>Demo de la cátedra</b>", "El generador original de la cátedra: cada motor oscila con una senoidal, sin relación entre ellos.", "Comparar con lo que provee la cátedra.", "Nada."],
-          ["<b>Simulación en el navegador</b>", "La misma simulación «paseo», pero calculada dentro de la página: no hay servidor.", "Mirar el dashboard sin instalar nada (es lo que usa GitHub Pages).", "Nada. No puede conectarse al robot real."],
+          ["<b>Demo</b>", "Simulación de este proyecto: el robot pasea (camina, trota, gira, frena) y los datos son coherentes entre sí: si trota, suben el torque y la temperatura. La calcula el servidor; si no hay servidor (por ejemplo, en GitHub Pages), la misma simulación corre en el navegador.", "Desarrollar, corregir y presentar.", "Nada."],
         ],
       },
       {
         type: "callout",
-        kind: "warn",
-        html: "<b>¿Por qué el robot 3D se ve en una pose rara con la «Demo de la cátedra»?</b> Esa demo mueve todos los motores alrededor de 0°. Para el Go2 eso es una pose imposible: patas estiradas y rodillas sin doblar. No es un error del dashboard: el modelo 3D muestra fielmente los ángulos que llegan. La <b>Demo «paseo»</b> genera los ángulos de un trote real, y por eso se ve natural.",
+        kind: "info",
+        html: "<b>¿Y la demo de la cátedra?</b> No está en el panel porque hace lo mismo que la Demo, pero peor: cada motor oscila con una senoidal suelta, sin marcha, el semáforo nunca pasa de verde y el robot 3D queda en poses imposibles (todos los motores alrededor de 0°: patas estiradas y rodillas sin doblar). Sigue disponible para comparar: <code>python iniciar.py --demo-catedra</code>.",
       },
       {
         type: "list",

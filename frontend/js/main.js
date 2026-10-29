@@ -176,18 +176,13 @@ const actions = {
   },
 
   /**
-   * Fuentes de datos disponibles. Siempre incluye la simulación del navegador;
-   * las del backend se le preguntan al último servidor usado.
+   * Fuentes de datos para el panel. Son tres: Robot real, Simulador MuJoCo y
+   * Demo. La Demo es una sola opción para el usuario: si hay servidor la
+   * calcula el servidor (demo «paseo»); si no (p. ej. GitHub Pages), la
+   * calcula el navegador con la misma simulación. Es un detalle técnico que
+   * no hace falta elegir.
    */
   async loadSources({ probe = true } = {}) {
-    const navegador = {
-      modo: "navegador",
-      nombre: "Simulación en el navegador",
-      descripcion: "Sin servidor: los datos se generan en esta página. Ideal para probar el dashboard en cualquier lado.",
-      medido: false,
-      disponible: true,
-      motivo: "",
-    };
     let backend = null;
     let error = "";
     const sim = isSimUrl(state.baseUrl);
@@ -195,29 +190,40 @@ const actions = {
     try {
       // Desde GitHub Pages (https) el navegador no deja conectarse a un backend http.
       if (onPages) throw new Error("pages");
-      // En la simulación del navegador no hay servidor: solo se le pregunta si el
-      // usuario abre el panel de fuentes (así no se ensucia la consola, p. ej. en GitHub Pages).
+      // En la simulación del navegador solo se le pregunta al servidor si el usuario
+      // abre el panel (así no se ensucia la consola con un servidor que no existe).
       if (sim && !probe) throw new Error("sin-consulta");
       backend = await new ApiClient(state.backendUrl, { timeoutMs: 1500 }).fuentes();
     } catch (err) {
       error = onPages
-        ? "Desde GitHub Pages solo se puede usar la simulación del navegador: para el robot real, abrí el dashboard local con «python iniciar.py» (ver el Manual)."
+        ? "Desde GitHub Pages no hay servidor: para el robot real, abrí el dashboard local con «python iniciar.py» (ver el Manual)."
         : /404/.test(err.message)
-        ? "Este servidor no permite elegir la fuente (es el backend original de la cátedra)."
-        : `No hay un servidor en ${state.backendUrl}.`;
+          ? "Este servidor no permite elegir la fuente (es el backend original de la cátedra)."
+          : `No hay un servidor en ${state.backendUrl}.`;
     }
+    state.backendOk = Boolean(backend);
+
+    const demoDesc = backend
+      ? "El robot pasea solo (camina, trota, gira, frena) con datos coherentes. No necesita nada."
+      : "El robot pasea solo con datos coherentes, calculados en este navegador (no hay servidor). No necesita nada.";
     const fuentes = backend
-      ? backend.fuentes
-      : ["real", "simulador", "demo"].map((modo) => ({ modo, nombre: { real: "Robot real", simulador: "Simulador MuJoCo", demo: "Demo «paseo»" }[modo], descripcion: "", disponible: false, motivo: error }));
+      ? backend.fuentes.map((f) => (f.modo === "demo" ? { ...f, descripcion: demoDesc } : f))
+      : [
+          { modo: "real", nombre: "Robot real", medido: true, disponible: false, motivo: error },
+          { modo: "simulador", nombre: "Simulador MuJoCo", medido: false, disponible: false, motivo: error },
+          { modo: "demo", nombre: "Demo", medido: false, disponible: true, descripcion: demoDesc, motivo: "" },
+        ];
+
     state.source = sim
-      ? { modo: "navegador", robot: /g1$/.test(state.baseUrl) ? "g1" : "go2", medido: false }
+      ? { modo: "demo", enNavegador: true, robot: /g1$/.test(state.baseUrl) ? "g1" : "go2", medido: false }
       : backend
         ? { ...backend.actual, medido: backend.actual.modo === "real" }
         : { modo: state.info?.modo ?? "desconocido", robot: state.info?.modelo, medido: state.info?.modo === "real" };
     const result = {
       actual: state.source,
-      cambiable: backend?.cambiable ?? false,
-      fuentes: [...fuentes, navegador],
+      // Sin servidor, la única opción (Demo en el navegador) siempre se puede elegir.
+      cambiable: backend ? backend.cambiable : true,
+      fuentes,
       interfaces: backend?.interfaces ?? [],
       interfazSugerida: backend?.interfaz_sugerida ?? null,
       backendUrl: state.backendUrl,
@@ -228,11 +234,11 @@ const actions = {
     return result;
   },
 
-  /** Cambia la fuente de datos: del navegador, o del backend (POST /fuente). */
+  /** Cambia la fuente de datos (y el robot). La Demo va al servidor si hay uno; si no, al navegador. */
   async setSource({ modo, robot = "go2", interfaz = null }) {
-    if (modo === "navegador") {
+    if (modo === "navegador" || (modo === "demo" && state.backendOk === false)) {
       await actions.connect(robot === "g1" ? "demo-g1" : "demo");
-      toast(`Fuente: simulación en el navegador · ${robot.toUpperCase()}`, { kind: "ok" });
+      toast(`Fuente: demo (en el navegador) · ${robot.toUpperCase()}`, { kind: "ok" });
       return true;
     }
     try {
@@ -247,8 +253,9 @@ const actions = {
       await service.refreshInfo();
       await actions.loadSources();
     }
-    logEvent("ok", `Fuente de datos: ${modo} · ${robot}`);
-    toast(`Fuente: ${modo === "real" ? "robot real" : modo} · ${robot.toUpperCase()}`, { kind: "ok" });
+    const nombre = { real: "robot real", simulador: "simulador MuJoCo", demo: "demo" }[modo] ?? modo;
+    logEvent("ok", `Fuente de datos: ${nombre} · ${robot}`);
+    toast(`Fuente: ${nombre} · ${robot.toUpperCase()}`, { kind: "ok" });
     return true;
   },
 

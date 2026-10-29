@@ -36,14 +36,17 @@ FUENTES = {
         "medido": False,
     },
     "demo": {
-        "nombre": "Demo «paseo»",
-        "descripcion": "Simulación con marcha, temperatura y batería coherentes. No necesita nada.",
+        "nombre": "Demo",
+        "descripcion": "El robot pasea solo (camina, trota, gira, frena) con datos coherentes. No necesita nada.",
         "medido": False,
     },
+    # No se ofrece en el panel (hace lo mismo que la Demo, pero con senoidales
+    # sueltas). Sigue disponible para comparar: `python iniciar.py --demo-catedra`.
     "demo-catedra": {
         "nombre": "Demo de la cátedra",
-        "descripcion": "El DemoReader original: señales senoidales.",
+        "descripcion": "El DemoReader original de la cátedra: señales senoidales.",
         "medido": False,
+        "oculta": True,
     },
 }
 
@@ -108,8 +111,10 @@ def crear_router(crear_lector, configurar, estado: dict, cambiable: bool = True)
     def fuentes():
         lista = []
         for modo, meta in FUENTES.items():
+            if meta.get("oculta") and estado["modo"] != modo:
+                continue  # solo aparece si el servidor arrancó con ella
             ok, motivo = disponibilidad(modo)
-            lista.append({"modo": modo, **meta, "disponible": ok, "motivo": motivo})
+            lista.append({"modo": modo, **{k: v for k, v in meta.items() if k != "oculta"}, "disponible": ok, "motivo": motivo})
         placas = interfaces_de_red()
         sugerida = next((p["nombre"] for p in placas if p["robot"]), None)
         return {

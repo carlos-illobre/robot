@@ -144,9 +144,11 @@ aula**, no la del cable del robot (`192.168.123.x`). Detalles y firewall en
 |---|---|---|
 | **Robot real** · *datos medidos* | Lee el robot por el cable de red (DDS) | Falta el SDK de Unitree en la notebook del backend (paso 2) |
 | **Simulador MuJoCo** | El simulador 3D de la cátedra, corriendo en la notebook del backend | Ese simulador no está abierto (se abre con `INICIAR_TP05` del repositorio de la cátedra) |
-| **Demo «paseo»** | Simulación de este proyecto: el robot pasea y los datos son coherentes | Nunca: siempre disponible |
-| **Demo de la cátedra** | El generador original de la cátedra: senoidales | Nunca |
-| **Simulación en el navegador** | La misma simulación, calculada en la página, sin servidor | Nunca |
+| **Demo** | El robot pasea solo (camina, trota, gira, frena) con datos coherentes. La calcula el servidor; si no hay servidor (por ejemplo, en GitHub Pages), la misma simulación corre en el navegador | Nunca: siempre disponible |
+
+Son tres a propósito. La **demo original de la cátedra** (senoidales) no está en el panel porque
+hace lo mismo que la Demo, pero sin marcha, sin que el semáforo pase de verde y con el robot 3D en
+poses imposibles. Sigue disponible para comparar: `python iniciar.py --demo-catedra`.
 
 Gris no quiere decir roto: quiere decir que **en esa máquina** falta algo para esa fuente, y el
 motivo está escrito debajo del nombre. Más detalle en el Manual del dashboard
@@ -506,9 +508,7 @@ datos**: `REAL` en verde (medidos) o `SIMULADO` en violeta. Haciendo clic se abr
 |---|---|---|
 | **Robot real** | El backend lee el robot por DDS | Notebook con cable al robot y `unitree_sdk2py` |
 | **Simulador MuJoCo** | El simulador 3D de la cátedra | Simulador de la cátedra abierto en la máquina del backend |
-| **Demo «paseo»** | Simulación coherente del backend | Nada |
-| **Demo de la cátedra** | El `DemoReader` original | Nada |
-| **Simulación en el navegador** | Los datos se generan en la página, sin servidor | Nada (es lo que usa GitHub Pages) |
+| **Demo** | El robot pasea solo con datos coherentes: la calcula el servidor o, si no hay servidor, el navegador (es lo que usa GitHub Pages) | Nada |
 
 …y el robot: **Go2** (12 motores) o **G1** (29). El cambio es **en caliente** (sin reiniciar nada) y
 **transaccional**: el backend solo cambia si la fuente nueva entrega datos en 5 s; si no, sigue con
@@ -576,7 +576,7 @@ navegadores **bloquean** que una página segura se conecte a un servidor no segu
 
 | Dónde se abre | Datos posibles |
 |---|---|
-| GitHub Pages | Simulación en el navegador |
+| GitHub Pages | Demo (calculada en el navegador) |
 | `python iniciar.py` (local) | Demo, simulador MuJoCo **y robot real** |
 
 ### Conectar el dashboard a otro servidor
