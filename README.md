@@ -81,16 +81,29 @@ La gracia no es solo "verlo en el navegador". Es la arquitectura que eso obliga 
 > Requisito único: **Python 3.10 o superior**. No hace falta el robot, ni MuJoCo, ni Node, ni
 > internet (después de instalar las dependencias).
 
-**Windows** → doble clic en **`iniciar.bat`**
-
-**Linux / macOS** →
+Un solo comando, **igual en Windows, macOS y Linux**:
 
 ```bash
-./iniciar.sh
+python iniciar.py
 ```
 
-El script crea un entorno virtual, instala las dependencias, levanta el backend en **modo demo**
-(el robot "pasea" solo) y abre el navegador en **http://localhost:8001**. Eso es todo.
+(En Windows también funciona `py iniciar.py`, o doble clic en `iniciar.py` si Python está asociado
+a los archivos `.py`; en macOS/Linux puede hacer falta `python3`.)
+
+El script —escrito en Python, sin `.sh` ni `.bat`, para que no haya diferencias entre sistemas—
+crea un entorno virtual (`.venv`), instala las dependencias **solo la primera vez**, levanta el
+backend en **modo demo** (el robot "pasea" solo) y abre el navegador en
+**http://localhost:8001** recién cuando el servidor responde. Eso es todo.
+
+| Variante | Comando |
+|---|---|
+| Humanoide G1 (29 motores) | `python iniciar.py --robot g1` |
+| Robot real (laboratorio) | `python iniciar.py --real --interfaz eth0` |
+| Otro puerto | `python iniciar.py --puerto 8002` |
+| Sin abrir el navegador | `python iniciar.py --sin-navegador` |
+
+> 💡 **Para el día de la presentación:** corré `python iniciar.py` una vez antes, con internet.
+> A partir de ahí arranca sin conexión (fuentes, Chart.js y Three.js están incluidos en el repo).
 
 ¿Preferís hacerlo a mano? Son tres comandos:
 
@@ -696,7 +709,7 @@ definido como *skill* y agente de Claude Code en [`.claude/`](.claude):
 
 ```
 robot/
-├── iniciar.sh / iniciar.bat     ← arranque en un paso (entorno + dependencias + navegador)
+├── iniciar.py                   ← arranque en un paso, multiplataforma (entorno + dependencias + navegador)
 ├── requirements.txt
 ├── backend/
 │   ├── servidor.py              ← lanzador: elige la fuente de datos y sirve el dashboard

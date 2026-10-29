@@ -53,7 +53,7 @@ export const SECTIONS = [
       {
         type: "steps",
         items: [
-          "<b>Levantar el servidor.</b> En Windows, doble clic en <code>iniciar.bat</code>. En Linux o macOS, <code>./iniciar.sh</code>. A mano: <code>python backend/servidor.py --demo</code>.",
+          "<b>Levantar el servidor.</b> En una terminal, dentro de la carpeta del proyecto: <code>python iniciar.py</code> (igual en Windows, macOS y Linux). La primera vez instala lo necesario; después arranca al instante.",
           "<b>Abrir el navegador</b> en <code>http://localhost:8001</code> (el script lo abre solo).",
           "<b>Mirar el indicador de conexión</b> arriba a la derecha: tiene que decir <i>En vivo · WS · 10 Hz</i> con un punto verde que late.",
           "<b>Elegir una vista</b> con los botones de arriba o las teclas <kbd>1</kbd> a <kbd>4</kbd>.",
