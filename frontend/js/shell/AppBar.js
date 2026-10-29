@@ -26,7 +26,8 @@ export class AppBar {
     const { actions } = this;
 
     // El robot es un botón desplegable: abre el selector de robot y de fuente de datos.
-    this.robotEl = h("button", { type: "button", class: "brand__robot", title: "Cambiar de robot (Go2 / G1) o de fuente de datos", "aria-haspopup": "dialog", onclick: () => this.togglePopover(true, "source") }, "Esperando /info…");
+    this.robotEl = h("button", { type: "button", class: "brand__robot", title: "Cambiar de robot (Go2 / G1)", "aria-haspopup": "menu", "aria-expanded": "false", onclick: () => this.toggleRobotMenu() }, "Esperando /info…");
+    this.robotMenu = this.#buildRobotMenu();
     // Fuente de datos, siempre a la vista: ¿lo que veo es el robot real o una simulación?
     this.modeEl = h("button", { type: "button", class: "mode-chip", hidden: true, title: "Fuente de datos (clic para cambiar)", onclick: () => this.togglePopover(true, "source") });
     const brand = h(
@@ -71,10 +72,16 @@ export class AppBar {
     const helpBtn = h("button", { type: "button", class: "icon-btn", "data-optional": "", title: "Ayuda y atajos (?)", "aria-label": "Ayuda", onclick: () => actions.openHelp(), html: icon("keyboard") });
 
     this.popover = this.#buildPopover();
-    this.root.replaceChildren(brand, views, h("div", { class: "conn" }, this.pill, this.themeBtn, helpBtn), this.popover);
+    document.addEventListener("click", (e) => {
+      if (!this.robotMenu.hidden && !this.robotMenu.contains(e.target) && !this.robotEl.contains(e.target)) this.toggleRobotMenu(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !this.robotMenu.hidden) this.toggleRobotMenu(false);
+    });
+    this.root.replaceChildren(brand, views, h("div", { class: "conn" }, this.pill, this.themeBtn, helpBtn), this.popover, this.robotMenu);
 
     document.addEventListener("click", (e) => {
-      if (!this.popover.hidden && !this.popover.contains(e.target) && !this.pill.contains(e.target) && !this.modeEl.contains(e.target) && !this.robotEl.contains(e.target)) this.togglePopover(false);
+      if (!this.popover.hidden && !this.popover.contains(e.target) && !this.pill.contains(e.target) && !this.modeEl.contains(e.target)) this.togglePopover(false);
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !this.popover.hidden) this.togglePopover(false);
@@ -158,8 +165,55 @@ export class AppBar {
         h("div", { class: "stat" }, this.statGap, h("span", {}, "entre muestras")),
         h("div", { class: "stat" }, this.statFrames, h("span", {}, "recibidas")),
       ),
-      h("p", {}, "Tip: ", h("code", {}, "?server=http://IP:8001"), " en la URL apunta el dashboard a otro robot. Con ", h("code", {}, "demo"), " o ", h("code", {}, "demo-g1"), " como servidor, los datos se simulan en el navegador."),
+      h("p", {}, "Para conectarte a un backend que corre en ", h("b", {}, "otra computadora"), ": escribí su dirección, por ejemplo ", h("code", {}, "http://192.168.0.23:8001"), " (la consola del backend la muestra al arrancar). ", h("code", {}, "demo"), " o ", h("code", {}, "demo-g1"), " simulan los datos en el navegador, sin servidor."),
     );
+  }
+
+  /**
+   * Menú del robot: elegir Go2 o G1 cambia AL INSTANTE, con la misma fuente de
+   * datos. (Para cambiar de fuente está la etiqueta Real/Simulado.)
+   */
+  #buildRobotMenu() {
+    const item = (robot, title, sub) =>
+      h(
+        "button",
+        {
+          type: "button",
+          role: "menuitemradio",
+          class: "robot-menu__item",
+          dataset: { robot },
+          onclick: async () => {
+            this.toggleRobotMenu(false);
+            const actual = this.sources?.actual ?? { modo: "demo" };
+            if (actual.robot === robot) return;
+            await this.actions.setSource({ modo: actual.modo, robot, interfaz: actual.interfaz });
+          },
+        },
+        h("span", { class: "robot-menu__check", "aria-hidden": "true" }, "✓"),
+        h("span", {}, h("b", {}, title), h("small", {}, sub)),
+      );
+    return h(
+      "div",
+      { class: "robot-menu", role: "menu", "aria-label": "Robot", hidden: true },
+      h("p", { class: "robot-menu__head" }, "Robot"),
+      item("go2", "Unitree Go2", "cuadrúpedo · 12 motores · 4 patas"),
+      item("g1", "Unitree G1", "humanoide · 29 motores · 2 pies"),
+      h("button", { type: "button", class: "robot-menu__more", onclick: () => { this.toggleRobotMenu(false); this.togglePopover(true, "source"); } }, "Fuente de datos…"),
+    );
+  }
+
+  toggleRobotMenu(force) {
+    const open = force ?? this.robotMenu.hidden;
+    if (open) this.togglePopover(false);
+    this.robotMenu.hidden = !open;
+    this.robotEl.setAttribute("aria-expanded", String(open));
+    if (open) {
+      const r = this.robotEl.getBoundingClientRect();
+      this.robotMenu.style.left = `${Math.round(r.left)}px`;
+      const current = this.sources?.actual?.robot ?? this.state.info?.modelo;
+      this.robotMenu.querySelectorAll(".robot-menu__item").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.robot === current)));
+      this.robotMenu.querySelector('[aria-checked="true"]')?.focus();
+    }
   }
 
   togglePopover(force, focus) {

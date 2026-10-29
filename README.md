@@ -432,6 +432,48 @@ lectura, **todos los grupos pueden conectarse a la vez**.
 > las fuerzas van a ser otros. Los umbrales del semáforo son los de electroSim; el de alarma de
 > torque se puede ajustar en la vista Consola.
 
+### 💻 Ver el dashboard desde otra computadora
+
+El backend corre en una máquina (**A**, por ejemplo la notebook conectada al robot) y el dashboard
+se puede mirar desde cualquier otra de la misma red (**B**: otra notebook, un celular, el proyector).
+Pueden ser varias a la vez: la API es de solo lectura.
+
+**1. En la máquina A**, levantar el backend como siempre:
+
+```bash
+python iniciar.py
+```
+
+La consola muestra la dirección para las otras máquinas:
+
+```text
+  DASHBOARD  ->  http://localhost:8001
+  (desde otra maquina de la red: http://192.168.0.23:8001)
+```
+
+**2. En la máquina B**, abrir en el navegador **esa dirección**: `http://192.168.0.23:8001`.
+No hay que instalar nada ni escribir nada más: el backend sirve el dashboard y ya viene conectado
+a él.
+
+> Si el dashboard de B ya estaba abierto desde otro lado, hacé clic en el indicador de conexión
+> (arriba a la derecha) y escribí `http://192.168.0.23:8001` en **Servidor**, o agregá
+> `?server=http://192.168.0.23:8001` a la URL. Ojo: `demo` o `demo-g1` en ese campo significa
+> «simular en el navegador», no conectarse a otra máquina.
+
+**Si B no llega a A:**
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| La página no carga (*no se puede acceder al sitio*) | El **firewall** de A bloquea el puerto 8001 | Windows: la primera vez aparece un aviso de seguridad: tildar **Redes privadas** y permitir. Si ya se rechazó: *Firewall de Windows → Permitir una aplicación* → Python. Linux con ufw: `sudo ufw allow 8001/tcp`. macOS: *Ajustes → Red → Firewall → Opciones* → permitir Python |
+| La página no carga | A y B están en **redes distintas** (por ejemplo, la WiFi de invitados o datos del celular) | Conectar las dos a la misma red |
+| La página no carga | El backend se levantó con `--host 127.0.0.1` | Ese modo solo acepta conexiones de la propia máquina: arrancarlo sin esa opción (por defecto escucha en todas las interfaces) |
+| No sé la IP de A | — | La imprime el backend al arrancar. También: `ipconfig` (Windows) o `ip -br addr` (Linux) o *Ajustes → Red* (macOS) |
+| La IP que muestra no funciona | A tiene varias placas de red (WiFi y cable al robot) | Probar con la IP de la placa que está en la misma red que B (la del robot suele ser `192.168.123.x`) |
+
+> 💡 Para proyectar en clase: el backend en la notebook del robot, y el proyector conectado a otra
+> máquina abriendo `http://IP-DE-LA-NOTEBOOK:8001/?view=pilot` (la vista Piloto, pensada para verse
+> de lejos).
+
 ### 🌐 GitHub Pages vs. robot real
 
 La versión publicada en **https://carlos-illobre.github.io/robot/app/** funciona **sin servidor**:

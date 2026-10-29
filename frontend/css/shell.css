@@ -248,3 +248,23 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
 @media (max-width: 1240px) { .brand__robot { display: none; } }
 .popover__title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .link-btn { border: 0; background: none; padding: 0; color: var(--shell-accent); font-size: 12.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---- Menú del robot (Go2 / G1) ---- */
+.robot-menu {
+  position: absolute; top: calc(var(--appbar-h) - 6px); z-index: 61; min-width: 260px;
+  padding: 6px; border-radius: 12px; border: 1px solid var(--shell-border);
+  background: var(--shell-surface); box-shadow: 0 16px 40px rgba(0,0,0,.3);
+  display: grid; gap: 2px; animation: pop .16s var(--ease); transform-origin: top left;
+}
+.robot-menu[hidden] { display: none; }
+.robot-menu__head { margin: 4px 10px 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--shell-muted); font-weight: 650; }
+.robot-menu__item {
+  display: flex; gap: 10px; align-items: center; text-align: left; width: 100%;
+  border: 0; background: transparent; color: var(--shell-text); padding: 8px 10px; border-radius: 8px;
+}
+.robot-menu__item:hover, .robot-menu__item:focus-visible { background: var(--shell-surface-2); }
+.robot-menu__item b { display: block; font-size: 13.5px; }
+.robot-menu__item small { color: var(--shell-muted); font-size: 12px; }
+.robot-menu__check { width: 16px; color: var(--shell-accent); font-weight: 800; visibility: hidden; }
+.robot-menu__item[aria-checked="true"] .robot-menu__check { visibility: visible; }
+.robot-menu__more { border: 0; border-top: 1px solid var(--shell-border); background: transparent; color: var(--shell-accent); text-align: left; padding: 9px 10px 5px 36px; font-weight: 600; font-size: 12.5px; margin-top: 4px; }
