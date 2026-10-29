@@ -129,7 +129,7 @@ def main(argv=None) -> int:
     modo = ("demo" if args.demo else "demo-catedra" if args.demo_catedra
             else "real" if args.real else "simulador")
     try:
-        lector = crear_lector(modo, args.robot, args.interfaz)
+        lector = crear_lector(modo, args.robot, args.interfaz or None)  # "" = automática
     except RuntimeError as exc:          # p. ej. falta unitree_sdk2py
         print(f"\n  {exc}\n")
         return 1

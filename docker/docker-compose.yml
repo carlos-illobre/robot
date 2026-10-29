@@ -25,5 +25,6 @@ services:
       dockerfile: docker/Dockerfile
     image: tp05-dashboard
     network_mode: host
-    command: ["--real", "--robot", "${ROBOT:-go2}", "--interfaz", "${INTERFAZ:?Indicá la placa de red hacia el robot, p. ej. INTERFAZ=enp3s0}"]
+    # INTERFAZ: placa de red hacia el robot (p. ej. enp3s0). Vacía = la elige el SDK.
+    command: ["--real", "--robot", "${ROBOT:-go2}", "--interfaz", "${INTERFAZ:-}"]
     restart: unless-stopped
