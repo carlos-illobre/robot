@@ -8,7 +8,7 @@
  *  - un eje X relativo al último dato ("−10 s … ahora"), que se lee mejor que
  *    el `ts` absoluto del servidor.
  */
-import { createLineChart } from "../../ui/charts.js";
+import { createLineChart, destroyChart } from "../../ui/charts.js";
 import { fmt } from "../../ui/dom.js";
 
 /**
@@ -24,6 +24,7 @@ export function createConsoleChart(canvas, root, cfg) {
   const { x } = chart.options.scales;
   x.title = { display: false };
   x.max = 0;
+  x.grid.display = false; // solo líneas horizontales: se lee el valor, no el instante
   x.ticks.callback = (v) => (Math.abs(v) < 0.05 ? "ahora" : `${fmt(Number(v), 0)} s`);
   chart.options.plugins.tooltip.callbacks.title = (items) => {
     const ago = -Number(items[0]?.parsed.x);
@@ -79,4 +80,9 @@ export function toPoints(samples, pick, out = [], { wrap = false } = {}) {
     prev = y;
   }
   return out;
+}
+
+/** Destruye un gráfico de la Consola (lo saca también del registro de temas). */
+export function destroyConsoleChart(chart) {
+  destroyChart(chart);
 }

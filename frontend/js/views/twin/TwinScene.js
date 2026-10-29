@@ -203,10 +203,10 @@ export class TwinScene {
         p.addScaledVector(fwd, -0.002 * d).y += d * 1.35; // casi cenital: el frente queda arriba en pantalla
         break;
       case "lateral":
-        p.addScaledVector(left, d).y += d * 0.08;
+        p.addScaledVector(left, d * 1.12).y += d * 0.06;
         break;
       case "frente":
-        p.addScaledVector(fwd, d).y += d * 0.1;
+        p.addScaledVector(fwd, d * 1.12).y += d * 0.08;
         break;
       default: // perspectiva 3/4, como la ventana de MuJoCo
         p.addScaledVector(fwd, d * 0.72).addScaledVector(left, d * 0.62).y += d * 0.42;
@@ -278,6 +278,10 @@ export class TwinScene {
     this.camera.aspect = w / h;
     // En pantallas angostas (celular vertical) se abre el campo visual para que entre el robot.
     this.camera.fov = w / h < 0.8 ? 52 : 40;
+    // Corre el centro óptico al área libre de paneles (en el celular el HUD tapa el tercio de arriba).
+    const off = this.getFocusOffset?.() ?? { x: 0, y: 0 };
+    if (off.x || off.y) this.camera.setViewOffset(w, h, -off.x, -off.y, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
 

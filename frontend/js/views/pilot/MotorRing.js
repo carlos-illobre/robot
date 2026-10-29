@@ -17,6 +17,12 @@ import { RING_R as R, layoutRing, layoutFeet, polar, arcPath } from "./ringLayou
 const MAX_CALLOUTS = 3;
 /** Distancia al centro de la silueta donde terminan las patas dibujadas. */
 const LEG_REACH = R - 44;
+/** En el humanoide los pies van adentro del anillo, al final de las piernas, con el rótulo debajo. */
+const FOOT_INSIDE_R = 112;
+/** Altura máxima (fracción de R) de las etiquetas de motor, para que no salgan del anillo hacia arriba o abajo. */
+const CALLOUT_MAX_Y = 0.72;
+/** Separación angular mínima (°) entre dos etiquetas de motor para que no se encimen. */
+const CALLOUT_MIN_GAP = 28;
 
 export class MotorRing {
   /**
@@ -82,6 +88,7 @@ export class MotorRing {
         torqueW: "",
         over: false,
         temp: NaN,
+        mid: seg.mid,
       });
     }
 
@@ -96,8 +103,11 @@ export class MotorRing {
 
     const feetLayer = s("g", { class: "pv-ring__feet" });
     for (const foot of layoutFeet(legs)) {
-      const [cx, cy] = polar(R + 40, foot.angle);
-      const [lx, ly] = polar(R + 66, foot.angle);
+      // Go2: las patas van afuera del anillo, en las diagonales. G1: los pies van al
+      // final de las piernas de la silueta, adentro, con el rótulo debajo.
+      const inside = kind === "humanoide";
+      const [cx, cy] = polar(inside ? FOOT_INSIDE_R : R + 40, foot.angle);
+      const [lx, ly] = inside ? [cx, cy + 26] : polar(R + 66, foot.angle);
       const g = s(
         "g",
         { class: "pv-foot", "data-contact": "0" },
@@ -123,7 +133,8 @@ export class MotorRing {
     const g = s("g", { class: "pv-silhouette", "aria-hidden": "true" });
     const feet = new Map(layoutFeet(legs).map((f) => [f.leg, f.angle]));
     const leg = (name, x0, y0, fallback) => {
-      const [x1, y1] = feet.has(name) ? polar(LEG_REACH, feet.get(name)) : fallback;
+      const reach = kind === "humanoide" ? FOOT_INSIDE_R : LEG_REACH;
+      const [x1, y1] = feet.has(name) ? polar(reach, feet.get(name)) : fallback;
       return s("line", { class: "pv-silhouette__leg", "data-leg": name, x1: x0, y1: y0, x2: x1.toFixed(1), y2: y1.toFixed(1) });
     };
 
@@ -153,8 +164,15 @@ export class MotorRing {
   /** Etiqueta de motor caliente: línea guía desde el segmento + temperatura + nombre. */
   #callout(seg) {
     const [x1, y1] = polar(R + 26, seg.mid);
-    const [x2, y2] = polar(R + 62, seg.mid);
     const right = Math.cos((seg.mid * Math.PI) / 180) >= 0;
+    // Los motores de arriba y de abajo (torso, rodillas del G1) se rotulan hacia el
+    // costado: si no, el texto pisaría la cinta de rumbo o la línea de estado.
+    let [x2, y2] = polar(R + 62, seg.mid);
+    const yMax = R * CALLOUT_MAX_Y;
+    if (Math.abs(y2) > yMax) {
+      y2 = Math.sign(y2) * yMax;
+      x2 = (right ? 1 : -1) * Math.sqrt((R + 44) ** 2 - y2 * y2);
+    }
     const x3 = x2 + (right ? 22 : -22);
     const tx = x3 + (right ? 6 : -6);
     const anchor = right ? "start" : "end";
@@ -219,11 +237,14 @@ export class MotorRing {
 
   /** Rotula los motores sobre 60 °C (los más calientes primero), el elegido, o si no el más caliente. */
   #updateCallouts(frame) {
-    const hot = [...this.byName.entries()]
-      .filter(([, e]) => e.level === "crit")
-      .sort((a, b) => b[1].temp - a[1].temp)
-      .slice(0, MAX_CALLOUTS)
-      .map(([n]) => n);
+    // Los más calientes primero; si dos motores vecinos están calientes, se rotula solo
+    // el peor (sus etiquetas caerían una encima de la otra).
+    const hot = [];
+    const ranked = [...this.byName.entries()].filter(([, e]) => e.level === "crit").sort((a, b) => b[1].temp - a[1].temp);
+    for (const [name, e] of ranked) {
+      if (hot.length === MAX_CALLOUTS) break;
+      if (hot.every((n) => Math.abs(this.byName.get(n).mid - e.mid) >= CALLOUT_MIN_GAP)) hot.push(name);
+    }
     const shown = new Set(hot.length ? hot : [frame.derived.tempMax?.motor]);
     if (this.selected) shown.add(this.selected);
 

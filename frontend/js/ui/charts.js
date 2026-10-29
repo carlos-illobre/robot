@@ -9,15 +9,32 @@ const charts = new Set();
 
 /** Paleta categórica para series (motores). Ordenada para máximo contraste. */
 export const SERIES_COLORS = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6", "--s7", "--s8"];
-export const seriesColor = (i) => cssVar(SERIES_COLORS[i % SERIES_COLORS.length]);
+export const seriesColor = (i, el) => cssVar(SERIES_COLORS[i % SERIES_COLORS.length], el);
 
-function themeOptions() {
-  const grid = cssVar("--grid");
-  const muted = cssVar("--text-muted");
+/** Al destruir un gráfico se lo saca del registro (si no, el cambio de tema lo tocaría muerto). */
+const forget = { id: "tp05-forget", afterDestroy: (chart) => charts.delete(chart) };
+
+/** Destruye un gráfico de forma segura. Las vistas lo llaman en destroy(). */
+export function destroyChart(chart) {
+  if (!chart) return;
+  charts.delete(chart);
+  chart.destroy();
+}
+
+/**
+ * Colores del tema, leídos del propio canvas: así cada vista puede definir su
+ * paleta (--grid, --text-muted…) dentro de `.view-<id>` y el gráfico la hereda.
+ * Si una variable no existe, se usan las de la barra común.
+ */
+function themeOptions(el = document.documentElement) {
+  const pick = (name, fallback) => cssVar(name, el) || cssVar(fallback, el);
   return {
-    grid,
-    muted,
-    font: { family: cssVar("--font-mono") || "monospace", size: 11 },
+    grid: pick("--grid", "--shell-border"),
+    muted: pick("--text-muted", "--shell-muted"),
+    surface: pick("--surface-2", "--shell-surface-2"),
+    text: pick("--text", "--shell-text"),
+    border: pick("--border", "--shell-border"),
+    font: { family: cssVar("--font-mono", el) || "monospace", size: 11 },
   };
 }
 
@@ -29,7 +46,7 @@ function themeOptions() {
 export function createLineChart(canvas, cfg = {}) {
   const Chart = globalThis.Chart;
   if (!Chart) throw new Error("Chart.js no está cargado (vendor/chart.umd.min.js)");
-  const t = themeOptions();
+  const t = themeOptions(canvas);
   const axis = (title, extra = {}) => ({
     grid: { color: t.grid, drawTicks: false },
     border: { display: false },
@@ -40,6 +57,7 @@ export function createLineChart(canvas, cfg = {}) {
 
   const chart = new Chart(canvas, {
     type: "line",
+    plugins: [forget],
     data: { datasets: [] },
     options: {
       animation: false,           // a 10 Hz las animaciones solo agregan lag
@@ -58,10 +76,10 @@ export function createLineChart(canvas, cfg = {}) {
         legend: { display: false },
         decimation: { enabled: false },
         tooltip: {
-          backgroundColor: cssVar("--surface-2"),
-          titleColor: cssVar("--text"),
-          bodyColor: cssVar("--text"),
-          borderColor: cssVar("--border"),
+          backgroundColor: t.surface,
+          titleColor: t.text,
+          bodyColor: t.text,
+          borderColor: t.border,
           borderWidth: 1,
           titleFont: t.font,
           bodyFont: t.font,
@@ -76,17 +94,21 @@ export function createLineChart(canvas, cfg = {}) {
 
 /** Al cambiar de tema, re-colorea ejes y grillas de todos los gráficos. */
 onThemeChange(() => {
-  const t = themeOptions();
-  for (const chart of charts) {
+  for (const chart of [...charts]) {
+    if (!chart.canvas?.isConnected) {
+      charts.delete(chart); // quedó de una vista que ya no está
+      continue;
+    }
+    const t = themeOptions(chart.canvas);
     for (const scale of Object.values(chart.options.scales)) {
       if (scale.grid) scale.grid.color = t.grid;
       if (scale.ticks) scale.ticks.color = t.muted;
       if (scale.title) scale.title.color = t.muted;
     }
     const tip = chart.options.plugins.tooltip;
-    tip.backgroundColor = cssVar("--surface-2");
-    tip.titleColor = tip.bodyColor = cssVar("--text");
-    tip.borderColor = cssVar("--border");
+    tip.backgroundColor = t.surface;
+    tip.titleColor = tip.bodyColor = t.text;
+    tip.borderColor = t.border;
     chart.$recolor?.();
     chart.update("none");
   }

@@ -40,11 +40,12 @@ export const PROFILES = {
     /** Geoms que se iluminan cuando la pata apoya (malla "foot" del MJCF). */
     footGeom: "foot",
     padRadius: 0.07,
+    footGlow: 1,
     /** Pose "de pie" de robots.py de la cátedra, mientras no llega el primer dato. */
     restPose: { FR_thigh: 0.8, FL_thigh: 0.8, RR_thigh: 0.8, RL_thigh: 0.8, FR_calf: -1.55, FL_calf: -1.55, RR_calf: -1.55, RL_calf: -1.55 },
-    markerRadius: () => 0.042,
+    markerRadius: (joint) => (/hip/.test(joint) ? 0.034 : 0.03),
     materialFor: (mjcfMaterial) => GO2_MATERIALS[mjcfMaterial],
-    camera: { target: 0.2, distance: 1.35, minDistance: 0.45, maxDistance: 4 },
+    camera: { target: 0.17, distance: 1.3, minDistance: 0.45, maxDistance: 4 },
     /** Escala de "velocidad visual" del piso: m/s por rad/s de velocidad articular media. */
     floorSpeed: 0.45,
   },
@@ -55,14 +56,15 @@ export const PROFILES = {
     feet: { R_foot: "right_ankle_roll_link", L_foot: "left_ankle_roll_link" },
     footGeom: null, // se ilumina todo el eslabón del tobillo
     padRadius: 0.11,
+    footGlow: 0.25,
     restPose: { L_shoulder_pitch: 0.2, R_shoulder_pitch: 0.2, L_elbow: 1.0, R_elbow: 1.0, L_shoulder_roll: 0.18, R_shoulder_roll: -0.18 },
-    markerRadius: (joint) => (/wrist/.test(joint) ? 0.03 : /shoulder|elbow/.test(joint) ? 0.04 : /waist/.test(joint) ? 0.06 : 0.052),
+    markerRadius: (joint) => (/wrist/.test(joint) ? 0.024 : /shoulder|elbow/.test(joint) ? 0.032 : /waist/.test(joint) ? 0.05 : 0.042),
     // Los grises del MJCF del G1 (0.2 y 0.7) se pasan a grafito y aluminio.
     materialFor: (_name, rgba) =>
       rgba && rgba[0] < 0.4
         ? { color: 0x24272e, roughness: 0.5, metalness: 0.2 }
         : { color: 0xc4c8d0, roughness: 0.36, metalness: 0.45 },
-    camera: { target: 0.72, distance: 2.6, minDistance: 0.8, maxDistance: 7 },
+    camera: { target: 0.6, distance: 2.2, minDistance: 0.7, maxDistance: 7 },
     floorSpeed: 0.55,
   },
 };

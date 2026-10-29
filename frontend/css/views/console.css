@@ -39,6 +39,7 @@
   height: calc(100dvh - var(--appbar-h));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr); /* que ningún contenido ancho estire la página */
   background: var(--cv-bg);
   color: var(--cv-text);
   font: 14px/1.4 var(--font-ui);
@@ -80,7 +81,7 @@
 .view-console .cv-sw[data-level="crit"] { background: var(--cv-hot); }
 .view-console .cv-sub { white-space: nowrap; color: var(--cv-text-3); font-size: 12px; }
 .view-console .cv-empty { margin: auto; text-align: center; color: var(--cv-text-3); font-size: 13px; padding: 12px; }
-.view-console .cv-link { margin-left: 8px; padding: 0; border: 0; background: none; color: var(--cv-accent); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.view-console .cv-link { flex: none; margin-left: 4px; padding: 0; border: 0; background: none; color: var(--cv-accent); font-size: 13px; font-weight: 600; white-space: nowrap; }
 .view-console .cv-link:hover { text-decoration: underline; }
 
 /* Control segmentado (orden de la tabla, magnitud del gráfico) */
@@ -223,10 +224,10 @@
 }
 .view-console .cv-table .is-left { text-align: left; }
 .view-console .cv-table td, .view-console .cv-table tbody th {
-  height: 24px; padding: 0 8px; text-align: right; white-space: nowrap;
+  height: 23px; padding: 0 8px; text-align: right; white-space: nowrap;
   border-bottom: 1px solid color-mix(in srgb, var(--cv-line) 60%, transparent);
 }
-.view-console .cv-grp th { height: 24px; padding-top: 6px; border-bottom: 0; text-align: left; font-size: 12px; font-weight: 550; color: var(--cv-text-3); }
+.view-console .cv-table .cv-grp th { height: 20px; padding-top: 4px; border-bottom: 0; text-align: left; font-size: 12px; font-weight: 550; color: var(--cv-text-3); }
 .view-console .cv-contact { margin-left: 8px; font-weight: 500; }
 .view-console .cv-contact::before { content: "· "; }
 .view-console .cv-contact[data-down="true"] { color: var(--cv-text-2); }
@@ -259,7 +260,7 @@
 .view-console .cv-row[data-over="true"] .cv-tq__bar i { background: var(--cv-warn); }
 .view-console .cv-row[data-over="true"] .cv-tq .num { color: var(--cv-warn); font-weight: 700; }
 
-.view-console .cv-mchart { flex: none; height: 158px; display: flex; flex-direction: column; padding: 8px 16px 10px; border-top: 1px solid var(--cv-line); }
+.view-console .cv-mchart { flex: none; height: 150px; display: flex; flex-direction: column; padding: 8px 16px 10px; border-top: 1px solid var(--cv-line); }
 .view-console .cv-mchart__hdr { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; font-size: 12px; color: var(--cv-text-3); }
 .view-console .cv-mchart__title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .view-console .cv-mchart__title b { color: var(--cv-text-2); font-weight: 600; }
@@ -360,8 +361,10 @@
   .view-console .cv-footer__keys span:nth-child(n + 6) { display: none; }
 }
 @media (max-width: 1100px) {
-  .view-console { height: auto; min-height: calc(100dvh - var(--appbar-h)); overflow: visible; }
+  /* Debajo de 1100 px la página crece con su contenido y se desplaza entera */
+  .view-console { height: auto; min-height: calc(100dvh - var(--appbar-h)); overflow: visible; grid-template-rows: auto auto auto; }
   .view-console .cv-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .view-console .cv-panel { flex: none; }
   .view-console .cv-motors { grid-row: auto; }
   .view-console .cv-tablewrap { overflow: visible; }
   .view-console .cv-imu { height: 300px; }
@@ -379,7 +382,9 @@
   .view-console .cv-strip { flex-basis: 100%; align-items: flex-start; font-size: 14px; }
   .view-console .cv-strip__icon { margin-top: 2px; }
   .view-console .cv-strip__text { white-space: normal; }
-  .view-console .cv-link { font-size: 14px; }
+  .view-console .cv-strip { flex-wrap: wrap; }
+  .view-console .cv-strip__text { flex: 1 1 0; }
+  .view-console .cv-link { font-size: 14px; margin-left: 24px; }
   .view-console .cv-grid { display: flex; flex-direction: column; padding: 12px 12px 96px; }
   .view-console .cv-right2 { display: contents; }
   .view-console .cv-feet { order: 1; }
@@ -391,6 +396,9 @@
   .view-console .cv-sub, .view-console .cv-tools { font-size: 13px; }
   .view-console .cv-tools { flex-wrap: wrap; row-gap: 6px; }
   .view-console .cv-table { font-size: 14px; }
+  .view-console .cv-tablewrap { overflow-x: auto; padding: 0 4px; }
+  .view-console .cv-table td, .view-console .cv-table tbody th, .view-console .cv-table thead th { padding-left: 5px; padding-right: 5px; }
+  .view-console .cv-long { display: none; }
   .view-console .cv-pick { font-size: 14px; }
   .view-console .cv-tbar, .view-console .cv-tq__bar, .view-console .cv-col-ang { display: none; }
   .view-console .cv-mchart { height: 220px; }
@@ -408,16 +416,55 @@
   /* Las acciones bajan a un "dock" fijo, al alcance del pulgar */
   .view-console .cv-actions {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-    display: grid; grid-template-columns: 52px 52px 1fr auto; gap: 8px;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    display: grid; grid-template-columns: 46px 46px minmax(0, 1fr) auto; gap: 6px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     background: color-mix(in srgb, var(--cv-panel) 92%, transparent);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--cv-line);
   }
-  .view-console .cv-btn { height: 52px; border-radius: 12px; justify-content: center; font-size: 15px; }
+  .view-console .cv-btn { height: 50px; padding: 0 10px; border-radius: 12px; justify-content: center; font-size: 15px; }
   .view-console .cv-btn--pause .cv-btn__label, .view-console .cv-btn--rec .cv-btn__label { display: none; }
   .view-console .cv-btn--primary { font-size: 16px; }
   .view-console .cv-split .cv-btn--export { border-radius: 12px 0 0 12px; }
-  .view-console .cv-btn--menu { width: 36px; border-radius: 0 12px 12px 0; }
+  .view-console .cv-btn--menu { width: 32px; padding: 0; border-radius: 0 12px 12px 0; }
   .view-console .cv-menu { top: auto; bottom: calc(100% + 8px); transform-origin: bottom right; }
 }
+
+/* =====================================================================
+   Identidad de los cuatro paneles de la consigna.
+   Cada panel tiene número, color de acento (ninguno es verde, amarillo ni
+   rojo: esos colores son exclusivos del semáforo), borde superior y una
+   cabecera teñida separada de los datos. Así se distinguen de un vistazo
+   aunque todos tengan muchos números.
+   ===================================================================== */
+.view-console .cv-motors { --acc: #5b8cff; --n: "1"; }
+.view-console .cv-imu    { --acc: #a78bfa; --n: "2"; }
+.view-console .cv-bms    { --acc: #2dd4bf; --n: "3"; }
+.view-console .cv-feet   { --acc: #f472b6; --n: "4"; }
+:root[data-theme="light"] .view-console .cv-motors { --acc: #2f5bea; }
+:root[data-theme="light"] .view-console .cv-imu    { --acc: #7c3aed; }
+:root[data-theme="light"] .view-console .cv-bms    { --acc: #0d9488; }
+:root[data-theme="light"] .view-console .cv-feet   { --acc: #db2777; }
+
+.view-console .cv-grid { gap: 14px; }
+.view-console .cv-right2 { gap: 14px; }
+
+.view-console .cv-panel {
+  border-top: 3px solid var(--acc, var(--cv-line));
+  box-shadow: var(--cv-shadow), 0 -1px 0 0 color-mix(in srgb, var(--acc, transparent) 30%, transparent);
+}
+.view-console .cv-panel > .cv-ph {
+  padding: 9px 14px 9px 12px;
+  margin-bottom: 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--acc, transparent) 13%, var(--cv-panel)), color-mix(in srgb, var(--acc, transparent) 5%, var(--cv-panel)));
+  border-bottom: 1px solid color-mix(in srgb, var(--acc, var(--cv-line)) 28%, var(--cv-line));
+}
+.view-console .cv-panel > .cv-ph h2 { font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+.view-console .cv-panel > .cv-ph h2::before {
+  content: var(--n);
+  display: inline-grid; place-items: center; flex: none;
+  width: 20px; height: 20px; border-radius: 6px;
+  background: var(--acc); color: #fff;
+  font: 800 11.5px/1 var(--font-ui);
+}
+.view-console .cv-panel > .cv-ph .cv-ph__icon { color: var(--acc); }

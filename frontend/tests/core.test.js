@@ -140,3 +140,13 @@ test("URLs del servidor", () => {
   assert.equal(ApiClient.toWebSocketUrl("http://10.0.0.5:8001"), "ws://10.0.0.5:8001/ws");
   assert.equal(ApiClient.toWebSocketUrl("https://robot.lab"), "wss://robot.lab/ws");
 });
+
+test("alarmas con histéresis: no titilan si la temperatura oscila alrededor de 60 °C", () => {
+  const at = (temp) => normalizeFrame({ ...RAW, motores: [{ ...RAW.motores[0], temperatura: temp }] });
+  const tracker = new AlertTracker();
+  const step = (temp) => tracker.update(evaluateAlerts(at(temp), {}, tracker.keys));
+  assert.equal(step(60.5).raised.length, 1, "se activa al pasar 60 °C");
+  assert.equal(step(59.6).cleared.length, 0, "a 59,6 °C sigue activa (no titila)");
+  assert.equal(step(60.4).raised.length, 0, "no se vuelve a avisar");
+  assert.equal(step(57.9).cleared.length, 1, "se normaliza recién por debajo de 58 °C");
+});

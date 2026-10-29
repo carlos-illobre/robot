@@ -182,9 +182,9 @@ export class RobotRig {
     for (const j of this.joints.values()) {
       const r = this.profile.markerRadius(j.name);
       const key = r.toFixed(3);
-      if (!geoCache.has(key)) geoCache.set(key, this._track(new THREE.TorusGeometry(r, r * 0.13, 10, 40)));
+      if (!geoCache.has(key)) geoCache.set(key, this._track(new THREE.TorusGeometry(r, Math.max(0.0028, r * 0.09), 8, 48)));
       const mat = this._track(
-        new THREE.MeshBasicMaterial({ color: SEM_COLORS.unknown, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false, toneMapped: false }),
+        new THREE.MeshBasicMaterial({ color: SEM_COLORS.unknown, transparent: true, opacity: 0.88, depthTest: false, depthWrite: false, toneMapped: false }),
       );
       const ring = new THREE.Mesh(geoCache.get(key), mat);
       ring.quaternion.setFromUnitVectors(zAxis, j.axis);
@@ -221,7 +221,7 @@ export class RobotRig {
       pad.renderOrder = 2;
       this.root.add(pad);
       const footMaterials = body.children
-        .filter((c) => c.isMesh && (!this.profile.footGeom || c.userData.geom === this.profile.footGeom))
+        .filter((c) => c.isMesh && c.userData.geom && (!this.profile.footGeom || c.userData.geom === this.profile.footGeom))
         .map((c) => c.material);
       this.feet.set(leg, { contacts, pad, footMaterials, level: 0 });
     }
@@ -288,7 +288,8 @@ export class RobotRig {
       if (lowest) f.pad.position.set(lowest.x, 0.002, lowest.z);
       f.pad.material.opacity = 0.9 * f.level;
       f.pad.visible = f.level > 0.01;
-      for (const m of f.footMaterials) m.emissive.setRGB(0.05 * f.level, 0.55 * f.level, 0.65 * f.level);
+      const g = f.level * (this.profile.footGlow ?? 1);
+      for (const m of f.footMaterials) m.emissive.setRGB(0.05 * g, 0.55 * g, 0.65 * g);
     }
   }
 
@@ -320,9 +321,14 @@ export class RobotRig {
     const meshHits = raycaster.intersectObjects(this.meshes, false);
     for (let o = meshHits[0]?.object; o; o = o.parent) {
       if (o.userData?.joint?.name) return this.joints.get(o.userData.joint.name);
-      if (o.userData?.body) return { name: o.userData.body, base: true, body: o };
+      if (o.userData?.body) return (this._basePick ??= { name: o.userData.body, base: true, body: o });
     }
     return null;
+  }
+
+  /** Raycaster con el umbral por defecto (la vista no importa three directamente). */
+  static makeRaycaster() {
+    return new THREE.Raycaster();
   }
 
   dispose() {

@@ -44,6 +44,7 @@ function contactsText(frame) {
     const all = { 2: feet ? "los dos" : "las dos", 4: "las cuatro" }[legs] ?? `${feet ? "los" : "las"} ${legs}`;
     return `${all} ${noun} ${adj}`;
   }
+  if (one) return feet ? "un solo pie apoyado" : "una sola pata apoyada";
   return `${contacts} de ${legs} ${noun} ${adj}`;
 }
 

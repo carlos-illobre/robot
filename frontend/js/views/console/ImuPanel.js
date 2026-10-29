@@ -8,7 +8,7 @@
 import { h, s, setText, fmt } from "../../ui/dom.js";
 import { icon } from "../../ui/icons.js";
 import { DEFAULTS } from "../../config.js";
-import { createConsoleChart, toPoints } from "./consoleChart.js";
+import { createConsoleChart, destroyConsoleChart, toPoints } from "./consoleChart.js";
 
 /** Exageración del horizonte (está rotulada en el dibujo). */
 const HORIZON_GAIN = 4;
@@ -98,7 +98,7 @@ export class ImuPanel {
   }
 
   init() {
-    this.chart = createConsoleChart(this.canvas, this.root, { yTitle: "roll / pitch [°]", y2: true, y2Title: "yaw [°]", yMin: -5, yMax: 5 });
+    this.chart = createConsoleChart(this.canvas, this.root, { yTitle: "°", y2: true, y2Title: "yaw °", yMin: -5, yMax: 5 });
     this.chart.options.scales.y2.ticks.stepSize = 90;
     this.chart.data.datasets = SERIES.map((sr) => ({
       label: sr.label,
@@ -147,7 +147,7 @@ export class ImuPanel {
   }
 
   destroy() {
-    this.chart?.destroy();
+    destroyConsoleChart(this.chart);
     this.chart = null;
   }
 }

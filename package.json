@@ -5,7 +5,14 @@
   "description": "Dashboard web de telemetría para robots Unitree (TP05 · Desarrollo de Aplicaciones II · UADE)",
   "type": "module",
   "scripts": {
-    "test": "node --test frontend/tests/*.test.js"
+    "test": "node --test frontend/tests/*.test.js",
+    "test:e2e": "node --test --test-concurrency=1 e2e/*.e2e.js",
+    "test:all": "npm test && python -m pytest backend/tests -q && npm run test:e2e"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "1.48.2"
+  }
 }

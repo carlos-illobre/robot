@@ -26,8 +26,9 @@ export class Horizon {
       h(
         "div",
         { class: "pv-ladder", "data-major": Math.abs(p) === 10 ? "" : null, style: { top: `calc(50% - ${p * PITCH_PX}px)` } },
-        h("span", { class: "pv-ladder__l" }, h("b", {}, String(Math.abs(p)))),
-        h("span", { class: "pv-ladder__r" }, h("b", {}, String(Math.abs(p)))),
+        // Solo se rotulan los ±5°: los de ±10° quedan cerca de la cinta de rumbo y la ensuciarían.
+        h("span", { class: "pv-ladder__l" }, Math.abs(p) === 5 ? h("b", {}, "5") : null),
+        h("span", { class: "pv-ladder__r" }, Math.abs(p) === 5 ? h("b", {}, "5") : null),
       ),
     );
     this.plane = h("div", { class: "pv-horizon__plane" }, h("div", { class: "pv-horizon__line" }), ...rungs);

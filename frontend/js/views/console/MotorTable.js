@@ -48,7 +48,7 @@ export class MotorTable {
             "tr",
             {},
             h("th", { scope: "col", class: "is-left" }, "Motor"),
-            h("th", { scope: "col" }, "Temperatura °C"),
+            h("th", { scope: "col" }, "Temp", h("span", { class: "cv-long" }, "eratura"), " °C"),
             h("th", { scope: "col", class: "cv-col-ang" }, "Ángulo °"),
             h("th", { scope: "col" }, "Vel. rad/s"),
             h("th", { scope: "col" }, "Torque N·m"),

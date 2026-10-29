@@ -7,7 +7,7 @@
  * del semáforo; con torque se dibuja el umbral de alarma (± N·m).
  */
 import { h, setText } from "../../ui/dom.js";
-import { createConsoleChart, toPoints } from "./consoleChart.js";
+import { createConsoleChart, destroyConsoleChart, toPoints } from "./consoleChart.js";
 
 export const MAX_SELECTED = 3;
 
@@ -125,7 +125,7 @@ export class MotorChart {
   }
 
   destroy() {
-    this.chart?.destroy();
+    destroyConsoleChart(this.chart);
     this.chart = null;
   }
 }

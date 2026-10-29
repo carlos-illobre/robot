@@ -16,6 +16,12 @@ import { tempLevel, motorGroup, LEG_LABELS } from "../../core/telemetryModel.js"
 /** "Delantera izquierda" → "Delantera izq." para que entre en la tarjeta. */
 const shortLeg = (leg) => (LEG_LABELS[leg] ?? leg).replace("izquierda", "izq.").replace("derecha", "der.");
 
+/**
+ * Nombre corto para las filas del G1: el grupo ya dice el lado, así que
+ * "L_shoulder_pitch" → "sh_pitch". El nombre completo queda en el title.
+ */
+const shortJoint = (n) => n.replace(/^[LR]_|^torso_/, "").replace("shoulder", "sh").replace("wrist", "wr").replace("ankle", "ank");
+
 export class Callouts {
   /**
    * @param {{ figure: import("./robotFigure.js").RobotFigure, onSelect: Function, torqueScale: () => number }} opts
@@ -67,8 +73,11 @@ export class Callouts {
         if (!groups.has(g.key)) groups.set(g.key, { ...g, names: [] });
         groups.get(g.key).names.push(n);
       }
+      // Brazos arriba y piernas abajo, como en el dibujo: así las líneas no se cruzan.
       const place = { R_brazo: "l", R_pierna: "l", torso: "r", L_brazo: "r", L_pierna: "r" };
-      for (const g of groups.values()) {
+      const rank = ["R_brazo", "R_pierna", "torso", "L_brazo", "L_pierna"];
+      const sorted = [...groups.values()].sort((a, b) => (rank.indexOf(a.key) + 1 || 99) - (rank.indexOf(b.key) + 1 || 99));
+      for (const g of sorted) {
         const side = place[g.key] ?? "r";
         const foot = g.key.endsWith("_pierna") ? `${g.key[0]}_foot` : null;
         const el = this.#group(g.label, foot && info.patas?.includes(foot) ? foot : null, g.names, "row");
@@ -91,8 +100,8 @@ export class Callouts {
       const bar = h("i");
       const card = h(
         "button",
-        { type: "button", class: `bd-card bd-card--${variant}`, "data-level": "ok", title: `Ver el detalle de ${n}`, onclick: () => this.onSelect(n) },
-        h("span", { class: "bd-card__name" }, variant === "row" ? n.replace(/^[LR]_|^torso_/, "") : n),
+        { type: "button", class: `bd-card bd-card--${variant}`, "data-level": "ok", title: `${n}: ver el detalle`, onclick: () => this.onSelect(n) },
+        h("span", { class: "bd-card__name" }, variant === "row" ? shortJoint(n) : n),
         temp,
         h("span", { class: "bd-card__q" }, h("span", { class: "bd-bar", "aria-hidden": "true" }, bar), tq),
       );

@@ -60,7 +60,7 @@ export class Timeline {
 
     const compact = W < 560;
     const titleW = compact ? 0 : 92;   // columna con el nombre de cada pista
-    const tickW = 34;                   // columna con los números del eje Y
+    const tickW = 42;                   // columna con los números del eje Y
     const left = titleW + tickW;
     const right = W - 6;
     const top = 16;                     // lugar para la cabeza de los alfileres
@@ -72,10 +72,10 @@ export class Timeline {
 
     const legList = [...legs].sort((a, b) => LEG_ORDER.indexOf(a) - LEG_ORDER.indexOf(b));
     const tracks = [
-      { key: "tilt", title: "Roll · pitch", unit: "°", weight: 0.4 },
-      { key: "yaw", title: "Yaw", unit: "°", weight: 0.22 },
-      { key: "legs", title: legList.some((l) => l.endsWith("_foot")) ? "Pies" : "Patas", weight: legList.length ? 0.26 : 0.1 },
-      { key: "heat", title: "Más caliente", weight: 0.12 },
+      { key: "tilt", title: "Roll · pitch", weight: 0.4 },
+      { key: "yaw", title: "Yaw", weight: 0.22 },
+      { key: "legs", title: legList.some((l) => l.endsWith("_foot")) ? "Pies" : "Patas", weight: legList.length ? 0.075 * legList.length + 0.03 : 0.1 },
+      { key: "heat", title: "Más caliente", weight: 0.1 },
     ];
     const gap = 6;
     const avail = bottom - top - gap * (tracks.length - 1);
@@ -116,9 +116,9 @@ export class Timeline {
   }
 
   /** Números del eje Y, alineados a la derecha de su columna. */
-  #tick(text, y, left, P) {
+  #tick(text, y, left, P, size = 11) {
     const x = this.ctx;
-    x.font = `11px ${P.mono}`;
+    x.font = `${size}px ${P.mono}`;
     x.fillStyle = P.muted;
     x.textAlign = "right";
     x.fillText(text, left - 6, y);
@@ -191,9 +191,10 @@ export class Timeline {
     const pad = 3;
     const Y = (v) => box.y + pad + ((180 - v) / 360) * (box.h - 2 * pad);
     this.#hline(Y(0), left, right, P.rule2);
-    this.#tick("+180°", Y(180) + 3, left, P);
-    this.#tick("0", Y(0), left, P);
-    this.#tick("−180°", Y(-180) - 3, left, P);
+    // Con poca altura, solo los extremos: el cero se lee por la línea guía.
+    if (box.h >= 34) this.#tick("0", Y(0), left, P);
+    this.#tick("+180°", Y(180) + 4, left, P);
+    this.#tick("−180°", Y(-180) - 4, left, P);
     const norm = (v) => ((((v + 180) % 360) + 360) % 360) - 180;
     // Al cruzar ±180° el yaw salta: se corta la línea en lugar de trazar una vertical.
     this.#series(frames, (f) => norm(f.imu.yaw), Y, X, P.ink, (a, b) => Math.abs(a - b) > 180);
@@ -212,7 +213,7 @@ export class Timeline {
     const rh = box.h / legs.length;
     legs.forEach((leg, li) => {
       const ry = box.y + li * rh;
-      this.#tick(leg.replace("_foot", ""), ry + rh / 2, left, P);
+      this.#tick(leg.replace("_foot", ""), ry + rh / 2, left, P, rh < 12 ? 9 : 11);
       x.fillStyle = P.ink2;
       // Rachas de apoyo: un rectángulo por racha (no uno por muestra); un hueco corta la racha.
       let start = null;

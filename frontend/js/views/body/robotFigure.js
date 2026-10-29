@@ -260,7 +260,9 @@ export class RobotFigure {
   #addFoot(leg, [x, y], r, label, side) {
     const ripple = s("circle", { cx: x, cy: y, r, class: "bd-ripple" });
     const foot = s("circle", { cx: x, cy: y, r, class: "bd-foot" });
-    const text = s("text", { x: x + side * (r + 14), y: y + 5, class: "bd-foot__label" });
+    // El rótulo va hacia afuera del pie (en el G1, más lejos: el texto es más largo).
+    const gap = this.kind === "humanoid" ? r + 30 : r + 14;
+    const text = s("text", { x: x + side * gap, y: y + 4, class: "bd-foot__label" });
     text.textContent = label;
     const title = s("title");
     title.textContent = leg;

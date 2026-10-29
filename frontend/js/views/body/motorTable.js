@@ -25,7 +25,8 @@ export class MotorTable {
       const tr = e.target.closest("tr[data-name]");
       if (tr) this.onSelect(tr.dataset.name);
     });
-    const th = (text, cls, title) => h("th", { scope: "col", class: cls, title }, text);
+    // Unidad en una segunda línea: la tabla entra en 400 px aun con los nombres largos del G1.
+    const th = (text, cls, title, unit) => h("th", { scope: "col", class: cls, title }, text, unit ? h("small", {}, unit) : null);
     this.el = h(
       "section",
       { class: "bd-motors", "aria-labelledby": "bd-motors-title" },
@@ -39,10 +40,10 @@ export class MotorTable {
           h("caption", { class: "sr-only" }, "Temperatura, ángulo, velocidad y torque de cada motor"),
           h("thead", {}, h("tr", {},
             th("Motor", "bd-l"),
-            th("Temp. °C", "", "Temperatura del motor: verde < 40 °C, amarillo 40–60 °C, rojo > 60 °C"),
-            th("Ángulo °", "", "Ángulo de la articulación en grados"),
-            th("Vel. rad/s", "", "Velocidad angular en radianes por segundo"),
-            th("Torque N·m", "", "Torque estimado en newton·metro"))),
+            th("Temp.", "", "Temperatura del motor: verde < 40 °C, amarillo 40–60 °C, rojo > 60 °C", "°C"),
+            th("Ángulo", "", "Ángulo de la articulación en grados", "°"),
+            th("Vel.", "", "Velocidad angular en radianes por segundo", "rad/s"),
+            th("Torque", "", "Torque estimado en newton·metro", "N·m"))),
           this.tbody)),
     );
   }

@@ -69,8 +69,8 @@ function drawBiped() {
     s(
       "g",
       { class: "cv-robot__lbl" },
-      s("text", { x: 48, y: 135, "text-anchor": "middle" }, document.createTextNode("R")),
-      s("text", { x: 84, y: 135, "text-anchor": "middle" }, document.createTextNode("L")),
+      s("text", { x: 22, y: 151, "text-anchor": "middle" }, document.createTextNode("R")),
+      s("text", { x: 110, y: 151, "text-anchor": "middle" }, document.createTextNode("L")),
     ),
     s("text", { class: "cv-robot__caption", x: 66, y: 166, "text-anchor": "middle" }, document.createTextNode("vista de frente")),
   );

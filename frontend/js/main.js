@@ -367,7 +367,7 @@ bus.on("frame", (frame) => {
     toast("Grabación detenida: se alcanzó el máximo de muestras", { kind: "warn" });
   }
 
-  const result = alertTracker.update(evaluateAlerts(frame, { torqueAlarm: state.torqueAlarm }));
+  const result = alertTracker.update(evaluateAlerts(frame, { torqueAlarm: state.torqueAlarm }, alertTracker.keys));
   state.alerts = result.active;
   if (result.raised.length || result.cleared.length) {
     for (const a of result.raised) {

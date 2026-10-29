@@ -149,8 +149,7 @@ export default class ConsoleView {
 
   onKey(e) {
     if (e.key === "Escape" && !this.menu.hidden) {
-      this.#toggleMenu(false);
-      this.menuBtn.focus();
+      this.#closeMenu();
       return true;
     }
     if (e.key.toLowerCase() === "s") {
@@ -186,7 +185,9 @@ export default class ConsoleView {
       "div",
       { class: "cv-strip", "data-kind": "ok" },
       h("span", { class: "cv-strip__icon", "aria-hidden": "true", html: icon("activity", { size: 16, cls: "is-ok" }) + icon("alert", { size: 16, cls: "is-alarm" }) + icon("plug", { size: 16, cls: "is-lost" }) }),
-      h("p", { class: "cv-strip__text" }, this.stripStrong, this.stripRest, this.stripGo),
+      // El enlace va fuera del texto: si el mensaje no entra, se recorta el texto y no el enlace.
+      h("p", { class: "cv-strip__text" }, this.stripStrong, this.stripRest),
+      this.stripGo,
     );
 
     const btn = (cls, iconName, label, kbd, onclick, extra = {}) => {
@@ -221,7 +222,11 @@ export default class ConsoleView {
     this.clearBtn = h("button", { type: "button", class: "cv-menu__item", onclick: () => { actions.clearCaptures(); this.#toggleMenu(false); } });
     this.menu = h(
       "div",
-      { class: "cv-menu", hidden: true, role: "group", "aria-label": "Opciones de exportación" },
+      {
+        class: "cv-menu", hidden: true, role: "group", "aria-label": "Opciones de exportación",
+        // main.js ignora las teclas que se escriben en un <input>: el Escape de la casilla se atiende acá.
+        onkeydown: (e) => { if (e.key === "Escape") { e.preventDefault(); this.#closeMenu(); } },
+      },
       h("label", { class: "cv-menu__check" }, this.excelBox, h("span", {}, h("b", {}, "Formato Excel"), h("small", {}, "separador ; y coma decimal"))),
       h("button", { type: "button", class: "cv-menu__item", onclick: () => { actions.exportJson(); this.#toggleMenu(false); }, html: `${icon("braces", { size: 15 })}<span>Exportar JSON</span>` }),
       this.clearBtn,
@@ -338,6 +343,12 @@ export default class ConsoleView {
     this.menu.hidden = !open;
     this.menuBtn.setAttribute("aria-expanded", String(open));
     if (open) this.excelBox.checked = this.ctx.state.excel;
+  }
+
+  /** Cierra el menú y devuelve el foco a su botón, para que los atajos vuelvan a andar. */
+  #closeMenu() {
+    this.#toggleMenu(false);
+    this.menuBtn.focus();
   }
 
   /** Cierra el menú de exportación al tocar afuera (función flecha: se registra y se quita tal cual). */
