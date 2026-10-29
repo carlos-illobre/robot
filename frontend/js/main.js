@@ -191,13 +191,18 @@ const actions = {
     let backend = null;
     let error = "";
     const sim = isSimUrl(state.baseUrl);
+    const onPages = location.hostname.endsWith("github.io");
     try {
+      // Desde GitHub Pages (https) el navegador no deja conectarse a un backend http.
+      if (onPages) throw new Error("pages");
       // En la simulación del navegador no hay servidor: solo se le pregunta si el
       // usuario abre el panel de fuentes (así no se ensucia la consola, p. ej. en GitHub Pages).
       if (sim && !probe) throw new Error("sin-consulta");
       backend = await new ApiClient(state.backendUrl, { timeoutMs: 1500 }).fuentes();
     } catch (err) {
-      error = /404/.test(err.message)
+      error = onPages
+        ? "Desde GitHub Pages solo se puede usar la simulación del navegador: para el robot real, abrí el dashboard local con «python iniciar.py» (ver el Manual)."
+        : /404/.test(err.message)
         ? "Este servidor no permite elegir la fuente (es el backend original de la cátedra)."
         : `No hay un servidor en ${state.backendUrl}.`;
     }

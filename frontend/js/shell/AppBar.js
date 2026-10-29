@@ -25,7 +25,8 @@ export class AppBar {
   #build() {
     const { actions } = this;
 
-    this.robotEl = h("span", { class: "brand__robot" }, "Esperando /info…");
+    // El robot es un botón desplegable: abre el selector de robot y de fuente de datos.
+    this.robotEl = h("button", { type: "button", class: "brand__robot", title: "Cambiar de robot (Go2 / G1) o de fuente de datos", "aria-haspopup": "dialog", onclick: () => this.togglePopover(true, "source") }, "Esperando /info…");
     // Fuente de datos, siempre a la vista: ¿lo que veo es el robot real o una simulación?
     this.modeEl = h("button", { type: "button", class: "mode-chip", hidden: true, title: "Fuente de datos (clic para cambiar)", onclick: () => this.togglePopover(true, "source") });
     const brand = h(
@@ -73,7 +74,7 @@ export class AppBar {
     this.root.replaceChildren(brand, views, h("div", { class: "conn" }, this.pill, this.themeBtn, helpBtn), this.popover);
 
     document.addEventListener("click", (e) => {
-      if (!this.popover.hidden && !this.popover.contains(e.target) && !this.pill.contains(e.target) && !this.modeEl.contains(e.target)) this.togglePopover(false);
+      if (!this.popover.hidden && !this.popover.contains(e.target) && !this.pill.contains(e.target) && !this.modeEl.contains(e.target) && !this.robotEl.contains(e.target)) this.togglePopover(false);
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !this.popover.hidden) this.togglePopover(false);
@@ -184,7 +185,7 @@ export class AppBar {
 
   setInfo(info) {
     if (!info) return;
-    this.robotEl.replaceChildren(h("b", {}, info.nombre ?? info.modelo), ` · ${info.n_motores} motores`);
+    this.robotEl.replaceChildren(h("b", {}, info.nombre ?? info.modelo), ` · ${info.n_motores} motores`, h("span", { class: "brand__caret", "aria-hidden": "true" }, "▾"));
     if (!this.sources) this.#paintChip({ modo: info.modo, medido: info.modo === "real" });
   }
 
@@ -192,7 +193,7 @@ export class AppBar {
     const label = { real: "Robot real", simulador: "MuJoCo", demo: "Demo", "demo-catedra": "Demo cátedra", navegador: "Navegador" }[actual?.modo] ?? actual?.modo ?? "";
     this.modeEl.hidden = !label;
     this.modeEl.dataset.mode = actual?.medido ? "real" : "demo";
-    this.modeEl.innerHTML = `<span class="mode-chip__dot"></span>${actual?.medido ? "Real" : "Simulado"} · ${label}`;
+    this.modeEl.innerHTML = `<span class="mode-chip__dot"></span>${actual?.medido ? "Real" : "Simulado"} · ${label}<span class="mode-chip__caret" aria-hidden="true">▾</span>`;
   }
 
   /** Pinta el selector de fuentes con lo que devolvió actions.loadSources(). */
