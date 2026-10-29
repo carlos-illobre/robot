@@ -1,0 +1,331 @@
+/* =====================================================================
+   Vista 4 · Gemelo 3D
+   El robot ocupa toda la vista; los paneles flotan encima con vidrio
+   esmerilado. Los colores de la escena 3D también salen de acá
+   (--r3d-scene-*): TwinView los lee con getComputedStyle.
+   ===================================================================== */
+
+.view-twin {
+  --tw-accent: #22d3ee;
+  --tw-accent-soft: color-mix(in srgb, var(--tw-accent) 16%, transparent);
+  --tw-text: #e8ebf2;
+  --tw-muted: #9aa3b5;
+  --tw-panel: rgba(16, 19, 26, .72);
+  --tw-panel-solid: #12151c;
+  --tw-border: rgba(255, 255, 255, .08);
+  --tw-hover: rgba(255, 255, 255, .06);
+  --tw-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  --tw-gutter: 16px;
+
+  /* Escena 3D */
+  --r3d-scene-bg: #0b0e14;
+  --r3d-scene-floor: #10141b;
+  --r3d-scene-grid: #1a2029;
+  --r3d-scene-grid-major: #2a3342;
+  --r3d-scene-sky: #dfe9ff;
+  --r3d-scene-ground: #1a1e26;
+}
+
+:root[data-theme="light"] .view-twin {
+  --tw-accent: #0e7490;
+  --tw-text: #151820;
+  --tw-muted: #586174;
+  --tw-panel: rgba(255, 255, 255, .8);
+  --tw-panel-solid: #ffffff;
+  --tw-border: rgba(15, 23, 42, .1);
+  --tw-hover: rgba(15, 23, 42, .05);
+  --tw-shadow: 0 10px 30px rgba(15, 23, 42, .12);
+
+  --r3d-scene-bg: #e7ebf1;
+  --r3d-scene-floor: #f1f3f7;
+  --r3d-scene-grid: #d4dae3;
+  --r3d-scene-grid-major: #b3bccb;
+  --r3d-scene-sky: #ffffff;
+  --r3d-scene-ground: #aab2c0;
+}
+
+.view-twin .tw {
+  position: relative;
+  height: calc(100dvh - var(--appbar-h));
+  min-height: 420px;
+  overflow: hidden;
+  background: var(--r3d-scene-bg);
+  color: var(--tw-text);
+  isolation: isolate;
+}
+
+/* ---- Lienzo (el robot 3D es el componente .r3d, estilado al final) ---- */
+.view-twin .tw-stage { position: absolute; inset: 0; }
+.view-twin .tw-error { position: absolute; inset: auto 16px 50% 16px; text-align: center; color: var(--tw-muted); }
+
+/* ---- Vidrio común ---- */
+.view-twin .tw-glass {
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-border);
+  border-radius: 14px;
+  box-shadow: var(--tw-shadow);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+}
+
+.view-twin .tw-dot {
+  width: 9px; height: 9px; border-radius: 50%; flex: none; display: inline-block;
+  background: var(--tw-muted);
+}
+.view-twin [data-level="ok"] > .tw-dot, .view-twin .tw-dot[data-level="ok"] { background: var(--sem-ok); }
+.view-twin [data-level="warn"] > .tw-dot, .view-twin .tw-dot[data-level="warn"] { background: var(--sem-warn); }
+.view-twin [data-level="crit"] > .tw-dot, .view-twin .tw-dot[data-level="crit"] { background: var(--sem-crit); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sem-crit) 25%, transparent); }
+
+/* ---- HUD (arriba a la izquierda) ---- */
+.view-twin .tw-hud {
+  position: absolute; z-index: 3; top: var(--tw-gutter); left: var(--tw-gutter);
+  width: 288px; padding: 14px; display: grid; gap: 10px;
+}
+.view-twin .tw-hud__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.view-twin .tw-hud__name { font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.view-twin .tw-chip {
+  font: 600 10.5px/1 var(--font-mono); letter-spacing: .05em; text-transform: uppercase;
+  padding: 5px 8px; border-radius: 999px; border: 1px solid var(--tw-border); color: var(--tw-muted); white-space: nowrap;
+}
+.view-twin .tw-chip[data-on="true"] { color: var(--tw-accent); border-color: color-mix(in srgb, var(--tw-accent) 45%, transparent); background: var(--tw-accent-soft); }
+
+.view-twin .tw-att { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.view-twin .tw-att__cell {
+  display: grid; gap: 4px; padding: 8px 8px 9px; border-radius: 10px;
+  background: var(--tw-hover); border: 1px solid var(--tw-border); min-width: 0;
+}
+.view-twin .tw-att__label { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--tw-muted); }
+.view-twin .tw-att__value { font: 600 16px/1.1 var(--font-mono); white-space: nowrap; }
+.view-twin .tw-att__cell[data-level="warn"] .tw-att__value { color: var(--sem-warn); }
+.view-twin .tw-att__cell[data-level="crit"] .tw-att__value { color: var(--sem-crit); }
+.view-twin .tw-att__track {
+  position: relative; height: 4px; border-radius: 4px; margin-top: 3px;
+  background: linear-gradient(90deg, transparent, var(--tw-border) 20%, var(--tw-border) 80%, transparent);
+  container-type: inline-size;
+}
+.view-twin .tw-att__track::after { content: ""; position: absolute; left: 50%; top: -2px; width: 1px; height: 8px; background: var(--tw-muted); opacity: .6; }
+.view-twin .tw-att__marker {
+  position: absolute; left: calc(50% - 4px); top: -2px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--tw-accent); transition: transform .12s linear;
+}
+.view-twin .tw-compass { color: var(--tw-accent); height: 12px; display: flex; align-items: center; }
+.view-twin .tw-compass svg { width: 22px; height: 22px; margin-top: -6px; transform-origin: 50% 50%; transition: transform .12s linear; }
+
+.view-twin .tw-hud__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12.5px; min-height: 22px; }
+.view-twin .tw-hud__label { color: var(--tw-muted); white-space: nowrap; }
+.view-twin .tw-hot { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+.view-twin .tw-hot__name { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.view-twin .tw-hot__value { font: 600 13px/1 var(--font-mono); }
+.view-twin .tw-hot__value[data-level="warn"] { color: var(--sem-warn); }
+.view-twin .tw-hot__value[data-level="crit"] { color: var(--sem-crit); }
+.view-twin .tw-feet { display: inline-flex; align-items: center; gap: 8px; }
+.view-twin .tw-feet b { font: 600 13px/1 var(--font-mono); }
+.view-twin .tw-feet__pips { display: inline-flex; gap: 4px; }
+.view-twin .tw-pip {
+  font: 600 10px/1 var(--font-mono); padding: 4px 5px; border-radius: 6px;
+  border: 1px solid var(--tw-border); color: var(--tw-muted);
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.view-twin .tw-pip[data-on="true"] { color: #031016; background: var(--tw-accent); border-color: var(--tw-accent); }
+:root[data-theme="light"] .view-twin .tw-pip[data-on="true"] { color: #fff; }
+.view-twin .tw-sem__counts { display: inline-flex; gap: 12px; }
+.view-twin .tw-sem__counts > span { display: inline-flex; align-items: center; gap: 5px; font: 600 12.5px/1 var(--font-mono); }
+
+/* ---- Estado (arriba al centro) ---- */
+.view-twin .tw-status {
+  position: absolute; z-index: 3; top: var(--tw-gutter); left: 50%; transform: translateX(-50%);
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; pointer-events: none;
+  max-width: calc(100% - 2 * 320px);
+}
+.view-twin .tw-status__chip {
+  font: 600 12px/1 var(--font-ui); padding: 8px 12px; border-radius: 999px; white-space: nowrap;
+  background: var(--tw-panel-solid); border: 1px solid var(--tw-border); box-shadow: var(--tw-shadow);
+}
+.view-twin .tw-status__chip[hidden] { display: none; }
+.view-twin .tw-status__chip[data-kind="pause"] { color: var(--shell-accent); }
+.view-twin .tw-status__chip[data-kind="warn"] { color: var(--sem-warn); }
+.view-twin .tw-status__chip[data-kind="info"] { color: var(--tw-accent); }
+
+/* ---- Panel de motores (derecha) ---- */
+.view-twin .tw-panel {
+  position: absolute; z-index: 3; top: var(--tw-gutter); right: var(--tw-gutter); bottom: calc(var(--tw-gutter) + 64px);
+  width: 264px; display: flex; flex-direction: column; overflow: hidden;
+  transition: transform .25s var(--ease), opacity .2s var(--ease), visibility .25s;
+}
+.view-twin .tw-panel[data-open="false"] { transform: translateX(16px); opacity: 0; visibility: hidden; }
+.view-twin .tw-panel__head { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px 4px 14px; }
+.view-twin .tw-panel__head h2 { margin: 0; font-size: 13px; font-weight: 700; }
+.view-twin .tw-panel__count { color: var(--tw-muted); font-weight: 500; }
+.view-twin .tw-panel__hint { margin: 0; padding: 0 14px 8px; font-size: 11.5px; color: var(--tw-muted); }
+.view-twin .tw-panel__list { overflow-y: auto; padding: 0 8px 10px; overscroll-behavior: contain; scrollbar-width: thin; }
+.view-twin .tw-group h3 {
+  margin: 10px 6px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--tw-muted);
+}
+.view-twin .tw-m {
+  width: 100%; display: grid; grid-template-columns: auto 1fr auto 48px; align-items: center; gap: 8px;
+  padding: 6px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent;
+  color: var(--tw-text); text-align: left; font: 500 12px/1.2 var(--font-mono);
+}
+.view-twin .tw-m:hover, .view-twin .tw-m[data-active] { background: var(--tw-hover); border-color: var(--tw-border); }
+.view-twin .tw-m[data-active] { box-shadow: inset 2px 0 0 var(--tw-accent); }
+.view-twin .tw-m[data-unmapped] { opacity: .5; }
+.view-twin .tw-m__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.view-twin .tw-m__ang { color: var(--tw-muted); }
+.view-twin .tw-m__temp { text-align: right; }
+.view-twin .tw-icon-btn {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px;
+  border: 0; background: transparent; color: var(--tw-muted);
+}
+.view-twin .tw-icon-btn:hover { background: var(--tw-hover); color: var(--tw-text); }
+
+/* ---- Barra inferior ---- */
+.view-twin .tw-dock {
+  position: absolute; z-index: 4; left: var(--tw-gutter); right: var(--tw-gutter); bottom: var(--tw-gutter);
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; pointer-events: none;
+}
+.view-twin .tw-dock__group { display: flex; align-items: center; gap: 2px; padding: 4px; pointer-events: auto; max-width: 100%; }
+.view-twin .tw-sep { width: 1px; height: 22px; background: var(--tw-border); margin: 0 4px; flex: none; }
+.view-twin .tw-btn {
+  position: relative; height: 38px; min-width: 38px; padding: 0 11px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border-radius: 10px; border: 1px solid transparent; background: transparent;
+  color: var(--tw-muted); font-weight: 600; font-size: 12.5px; white-space: nowrap;
+  transition: background-color .15s, color .15s;
+}
+.view-twin .tw-btn:hover { color: var(--tw-text); background: var(--tw-hover); }
+.view-twin .tw-btn[aria-pressed="true"], .view-twin .tw-btn[aria-expanded="true"] { color: var(--tw-accent); background: var(--tw-accent-soft); }
+.view-twin .tw-btn--rec[aria-pressed="true"] { color: var(--sem-crit); background: color-mix(in srgb, var(--sem-crit) 14%, transparent); }
+.view-twin .tw-btn--rec[aria-pressed="true"] .icon { animation: tw-pulse 1.2s ease-in-out infinite; }
+.view-twin .tw-btn--primary { background: var(--shell-accent); color: #fff; }
+.view-twin .tw-btn--primary:hover { background: color-mix(in srgb, var(--shell-accent) 88%, #fff); color: #fff; }
+.view-twin .tw-badge {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center;
+  font: 600 11px/1 var(--font-mono); background: rgba(255, 255, 255, .22);
+}
+@keyframes tw-pulse { 50% { opacity: .35; } }
+
+/* ---- Tablet ---- */
+@media (max-width: 1100px) {
+  .view-twin .tw-dock__group:first-child .tw-btn span { display: none; }
+  .view-twin .tw-status { max-width: calc(100% - 2 * 310px); }
+}
+
+/* ---- Celular ---- */
+@media (max-width: 760px) {
+  .view-twin { --tw-gutter: 12px; }
+  .view-twin .tw-hud { right: var(--tw-gutter); width: auto; padding: 10px; gap: 6px; grid-template-columns: 1fr 1fr; }
+  .view-twin .tw-hud__head, .view-twin .tw-att { grid-column: 1 / -1; }
+  .view-twin .tw-att__cell { padding: 6px 7px 7px; }
+  .view-twin .tw-att__value { font-size: 14px; }
+  .view-twin .tw-hud__row { flex-direction: column; align-items: flex-start; gap: 3px; font-size: 11.5px; }
+  .view-twin .tw-sem { display: none; }
+  .view-twin .tw-status { top: auto; bottom: 122px; max-width: calc(100% - 24px); }
+  .view-twin .tw-dock { flex-direction: column; align-items: stretch; gap: 8px; }
+  .view-twin .tw-dock__group { justify-content: space-between; overflow-x: auto; scrollbar-width: none; }
+  .view-twin .tw-dock__group .tw-btn span { display: none; }
+  .view-twin .tw-btn { height: 40px; min-width: 40px; padding: 0 8px; }
+  .view-twin .tw-btn--primary span { display: inline !important; }
+  .view-twin .tw-panel { top: auto; left: var(--tw-gutter); right: var(--tw-gutter); bottom: 116px; width: auto; max-height: 48dvh; }
+  .view-twin .tw-panel[data-open="false"] { transform: translateY(16px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-twin .tw-att__marker, .view-twin .tw-compass svg { transition: none; }
+}
+
+/* =====================================================================
+   Componente RobotScene (.r3d)
+   Va FUERA de .view-twin a propósito: es un componente reutilizable que
+   otras vistas pueden embeber (botón "Esquema | 3D"). Toma sus colores de
+   variables --r3d-* con valores por defecto para los dos temas; una vista
+   puede sobrescribirlas (como hace .view-twin arriba).
+   ===================================================================== */
+
+.r3d {
+  --r3d-text: var(--shell-text);
+  --r3d-muted: var(--shell-muted);
+  --r3d-surface: var(--shell-surface);
+  --r3d-border: var(--shell-border);
+  --r3d-accent: #22d3ee;
+  --r3d-scene-bg: #0b0e14;
+  --r3d-scene-floor: #10141b;
+  --r3d-scene-grid: #1a2029;
+  --r3d-scene-grid-major: #2a3342;
+  --r3d-scene-sky: #dfe9ff;
+  --r3d-scene-ground: #1a1e26;
+  position: relative; width: 100%; height: 100%; min-height: 160px; overflow: hidden;
+  color: var(--r3d-text);
+}
+:root[data-theme="light"] .r3d {
+  --r3d-accent: #0e7490;
+  --r3d-scene-bg: #e7ebf1;
+  --r3d-scene-floor: #f1f3f7;
+  --r3d-scene-grid: #d4dae3;
+  --r3d-scene-grid-major: #b3bccb;
+  --r3d-scene-sky: #ffffff;
+  --r3d-scene-ground: #aab2c0;
+}
+/* Dentro del Gemelo 3D manda la paleta de la vista */
+.view-twin .r3d { --r3d-accent: var(--tw-accent); --r3d-surface: var(--tw-panel-solid); --r3d-border: var(--tw-border); --r3d-text: var(--tw-text); --r3d-muted: var(--tw-muted); }
+
+.r3d-canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.r3d[data-bg="transparent"] .r3d-canvas { touch-action: pan-y; }
+
+/* Etiqueta flotante */
+.r3d-tip {
+  position: absolute; z-index: 5; top: 0; left: 0; width: max-content; max-width: min(340px, calc(100% - 16px));
+  padding: 10px 12px; border-radius: 12px; pointer-events: none;
+  background: var(--r3d-surface); border: 1px solid var(--r3d-border); box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+  display: grid; gap: 2px; will-change: transform; font-size: 12px;
+}
+.r3d-tip[hidden] { display: none; }
+.r3d-tip strong { font-size: 13px; }
+.r3d-tip__sub { font: 500 11px/1.3 var(--font-mono); color: var(--r3d-muted); margin-bottom: 6px; }
+.r3d-tip dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 4px 14px; }
+.r3d-tip dt { color: var(--r3d-muted); }
+.r3d-tip dd { margin: 0; font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+.r3d-tip dd[data-level="ok"] { color: var(--sem-ok); }
+.r3d-tip dd[data-level="warn"] { color: var(--sem-warn); }
+.r3d-tip dd[data-level="crit"] { color: var(--sem-crit); }
+
+/* Carga / errores */
+.r3d-overlay {
+  position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px;
+  transition: opacity .35s var(--ease);
+}
+.r3d-overlay[hidden] { display: none; }
+.r3d-overlay.is-out { opacity: 0; pointer-events: none; }
+.r3d-overlay__card {
+  width: min(380px, 100%); padding: 22px; display: grid; justify-items: center; gap: 12px; text-align: center;
+  background: var(--r3d-surface); border: 1px solid var(--r3d-border); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+}
+.r3d-overlay__icon { color: var(--r3d-accent); }
+.r3d-overlay[data-kind="error"] .r3d-overlay__icon { color: var(--sem-warn); }
+.r3d-overlay__title { margin: 0; font-weight: 700; }
+.r3d-overlay__text { margin: 0; font-size: 12.5px; color: var(--r3d-muted); }
+.r3d-progress { width: 100%; height: 6px; border-radius: 6px; overflow: hidden; border: 1px solid var(--r3d-border); }
+.r3d-progress[hidden] { display: none; }
+.r3d-progress i { display: block; height: 100%; background: var(--r3d-accent); transform: scaleX(0); transform-origin: left; transition: transform .15s linear; }
+.r3d-overlay[data-kind="boot"] .r3d-progress i { width: 30%; transform: none; animation: r3d-indet 1.1s ease-in-out infinite; }
+@keyframes r3d-indet { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+.r3d-btn {
+  height: 34px; padding: 0 14px; border-radius: 9px; border: 0; font-weight: 600;
+  background: var(--shell-accent); color: #fff;
+}
+
+/* Línea guía de la etiqueta: de la articulación a la etiqueta, al costado del robot */
+.r3d-lead { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: visible; }
+.r3d-lead { --lead: var(--r3d-accent, #5b8cff); }
+.r3d-lead[data-level="ok"] { --lead: var(--sem-ok); }
+.r3d-lead[data-level="warn"] { --lead: var(--sem-warn); }
+.r3d-lead[data-level="crit"] { --lead: var(--sem-crit); }
+.r3d-lead__line { stroke: var(--lead); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.r3d-lead__dot { fill: var(--lead); stroke: #fff; stroke-width: 2; }
+.r3d-tip { z-index: 5; }
+
+/* Capa de la etiqueta cuando el 3D está incrustado en otra vista: cubre la ventana,
+   no recibe clics y deja que la etiqueta salga del recuadro del robot. */
+.r3d.r3d-portal {
+  position: fixed; inset: 0; width: auto; height: auto; min-height: 0;
+  overflow: visible; pointer-events: none; z-index: 60; background: none;
+}

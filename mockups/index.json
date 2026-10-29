@@ -1,0 +1,13 @@
+{
+  "screens": [
+    {
+      "id": "dashboard",
+      "title": "Dashboard",
+      "variants": [
+        { "id": "1-console", "name": "1 · Consola (evolución)", "desktop": "dashboard/desktop/variant-1-console/", "phone": "dashboard/phone/variant-1-console/" },
+        { "id": "2-body", "name": "2 · Cuerpo (reinvención)", "desktop": "dashboard/desktop/variant-2-body/", "phone": "dashboard/phone/variant-2-body/" },
+        { "id": "3-pilot", "name": "3 · Piloto (la audaz)", "desktop": "dashboard/desktop/variant-3-pilot/", "phone": "dashboard/phone/variant-3-pilot/" }
+      ]
+    }
+  ]
+}
