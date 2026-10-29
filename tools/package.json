@@ -1,0 +1,17 @@
+{
+  "name": "tp05-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Herramientas de build del dashboard (no se usan en tiempo de ejecución). Convierte los modelos MuJoCo de Unitree a GLB livianos para el Gemelo 3D.",
+  "type": "module",
+  "scripts": {
+    "modelos": "node convert_robot_models.mjs"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "meshoptimizer": "0.21.0",
+    "three": "0.169.0"
+  }
+}

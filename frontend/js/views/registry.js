@@ -44,6 +44,15 @@ export const VIEWS = [
     theme: "dark",
     load: () => import("./twin/TwinView.js"),
   },
+  {
+    id: "manual",
+    label: "Manual",
+    hint: "Cómo leer cada dato y usar el dashboard, con capturas",
+    key: "5",
+    icon: "book",
+    theme: "light",
+    load: () => import("./manual/ManualView.js"),
+  },
 ];
 
 export const viewById = (id) => VIEWS.find((v) => v.id === id) ?? VIEWS[0];

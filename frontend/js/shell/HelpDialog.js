@@ -10,7 +10,7 @@ export const GLOBAL_SHORTCUTS = [
   ["Espacio", "Pausar / reanudar la vista"],
   ["W", "Cambiar WebSocket ↔ polling"],
   ["T", "Tema claro / oscuro"],
-  ["1 2 3 4", "Cambiar de vista"],
+  ["1 2 3 4 5", "Cambiar de vista (5 = manual)"],
   ["?", "Esta ayuda"],
 ];
 
@@ -47,7 +47,7 @@ export function openHelp(dialog, view) {
       h(
         "section",
         {},
-        h("h3", {}, "Las cuatro vistas"),
+        h("h3", {}, "Las vistas"),
         h("p", {}, "Muestran los mismos datos, de la misma conexión: cambiar de vista no corta la conexión ni borra el historial ni las capturas."),
         h("ul", {}, ...VIEWS.map((v) => h("li", {}, h("b", {}, `${v.key} · ${v.label}: `), v.hint))),
       ),

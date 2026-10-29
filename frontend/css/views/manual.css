@@ -1,0 +1,177 @@
+/* =====================================================================
+   Vista Manual: documentación dentro del dashboard.
+   ===================================================================== */
+
+.view-manual {
+  --m-bg: #fbfbfc;
+  --m-surface: #ffffff;
+  --m-side: #f4f5f7;
+  --m-ink: #14171f;
+  --m-text: #2c3240;
+  --m-muted: #6a7182;
+  --m-line: #e5e7ec;
+  --m-accent: #2f5bea;
+  --m-accent-soft: #e9efff;
+  --m-code: #f1f3f6;
+  --m-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 8px 24px rgba(16, 24, 40, .06);
+  height: calc(100dvh - var(--appbar-h));
+  background: var(--m-bg);
+  color: var(--m-text);
+}
+:root[data-theme="dark"] .view-manual {
+  --m-bg: #0d1016;
+  --m-surface: #141822;
+  --m-side: #10131a;
+  --m-ink: #eef1f6;
+  --m-text: #c9cfdb;
+  --m-muted: #8a93a6;
+  --m-line: #242a36;
+  --m-accent: #7aa2ff;
+  --m-accent-soft: #1a2440;
+  --m-code: #1b202b;
+  --m-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+}
+
+.view-manual .man { display: grid; grid-template-columns: 264px minmax(0, 1fr); height: 100%; position: relative; }
+
+/* ---- Índice lateral ---- */
+.view-manual .man-side { background: var(--m-side); border-right: 1px solid var(--m-line); overflow: auto; padding: 20px 14px 32px; }
+.view-manual .man-side__head { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--m-ink); padding: 0 8px 14px; }
+.view-manual .man-live { margin-left: auto; font: 500 10.5px/1 var(--font-mono); color: var(--m-muted); display: inline-flex; align-items: center; gap: 5px; }
+.view-manual .man-live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--m-muted); }
+.view-manual .man-live[data-live="true"]::before { background: var(--sem-ok); }
+.view-manual .man-toc { display: grid; gap: 1px; }
+.view-manual .man-toc__link { display: block; padding: 6px 10px; border-radius: 7px; color: var(--m-text); text-decoration: none; font-size: 13.5px; font-weight: 600; transition: background .15s, color .15s; }
+.view-manual .man-toc__link.is-sub { font-weight: 450; padding-left: 22px; color: var(--m-muted); }
+.view-manual .man-toc__link:hover { background: var(--m-line); color: var(--m-ink); }
+.view-manual .man-toc__link.is-active { background: var(--m-accent-soft); color: var(--m-accent); }
+
+/* ---- Contenido ---- */
+.view-manual .man-scroller { overflow: auto; scroll-padding-top: 16px; }
+.view-manual .man-article { max-width: 920px; margin: 0 auto; padding: 40px 48px 120px; font-size: 15.5px; line-height: 1.65; }
+.view-manual .man-progress { position: absolute; top: 0; left: 264px; right: 0; height: 2px; background: var(--m-accent); transform-origin: 0 50%; transform: scaleX(0); }
+.view-manual .man-section { padding-top: 8px; }
+.view-manual .man-section--l1 { margin-top: 56px; }
+.view-manual .man-section--l1:first-child { margin-top: 0; }
+.view-manual .man-section--l2 { margin-top: 36px; }
+.view-manual .man-kicker { margin: 0 0 4px; font: 600 12px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--m-accent); }
+.view-manual .man-title { margin: 0 0 12px; color: var(--m-ink); letter-spacing: -.02em; line-height: 1.2; }
+.view-manual h2.man-title { font-size: 30px; font-weight: 750; }
+.view-manual h3.man-title { font-size: 21px; font-weight: 700; }
+.view-manual .man-section:first-child h2.man-title { font-size: 38px; }
+.view-manual .man-lead { font-size: 17.5px; color: var(--m-text); margin: 0 0 18px; }
+.view-manual p { margin: 0 0 14px; }
+.view-manual a { color: var(--m-accent); }
+.view-manual code { font: 500 .86em var(--font-mono); background: var(--m-code); padding: 2px 6px; border-radius: 5px; color: var(--m-ink); }
+.view-manual b { color: var(--m-ink); }
+
+.view-manual .man-list, .view-manual .man-steps { margin: 0 0 16px; padding-left: 22px; }
+.view-manual .man-list li, .view-manual .man-steps li { margin: 6px 0; }
+.view-manual .man-steps { list-style: none; padding: 0; counter-reset: step; display: grid; gap: 10px; }
+.view-manual .man-steps li { counter-increment: step; position: relative; padding: 12px 14px 12px 52px; background: var(--m-surface); border: 1px solid var(--m-line); border-radius: 12px; margin: 0; }
+.view-manual .man-steps li::before {
+  content: counter(step); position: absolute; left: 14px; top: 12px;
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--m-accent); color: #fff; font: 700 13px/1 var(--font-ui);
+}
+
+.view-manual .man-callout { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; margin: 18px 0; background: var(--m-accent-soft); border: 1px solid color-mix(in srgb, var(--m-accent) 25%, transparent); }
+.view-manual .man-callout > .icon { color: var(--m-accent); margin-top: 3px; }
+.view-manual .man-callout--warn { background: color-mix(in srgb, var(--sem-warn) 12%, var(--m-surface)); border-color: color-mix(in srgb, var(--sem-warn) 35%, transparent); }
+.view-manual .man-callout--warn > .icon { color: var(--sem-warn); }
+.view-manual .man-callout--tip { background: color-mix(in srgb, var(--sem-ok) 10%, var(--m-surface)); border-color: color-mix(in srgb, var(--sem-ok) 30%, transparent); }
+.view-manual .man-callout--tip > .icon { color: var(--sem-ok); }
+
+.view-manual .man-table-wrap { overflow-x: auto; margin: 16px 0 20px; border: 1px solid var(--m-line); border-radius: 12px; background: var(--m-surface); }
+.view-manual .man-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.5; }
+.view-manual .man-table th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--m-muted); font-weight: 650; background: var(--m-side); }
+.view-manual .man-table th, .view-manual .man-table td { padding: 10px 14px; border-bottom: 1px solid var(--m-line); vertical-align: top; }
+.view-manual .man-table tr:last-child td { border-bottom: 0; }
+
+/* ---- Diagramas ---- */
+.view-manual .man-diagram { margin: 20px 0 24px; padding: 20px; background: var(--m-surface); border: 1px solid var(--m-line); border-radius: 14px; }
+.view-manual .man-diagram svg { width: 100%; height: auto; display: block; font-family: var(--font-ui); }
+.view-manual .man-diagram figcaption { margin-top: 10px; font-size: 13px; color: var(--m-muted); text-align: center; }
+.view-manual .d-body { fill: var(--m-side); stroke: var(--m-ink); stroke-width: 2; }
+.view-manual .d-bone { stroke: var(--m-ink); stroke-width: 9; stroke-linecap: round; }
+.view-manual .d-joint { fill: var(--m-accent); stroke: var(--m-surface); stroke-width: 3; }
+.view-manual .d-foot { fill: var(--sem-ok); }
+.view-manual .d-eye { fill: var(--m-ink); }
+.view-manual .d-ring { fill: none; stroke: var(--m-line); stroke-width: 2; }
+.view-manual .d-axis { stroke: var(--m-muted); stroke-width: 1.5; }
+.view-manual .d-arrow { fill: none; stroke: var(--m-accent); stroke-width: 3; stroke-linecap: round; marker-end: none; }
+.view-manual .d-accent-line { stroke: var(--m-accent); stroke-width: 3; stroke-linecap: round; }
+.view-manual .d-empty { fill: none; stroke: var(--m-line); stroke-width: 1.5; }
+.view-manual .d-label { fill: var(--m-muted); font-size: 13px; }
+.view-manual .d-strong { fill: var(--m-ink); font-size: 13.5px; font-weight: 650; }
+.view-manual .d-title { fill: var(--m-ink); font-size: 15px; font-weight: 800; letter-spacing: .08em; }
+
+/* ---- Tarjetas de vistas ---- */
+.view-manual .man-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+.view-manual .man-card {
+  position: relative; text-align: left; display: grid; gap: 4px; align-content: start;
+  padding: 0 0 16px; border-radius: 14px; overflow: hidden;
+  background: var(--m-surface); border: 1px solid var(--m-line); box-shadow: var(--m-shadow);
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.view-manual .man-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(16, 24, 40, .14); }
+.view-manual .man-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top left; border-bottom: 1px solid var(--m-line); margin-bottom: 10px; background: var(--m-side); }
+.view-manual .man-card b { font-size: 16px; padding: 0 16px; }
+.view-manual .man-card > span:last-child { font-size: 13.5px; color: var(--m-muted); padding: 0 16px; }
+.view-manual .man-card__key { position: absolute; top: 10px; right: 10px; font: 700 12px/1 var(--font-mono); background: rgba(0,0,0,.6); color: #fff; padding: 5px 8px; border-radius: 6px; }
+
+/* ---- Capturas anotadas ---- */
+.view-manual .man-shot { margin: 20px 0 28px; }
+.view-manual .man-shot__frame { border-radius: 14px; overflow: hidden; border: 1px solid var(--m-line); box-shadow: var(--m-shadow); background: var(--m-side); }
+.view-manual .man-shot__stage { position: relative; }
+.view-manual .man-shot__stage img { display: block; width: 100%; height: auto; }
+.view-manual .man-shot__missing { display: none; margin: 0; padding: 60px 20px; text-align: center; color: var(--m-muted); }
+.view-manual .man-shot.is-missing .man-shot__stage { display: none; }
+.view-manual .man-shot.is-missing .man-shot__missing { display: block; }
+.view-manual .man-shot--phone .man-shot__frame { max-width: 320px; margin: 0 auto; border-radius: 28px; border-width: 6px; border-color: #111; }
+.view-manual .man-shot figcaption { margin: 10px 0 0; font-size: 13px; color: var(--m-muted); text-align: center; }
+.view-manual .man-marker {
+  position: absolute; transform: translate(-50%, -50%);
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
+  background: #ff3d71; color: #fff; font: 800 12px/1 var(--font-ui);
+  display: grid; place-items: center; padding: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  transition: transform .15s var(--ease);
+}
+.view-manual .man-marker.is-hot { transform: translate(-50%, -50%) scale(1.35); box-shadow: 0 0 0 6px rgba(255, 61, 113, .3); }
+.view-manual .man-legend { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.view-manual .man-legend li { display: flex; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--m-line); background: var(--m-surface); outline: none; transition: border-color .15s, background .15s; }
+.view-manual .man-legend li.is-hot, .view-manual .man-legend li:focus-visible { border-color: #ff3d71; background: color-mix(in srgb, #ff3d71 6%, var(--m-surface)); }
+.view-manual .man-legend__n { flex: none; width: 22px; height: 22px; border-radius: 50%; background: #ff3d71; color: #fff; display: grid; place-items: center; font: 800 11.5px/1 var(--font-ui); margin-top: 2px; }
+.view-manual .man-legend li > div > b { display: block; font-size: 14px; }
+.view-manual .man-legend p { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m-text); }
+
+.view-manual .man-try {
+  display: inline-flex; align-items: center; gap: 8px; margin: 4px 0 8px;
+  padding: 9px 14px; border-radius: 10px; border: 0;
+  background: var(--m-accent); color: #fff; font-weight: 650;
+}
+.view-manual .man-try kbd { background: rgba(255,255,255,.2); color: #fff; border-color: transparent; }
+
+.view-manual kbd { background: var(--m-code); border-color: var(--m-line); color: var(--m-ink); }
+
+/* Capturas apaisadas (la barra): las marcas van arriba, con una línea guía */
+.view-manual .man-shot--strip .man-shot__frame { overflow: visible; border: 0; box-shadow: none; background: transparent; }
+.view-manual .man-shot--strip .man-shot__stage { padding-top: 40px; }
+.view-manual .man-shot--strip .man-shot__stage img { border-radius: 10px; border: 1px solid var(--m-line); box-shadow: var(--m-shadow); }
+.view-manual .man-shot--strip .man-marker { top: 12px !important; }
+.view-manual .man-shot--strip .man-marker::after {
+  content: ""; position: absolute; left: 50%; top: 100%; width: 2px; height: 22px;
+  background: #ff3d71; transform: translateX(-50%);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .view-manual .man { grid-template-columns: 1fr; }
+  .view-manual .man-side { display: none; }
+  .view-manual .man-progress { left: 0; }
+  .view-manual .man-article { padding: 24px 16px 80px; font-size: 15px; }
+  .view-manual .man-section:first-child h2.man-title { font-size: 28px; }
+  .view-manual h2.man-title { font-size: 24px; }
+  .view-manual .man-cards, .view-manual .man-legend { grid-template-columns: 1fr; }
+}
