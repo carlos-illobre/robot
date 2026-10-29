@@ -43,7 +43,7 @@ const CHEVRON = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fi
 
 const FOOTER_KEYS = [
   ["C", "capturar"], ["R", "grabar"], ["E", "exportar"], ["Espacio", "pausar"],
-  ["W", "transporte"], ["S", "ordenar"], ["T", "tema"], ["?", "ayuda"],
+  ["W", "transporte"], ["G", "esquema/3D"], ["S", "ordenar"], ["T", "tema"], ["?", "ayuda"],
 ];
 
 export default class ConsoleView {
@@ -73,7 +73,7 @@ export default class ConsoleView {
     this.motorChart = new MotorChart({ root: container, onMetric: (m) => this.#setMetric(m) });
     this.imu = new ImuPanel({ root: container });
     this.battery = new BatteryPanel();
-    this.feet = new FeetPanel();
+    this.feet = new FeetPanel(this.ctx);
 
     this.grid = h(
       "div",
@@ -124,6 +124,7 @@ export default class ConsoleView {
     document.removeEventListener("pointerdown", this.#onOutsideClick);
     this.motorChart?.destroy();
     this.imu?.destroy();
+    this.feet?.destroy();
   }
 
   onConnection(conn) {
@@ -133,7 +134,17 @@ export default class ConsoleView {
     else this.#setStrip("lost", conn.state === "connecting" ? "Conectando con el servidor…" : "Sin conexión", ` — ${conn.detail || "esperando datos"}`);
   }
 
+  /** Esquema o modelo 3D real en el panel Patas (botón o tecla G; también se llama al montar). */
+  onFigureMode(mode) {
+    this.feet.setFigureMode(mode);
+  }
+
+  onTheme() {
+    this.feet.applyTheme(); // los gráficos se re-colorean solos (ui/charts.js)
+  }
+
   onPause(paused) {
+    this.feet.setPaused(paused);
     setAttr(this.root, "data-paused", paused);
     setAttr(this.pauseBtn, "aria-pressed", paused);
     this.pauseBtn.querySelector(".cv-btn__icon").innerHTML = icon(paused ? "play" : "pause", { size: 16 });

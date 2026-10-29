@@ -321,6 +321,10 @@
 
 /* ---------- Patas ---------- */
 .view-console .cv-feet__body { flex: 1; min-height: 0; display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 12px; padding: 0 16px 12px; }
+/* Área del dibujo: el SVG del esquema y, encima, la capa 3D de FigureSwitch (.fig3d) */
+.view-console .cv-figure { position: relative; align-self: stretch; display: grid; place-items: center; min-height: 0; }
+.view-console .cv-figure__svg { width: 100%; display: grid; place-items: center; }
+.view-console .cv-ph .fig-toggle { margin-left: auto; }
 .view-console .cv-robot { width: 100%; max-height: 100%; }
 .view-console .cv-robot__leg { fill: none; stroke: var(--cv-text-3); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .view-console .cv-robot__joint circle { fill: var(--cv-panel); stroke: var(--cv-text-3); stroke-width: 2; }
@@ -407,6 +411,7 @@
   .view-console .cv-imu__right { width: 100%; }
   .view-console .cv-imu .cv-chartbox { flex: none; height: 170px; }
   .view-console .cv-feet__body { grid-template-columns: 112px minmax(0, 1fr); padding-bottom: 16px; }
+  .view-console .cv-figure { min-height: 170px; }
   .view-console .cv-cells { flex: none; height: 96px; }
   .view-console .cv-stat__lbl, .view-console .cv-chip, .view-console .cv-kv dt, .view-console .cv-cellhdr,
   .view-console .cv-legrow__st, .view-console .cv-legrow b { font-size: 13px; }

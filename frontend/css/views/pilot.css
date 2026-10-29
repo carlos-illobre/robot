@@ -509,3 +509,22 @@
   .view-pilot .pv-sheet__battery dl { grid-template-columns: 1fr; }
   .view-pilot [data-robot="humanoide"] .pv-foot text { font-size: 16px; }
 }
+
+/* ---------- Esquema | 3D real (centro del anillo) ---------- */
+/* El 3D ocupa el círculo interior del anillo (radio 146 de 250 unidades del SVG):
+   así nunca tapa los segmentos, que siguen siendo lo que se toca. */
+.view-pilot .pv-figure {
+  position: absolute; left: 50%; top: 50%; width: 58.4%; aspect-ratio: 1;
+  transform: translate(-50%, -50%); border-radius: 50%; overflow: hidden; pointer-events: none;
+}
+.view-pilot .pv-figure.is-3d {
+  background: radial-gradient(circle, color-mix(in srgb, var(--pv-bg) 70%, transparent) 0 55%, transparent 72%);
+}
+.view-pilot .fig-toggle { border-color: var(--pv-hud-3); background: color-mix(in srgb, var(--pv-bg) 35%, transparent); border-radius: 7px; }
+.view-pilot .fig-toggle button {
+  color: var(--pv-hud-2); font: 600 11px/1 "Space Grotesk", var(--font-ui); letter-spacing: .08em; text-transform: uppercase; padding: 6px 8px;
+}
+.view-pilot .fig-toggle button[aria-checked="true"] { background: var(--pv-hud); color: var(--pv-bg); }
+@media (max-width: 640px) {
+  .view-pilot .fig-toggle button { padding: 9px 9px; font-size: 12px; }
+}

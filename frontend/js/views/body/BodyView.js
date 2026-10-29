@@ -11,6 +11,9 @@
  *   Batería (BMS)     → el cuerpo se llena + panel con corriente, temperatura y celdas
  *   Patas             → pies que se rellenan + estado en cada grupo + diagrama de apoyos
  *
+ * El dibujo puede cambiarse por el modelo 3D real de Unitree («Esquema | 3D
+ * real», tecla G): FigureSwitch lo monta en la misma caja, encima del esquema.
+ *
  * Esta clase solo orquesta: cada zona es un módulo de esta carpeta con su
  * propio `build` (una vez por robot) y `update` (cada muestra, sin crear DOM).
  */
@@ -25,6 +28,7 @@ import { Timeline, WINDOW_MS } from "./timeline.js";
 import { describe, yawRate } from "./sentence.js";
 import { cardinal, wrap360, degrees } from "./format.js";
 import { LEG_LABELS } from "../../core/telemetryModel.js";
+import { FigureSwitch, figureToggle } from "../../ui/FigureSwitch.js";
 
 /** Muestras que se leen del historial para la línea de tiempo (≈ 60 s a 10 Hz; se recorta a 30 s). */
 const HISTORY_READ = 600;
@@ -93,13 +97,36 @@ export default class BodyView {
     this.resizeObs.observe(this.canvas);
     document.fonts?.ready.then(() => this.root && this.#relayout());
 
+    // Esquema | 3D real: el 3D va en la caja del dibujo y oculta el esquema (no las tarjetas).
+    this.figToggle = figureToggle(this.ctx);
+    this.figToggle.classList.add("bd-figtoggle");
+    this.figure.el.append(this.figToggle);
+    this.figureMode = this.ctx.state.figure ?? "esquema";
+    this.#buildFigureSwitch("arriba");
+
     this.palette = this.#readPalette();
     this.#updateImuNote();
+  }
+
+  /**
+   * Crea el FigureSwitch con la cámara que coincide con el esquema: desde
+   * arriba para el Go2, de frente para el G1. Como el preset se fija al
+   * crearlo, se recrea solo si cambia el tipo de robot.
+   */
+  #buildFigureSwitch(preset) {
+    if (this.fig && this.figPreset === preset) return;
+    this.fig?.destroy();
+    this.figPreset = preset;
+    this.fig = new FigureSwitch(this.ctx, { host: this.figure.el, schematic: this.figure.tilt, preset });
+    if (this.info) this.fig.setInfo(this.info);
+    this.fig.setMode(this.figureMode);
   }
 
   setInfo(info) {
     this.info = info;
     this.figure.build(info);
+    this.#buildFigureSwitch(this.figure.kind === "humanoid" ? "frente" : "arriba");
+    this.fig.setInfo(info);
     this.callouts.build(info, this.figure.kind);
     this.table.build(info);
     this.#buildLegChips(info);
@@ -124,6 +151,7 @@ export default class BodyView {
     const history = this.ctx.history.tail(HISTORY_READ);
 
     this.figure.update(frame, { reducedMotion: this.reducedMotion });
+    this.fig.update(frame);
     this.callouts.update(frame);
     this.table.update(frame);
     this.detail.update(frame, history, this.palette);
@@ -136,6 +164,8 @@ export default class BodyView {
 
   destroy() {
     this.resizeObs?.disconnect();
+    this.fig?.destroy();
+    this.fig = null;
     clearTimeout(this.holdTimer);
     for (const fn of this.cleanup) fn();
     this.cleanup = [];
@@ -160,6 +190,17 @@ export default class BodyView {
     this.pauseBtn.querySelector(".bd-btn__icon").innerHTML = icon(paused ? "play" : "pause", { size: 16 });
     setText(this.pauseBtn.querySelector(".bd-btn__label"), paused ? "Seguir" : "Pausar");
     this.chipPaused.hidden = !paused;
+    this.fig?.setPaused(paused);
+  }
+
+  /** Esquema | 3D real (preferencia global; también se llama al montar). */
+  onFigureMode(mode) {
+    this.figureMode = mode;
+    this.fig?.setMode(mode);
+    this.figToggle.set(mode);
+    // En 3D las líneas guía ya no apuntan a las articulaciones: se ocultan y quedan las tarjetas.
+    this.stage.dataset.figure = mode;
+    this.#updateImuNote();
   }
 
   onRecording(on) {
@@ -172,6 +213,7 @@ export default class BodyView {
 
   onTheme() {
     this.palette = this.#readPalette();
+    this.fig?.applyTheme();
     if (this.latest) {
       const history = this.ctx.history.tail(HISTORY_READ);
       this.detail.update(this.latest, history, this.palette);
@@ -352,6 +394,7 @@ export default class BodyView {
   }
 
   #updateImuNote() {
+    if (this.figureMode === "3d") return setText(this.imuNote, "Modelo 3D real · arrastrá para girar");
     const where = this.figure?.kind === "humanoid" ? "Vista de frente" : "Vista desde arriba";
     setText(this.imuNote, this.reducedMotion ? `${where} · sin inclinación (movimiento reducido)` : `${where} · inclinación ×${TILT_GAIN}`);
   }

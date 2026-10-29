@@ -9,8 +9,9 @@
  *
  * Esta clase solo compone y reparte: cada instrumento es un objeto con su
  * propio DOM (instruments.js, MotorRing.js, Oscilloscope.js, MotorSheet.js)
- * y el sonido está aislado en CockpitSound.js. Ver el contrato en
- * views/README.md.
+ * y el sonido está aislado en CockpitSound.js. En el centro del anillo, la
+ * silueta se puede cambiar por el modelo 3D real (FigureSwitch, tecla G).
+ * Ver el contrato en views/README.md.
  */
 import { h, setText, fmt } from "../../ui/dom.js";
 import { icon } from "../../ui/icons.js";
@@ -21,6 +22,7 @@ import { MotorRing } from "./MotorRing.js";
 import { Oscilloscope, OSC_SAMPLES } from "./Oscilloscope.js";
 import { MotorSheet } from "./MotorSheet.js";
 import { CockpitSound } from "./CockpitSound.js";
+import { FigureSwitch, figureToggle } from "../../ui/FigureSwitch.js";
 
 /** Íconos de volumen (Lucide, ISC): no están en ui/icons.js. */
 const VOLUME = {
@@ -68,6 +70,11 @@ export default class PilotView {
       onToggle: (open) => this.tableButtons.forEach((b) => b.setAttribute("aria-expanded", String(open))),
     });
 
+    // Área circular interior del anillo: ahí va el modelo 3D en lugar de la silueta.
+    // Chico y sin interacción propia: el anillo ya es lo que se toca.
+    this.figHost = h("div", { class: "pv-figure", "aria-hidden": "true" });
+    this.fig = new FigureSwitch(this.ctx, { host: this.figHost, schematic: this.ring.figure, preset: "arriba", interactive: false, labels: false });
+
     this.status = h("p", { class: "pv-status" }, "Esperando datos…");
     this.ts = h("span", { class: "pv-ts" }, "ts —");
     this.recChip = h("span", { class: "pv-chip pv-chip--rec", hidden: true }, h("i"), "Grabando");
@@ -82,6 +89,7 @@ export default class PilotView {
     this.soundBtn.setAttribute("aria-label", "Sonido");
     const tableTop = btn("pv-btn", { "aria-haspopup": "dialog", "aria-expanded": "false", "aria-label": "Tabla de motores", title: "Tabla de motores y batería (M)", onclick: () => this.sheet.toggle() }, h("span", { class: "pv-btn__icon", html: icon("list") }), h("span", { class: "pv-desk" }, "Tabla"), key("M"));
     this.tableButtons = [tableTop];
+    this.figToggle = figureToggle(this.ctx, { compact: true });
 
     this.recButtons = [
       btn("pv-key", { "aria-pressed": "false", onclick: () => actions.toggleRecording() }, key("R"), "Grabar"),
@@ -109,11 +117,11 @@ export default class PilotView {
       "div",
       { class: "pv-hud" },
       h("div", { class: "pv-corner pv-corner--l" }, this.recChip, this.pauseChip, this.ts),
-      h("div", { class: "pv-corner pv-corner--r" }, h("span", { class: "pv-desk" }, "Muestras ", this.counts[0]), this.soundBtn, tableTop),
+      h("div", { class: "pv-corner pv-corner--r" }, h("span", { class: "pv-desk" }, "Muestras ", this.counts[0]), this.figToggle, this.soundBtn, tableTop),
       this.heading.el,
       this.battery.el,
       this.thermo.el,
-      h("div", { class: "pv-ring" }, this.ring.svg),
+      h("div", { class: "pv-ring" }, this.ring.svg, this.figHost),
       this.status,
       this.osc.el,
       controls,
@@ -152,6 +160,11 @@ export default class PilotView {
     this.ring.build(info);
     this.thermo.build(info);
     this.sheet.build(info);
+    // Cámara del 3D: el Go2 desde arriba (como su silueta), el G1 de frente.
+    const preset = info?.tipo === "humanoide" ? "frente" : "arriba";
+    this.fig.opts.preset = preset;
+    this.fig.scene?.setPreset(preset, { instant: true });
+    this.fig.setInfo(info);
     this.#select(this.selected, { force: true });
     this.root.dataset.robot = info?.tipo ?? "";
   }
@@ -165,6 +178,7 @@ export default class PilotView {
     this.ring.update(frame, { torqueRef: state.torqueAlarm });
     this.osc.draw(history.tail(OSC_SAMPLES), captures.samples);
     this.sheet.update(frame);
+    this.fig.update(frame);
 
     setText(this.ts, `ts ${fmt(frame.ts, 2)} s`);
     this.#updateStatus(frame);
@@ -177,6 +191,7 @@ export default class PilotView {
 
   destroy() {
     this.unsubscribe?.();
+    this.fig?.destroy();
     this.osc?.destroy();
     this.sound?.destroy();
     if (this.sheet?.open) this.sheet.dialog.close();
@@ -213,10 +228,19 @@ export default class PilotView {
   onPause(paused) {
     this.pauseChip.hidden = !paused;
     this.pauseBtn.setAttribute("aria-pressed", String(paused));
+    this.fig.setPaused(paused);
   }
 
   onTheme() {
     this.osc.readColors();
+    this.fig.applyTheme();
+  }
+
+  /** Esquema (silueta SVG) o modelo 3D real en el centro del anillo; también se llama al montar. */
+  onFigureMode(mode) {
+    this.fig.setMode(mode);
+    this.figToggle.set(mode);
+    this.root.dataset.figure = mode;
   }
 
   /* ---------------------------------------------------------------- */

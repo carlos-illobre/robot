@@ -33,6 +33,9 @@ export class MotorRing {
     this.byName = new Map();
     this.feet = new Map();
     this.selected = null;
+    // Contenedor fijo de la silueta: se rellena en cada build() pero el nodo es siempre
+    // el mismo, para que quien lo oculte (el modo "3D real") no pierda la referencia.
+    this.figure = s("g", { class: "pv-ring__figure" });
     this.svg = s("svg", {
       class: "pv-ring__svg",
       viewBox: "-250 -250 500 500",
@@ -124,7 +127,8 @@ export class MotorRing {
       feetLayer.append(s("text", { class: "pv-ring__nofeet", x: 0, y: R + 56, "text-anchor": "middle" }, `${(info?.modelo ?? "").toUpperCase()} · SIN DATOS DE PATAS`));
     }
 
-    this.svg.replaceChildren(guides, silhouette, groupLabels, segLayer, feetLayer, calloutLayer);
+    this.figure.replaceChildren(silhouette);
+    this.svg.replaceChildren(guides, this.figure, groupLabels, segLayer, feetLayer, calloutLayer);
     this.setSelected(this.byName.has(this.selected) ? this.selected : null);
   }
 

@@ -6,10 +6,15 @@
  * fila por pata con su "diagrama de apoyos" de los últimos 4 s (40 muestras):
  * cada cuadradito es una muestra, lleno si la pata estaba apoyada. Así se ve
  * la marcha: en el trote del Go2 las patas en diagonal apoyan juntas.
+ *
+ * El dibujo se puede cambiar por el modelo 3D real de Unitree (botón
+ * "Esquema | 3D", tecla G): FigureSwitch monta el 3D encima del esquema y lo
+ * oculta, así el panel no cambia de tamaño. Las filas de apoyos quedan igual.
  */
 import { h, s, setText } from "../../ui/dom.js";
 import { icon } from "../../ui/icons.js";
 import { LEG_LABELS } from "../../core/telemetryModel.js";
+import { FigureSwitch, figureToggle } from "../../ui/FigureSwitch.js";
 import { setAttr } from "./util.js";
 
 /** Muestras del diagrama de apoyos (4 s a 10 Hz). */
@@ -78,27 +83,46 @@ function drawBiped() {
 }
 
 export class FeetPanel {
-  constructor() {
+  /** @param {object} ctx contexto de la vista (FigureSwitch lo necesita para el estado y las acciones) */
+  constructor(ctx) {
+    this.ctx = ctx;
     this.sub = h("span", { class: "cv-sub" }, "");
-    this.body = h("div", { class: "cv-feet__body" });
+    this.toggle = figureToggle(ctx, { compact: true });
+    // El área del dibujo es fija: adentro se cambia el SVG (Go2 ↔ G1) y encima va la capa 3D.
+    this.schematic = h("div", { class: "cv-figure__svg" });
+    this.figure = h("div", { class: "cv-figure" }, this.schematic);
+    this.legsEl = h("div", { class: "cv-legs" });
     this.legs = [];
+    this.fig = null;
+    this.mode = ctx.state.figure ?? "esquema";
     this.el = h(
       "section",
       { class: "cv-panel cv-feet", "aria-labelledby": "cv-feet-title" },
-      h("header", { class: "cv-ph" }, h("span", { class: "cv-ph__icon", html: icon("feet", { size: 16 }) }), h("h2", { id: "cv-feet-title" }, "Patas"), this.sub),
-      this.body,
+      h(
+        "header",
+        { class: "cv-ph" },
+        h("span", { class: "cv-ph__icon", html: icon("feet", { size: 16 }) }),
+        h("h2", { id: "cv-feet-title" }, "Patas"),
+        this.sub,
+        this.toggle,
+      ),
+      h("div", { class: "cv-feet__body" }, this.figure, this.legsEl),
     );
   }
 
   /** Dibuja el robot y una fila por pata según `info.patas` (Go2: 4, G1: 2). */
   build(info) {
     const patas = spatialOrder(info.patas ?? []);
+    const biped = patas.length !== 4 && info.tipo !== "cuadrupedo";
+    const drawing = biped ? drawBiped() : drawQuadruped();
+    this.schematic.replaceChildren(drawing.svg);
+    this.#ensureFigure(biped ? "frente" : "arriba", info);
+
     if (!patas.length) {
       this.legs = [];
-      this.body.replaceChildren(h("p", { class: "cv-empty" }, "Este robot no informa el contacto de las patas."));
+      this.legsEl.replaceChildren(h("p", { class: "cv-empty" }, "Este robot no informa el contacto de las patas."));
       return;
     }
-    const drawing = patas.length === 4 ? drawQuadruped() : drawBiped();
     this.legs = patas.map((pata) => {
       const cells = Array.from({ length: STRIP }, () => h("i", { "data-on": "false" }));
       const state = h("span", { class: "cv-legrow__st", "data-down": "false" }, "");
@@ -111,10 +135,44 @@ export class FeetPanel {
       );
       return { pata, row, cells, state, foot: drawing.feet[pata] };
     });
-    this.body.replaceChildren(drawing.svg, h("div", { class: "cv-legs" }, ...this.legs.map((l) => l.row)));
+    this.legsEl.replaceChildren(...this.legs.map((l) => l.row));
+  }
+
+  /**
+   * El encuadre de la cámara 3D es fijo por escena: el Go2 se ve desde arriba
+   * (como el esquema) y el G1 de frente. Si cambia el robot, se rehace la escena.
+   */
+  #ensureFigure(preset, info) {
+    if (this.fig?.opts.preset !== preset) {
+      this.fig?.destroy();
+      this.fig = new FigureSwitch(this.ctx, { host: this.figure, schematic: this.schematic, preset, interactive: false, labels: false });
+      this.fig.setMode(this.mode);
+    }
+    this.fig.setInfo(info);
+  }
+
+  /** "esquema" o "3d" (preferencia global; la llama la vista en onFigureMode). */
+  setFigureMode(mode) {
+    this.mode = mode;
+    this.toggle.set(mode);
+    this.fig?.setMode(mode);
+  }
+
+  setPaused(paused) {
+    this.fig?.setPaused(paused);
+  }
+
+  applyTheme() {
+    this.fig?.applyTheme();
+  }
+
+  destroy() {
+    this.fig?.destroy();
+    this.fig = null;
   }
 
   update(frame, history) {
+    this.fig?.update(frame);
     if (!this.legs.length) return;
     const samples = history.tail(STRIP);
     const offset = STRIP - samples.length; // al principio hay menos de 40 muestras: se alinean a la derecha

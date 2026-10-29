@@ -136,6 +136,11 @@
 }
 .view-body .bd-robotbox[data-kind="humanoid"] .bd-shadow { left: 36%; top: 10%; width: 28%; height: 80%; }
 
+/* Esquema | 3D real: el botón va en la esquina libre de la caja del dibujo (el anillo es redondo) */
+.view-body .bd-figtoggle { position: absolute; left: 0; top: 0; z-index: 2; }
+.view-body .bd-robotbox.is-3d .bd-shadow { display: none; }
+.view-body .bd-stage[data-figure="3d"] .bd-leaders { display: none; }
+
 /* Anillo de rumbo */
 .view-body .bd-ring__circle { fill: none; stroke: var(--rule); stroke-width: 1; }
 .view-body .bd-ring__tick { stroke: var(--rule-2); stroke-width: 1; }
