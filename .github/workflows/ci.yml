@@ -6,13 +6,18 @@ on:
 
 jobs:
   backend:
-    name: Backend (pytest)
+    name: Backend (pytest, Python ${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 3.10 es la mínima que soporta el proyecto (y la de la imagen Docker):
+        # ahí apareció el error del WebSocket que 3.12 no mostraba.
+        python: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
       - run: pip install -r requirements.txt
       - run: python -m pytest backend/tests -q
 

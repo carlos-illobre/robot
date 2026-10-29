@@ -125,7 +125,11 @@ async def websocket_endpoint(ws: WebSocket):
                 evento = await asyncio.wait_for(ws.receive(), timeout=periodo)
                 if evento["type"] == "websocket.disconnect":
                     break
-            except TimeoutError:
+            # CORREGIDO respecto del original de la catedra (`except TimeoutError`):
+            # en Python 3.10 asyncio.wait_for lanza asyncio.TimeoutError, que recien
+            # desde 3.11 es la misma clase que TimeoutError. En 3.10 la excepcion no
+            # se atrapaba y cada WebSocket se cortaba a los 100 ms. Ver "Hallazgos".
+            except (asyncio.TimeoutError, TimeoutError):
                 pass
     except (WebSocketDisconnect, RuntimeError):
         pass

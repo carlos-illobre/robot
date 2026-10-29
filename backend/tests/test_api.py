@@ -205,3 +205,12 @@ def test_fuentes_lista_las_placas_de_red_y_sugiere_la_del_robot(monkeypatch):
     placas = fuentes.interfaces_de_red()
     assert placas[0] == {"nombre": "enp3s0", "ip": "192.168.123.99", "robot": True}
     assert [p["nombre"] for p in placas] == ["enp3s0", "wlp2s0"]
+
+
+def test_websocket_sigue_abierto_y_manda_muchas_muestras(cliente):
+    """Regresión: en Python 3.10 el WebSocket de la cátedra se cortaba después de 1 muestra
+    (`except TimeoutError` no atrapa `asyncio.TimeoutError` antes de 3.11)."""
+    _, c = cliente
+    with c.websocket_connect("/ws") as ws:
+        tiempos = [ws.receive_json()["ts"] for _ in range(8)]
+    assert tiempos == sorted(tiempos)

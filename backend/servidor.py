@@ -11,7 +11,7 @@ Uso rapido:
 y abrir  http://localhost:8001  en el navegador.
 
 Es el mismo backend FastAPI que provee la catedra (`api/telemetry_server.py`,
-sin modificaciones). Este archivo solo agrega tres cosas:
+con una sola correccion para Python 3.10). Este archivo solo agrega tres cosas:
 
 1. Elige que *lector* (fuente de datos) se inyecta en el servidor: la API y el
    JSON son identicos en los tres modos. Ese es el punto de la arquitectura.

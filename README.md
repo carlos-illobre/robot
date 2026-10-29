@@ -6,18 +6,60 @@
 
 La versión web del monitor de motores **electroSim**: un backend en Python (FastAPI) expone la
 telemetría del robot y un frontend en HTML/JS la visualiza **en vivo**, a 10 muestras por segundo,
-por **WebSocket** o **polling**.
+por **WebSocket** o **polling**. Funciona con el **robot real**, con el **simulador MuJoCo** de la
+cátedra y en **modo demo**.
 
 [![CI](https://github.com/carlos-illobre/robot/actions/workflows/ci.yml/badge.svg)](https://github.com/carlos-illobre/robot/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2022%20sin%20framework-F7DF1E?logo=javascript&logoColor=black)
 ![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?logo=chartdotjs&logoColor=white)
+![Three.js](https://img.shields.io/badge/Three.js-r169-000000?logo=threedotjs&logoColor=white)
+![Pruebas](https://img.shields.io/badge/pruebas-51-success)
 ![Sin internet](https://img.shields.io/badge/funciona-sin%20internet-success)
 
 ### 👉 [**Probalo ahora, sin instalar nada**](https://carlos-illobre.github.io/robot/app/) 👈
 
-<sub>(versión publicada en GitHub Pages, con el robot simulado en el navegador)</sub>
+<sub>Versión publicada en GitHub Pages, con el robot simulado en el navegador.</sub>
+
+</div>
+
+## 📑 Índice
+
+**Para empezar**
+
+1. [Qué es y por qué existe](#-qué-es-y-por-qué-existe)
+2. [Empezar en 1 minuto](#-empezar-en-1-minuto)
+3. [**Usar el dashboard con el robot real — paso a paso**](#-usar-el-dashboard-con-el-robot-real--paso-a-paso)
+
+**El trabajo práctico**
+
+4. [Cumplimiento de la consigna](#-cumplimiento-de-la-consigna)
+5. [Las cuatro vistas (y el manual)](#-las-cuatro-vistas-y-el-manual)
+6. [Guía de uso](#-guía-de-uso)
+7. [Instalación detallada](#-instalación-detallada)
+
+**Cómo está hecho**
+
+8. [Arquitectura](#-arquitectura)
+9. [Patrones de diseño aplicados](#-patrones-de-diseño-aplicados)
+10. [El modo demo "paseo": física de juguete, coherente](#-el-modo-demo-paseo-física-de-juguete-coherente)
+11. [Contrato de la API](#-contrato-de-la-api)
+12. [Formato del CSV exportado](#-formato-del-csv-exportado)
+13. [Hallazgos: tres errores en el material de la cátedra](#-hallazgos-tres-errores-en-el-material-de-la-cátedra)
+14. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
+15. [Pruebas y calidad](#-pruebas-y-calidad)
+16. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
+17. [Estructura del repositorio](#-estructura-del-repositorio)
+
+**Ayuda y créditos**
+
+18. [Problemas frecuentes](#-problemas-frecuentes)
+19. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
+
+---
+
+## 🎯 Qué es y por qué existe
 
 <img src="docs/img/hero-consola.png" alt="Vista Consola del dashboard" width="100%">
 
@@ -29,18 +71,72 @@ por **WebSocket** o **polling**.
 </tr>
 </table>
 
-[**🤖 Con el robot real (paso a paso)**](#-usar-el-dashboard-con-el-robot-real--paso-a-paso) ·
-[Empezar en 1 minuto](#-empezar-en-1-minuto) ·
-[Las vistas](#-las-cuatro-vistas-y-el-manual) ·
-[Instalación](#-instalación-paso-a-paso) ·
-[Guía de uso](#-guía-de-uso) ·
-[Arquitectura](#-arquitectura) ·
-[Patrones](#-patrones-de-diseño-aplicados) ·
-[API](#-contrato-de-la-api) ·
-[Pruebas](#-pruebas-y-calidad) ·
-[Problemas frecuentes](#-problemas-frecuentes)
+En robótica, la **telemetría** es la forma de saber qué le pasa al robot *mientras* se mueve:
+qué motor calienta, cuánto esfuerzo hace cada articulación, hacia dónde está inclinado, cuánta
+batería le queda y qué patas tiene apoyadas. La cátedra tiene una herramienta de escritorio para
+eso, **electroSim** (Python + PyQt6). Este proyecto es **su versión web**.
 
-</div>
+La gracia no es solo "verlo en el navegador". Es la arquitectura que eso obliga a pensar:
+
+```
+ ┌───────────────┐   DDS / socket   ┌────────────────────┐   HTTP + WebSocket   ┌─────────────────────┐
+ │ Robot real o  │ ───────────────► │  Backend FastAPI   │ ───────────────────► │  Dashboard web      │
+ │ simulador     │                  │  (proveedor)       │   JSON normalizado   │  (visualizador)     │
+ └───────────────┘                  └────────────────────┘                      └─────────────────────┘
+      fuente                            interfaz de servicio                         presentación
+```
+
+- El **backend** es el *proveedor de datos*: habla con el robot y publica un contrato estable.
+- El **frontend** es el *visualizador*: no sabe (ni le importa) si los datos vienen del robot, del
+  simulador MuJoCo o de un generador demo.
+- El **contrato** (`docs/API.md`) es lo único que los une. Por eso, el día de la visita al
+  laboratorio, **el mismo dashboard se conecta al robot real cambiando solo la IP**.
+
+---
+
+## ⚡ Empezar en 1 minuto
+
+> Requisito único: **Python 3.10 o superior**. No hace falta el robot, ni MuJoCo, ni Node, ni
+> internet (después de instalar las dependencias).
+
+Un solo comando, **igual en Windows, macOS y Linux**:
+
+```bash
+python iniciar.py
+```
+
+(En Windows también funciona `py iniciar.py`, o doble clic en `iniciar.py` si Python está asociado
+a los archivos `.py`; en macOS/Linux puede hacer falta `python3`.)
+
+El script —escrito en Python, sin `.sh` ni `.bat`, para que no haya diferencias entre sistemas—
+crea un entorno virtual (`.venv`), instala las dependencias **solo la primera vez**, levanta el
+backend en **modo demo** (el robot "pasea" solo) y abre el navegador en
+**http://localhost:8001** recién cuando el servidor responde. Eso es todo.
+
+| Variante | Comando |
+|---|---|
+| Humanoide G1 (29 motores) | `python iniciar.py --robot g1` |
+| Robot real (laboratorio) | `python iniciar.py --real --interfaz enp3s0` (ver la [guía paso a paso](#-usar-el-dashboard-con-el-robot-real--paso-a-paso)) |
+| Instalar el SDK de Unitree | `python iniciar.py --instalar-sdk` |
+| Otro puerto | `python iniciar.py --puerto 8002` |
+| Sin abrir el navegador | `python iniciar.py --sin-navegador` |
+
+> 💡 **Para el día de la presentación:** corré `python iniciar.py` una vez antes, con internet.
+> A partir de ahí arranca sin conexión (fuentes, Chart.js y Three.js están incluidos en el repo).
+
+¿Preferís hacerlo a mano? Son tres comandos:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+```bash
+python backend/servidor.py --demo
+```
+
+```text
+Abrir http://localhost:8001 en el navegador
+```
 
 ---
 
@@ -176,107 +272,13 @@ python iniciar.py --real --robot go2 --interfaz enp3s0
 
 ---
 
-## 📑 Índice
-
-0. [**Usar el dashboard con el robot real — paso a paso**](#-usar-el-dashboard-con-el-robot-real--paso-a-paso)
-1. [Qué es y por qué existe](#-qué-es-y-por-qué-existe)
-2. [Empezar en 1 minuto](#-empezar-en-1-minuto)
-3. [Cumplimiento de la consigna](#-cumplimiento-de-la-consigna)
-4. [Instalación paso a paso](#-instalación-paso-a-paso)
-5. [Las cuatro vistas (y el manual)](#-las-cuatro-vistas-y-el-manual)
-6. [Guía de uso](#-guía-de-uso)
-7. [Arquitectura](#-arquitectura)
-8. [Patrones de diseño aplicados](#-patrones-de-diseño-aplicados)
-9. [El modo demo "paseo": física de juguete, coherente](#-el-modo-demo-paseo-física-de-juguete-coherente)
-10. [Contrato de la API](#-contrato-de-la-api)
-11. [Formato del CSV exportado](#-formato-del-csv-exportado)
-12. [Hallazgos: errores en el material de la cátedra](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)
-13. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
-14. [Pruebas y calidad](#-pruebas-y-calidad)
-15. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
-16. [Estructura del repositorio](#-estructura-del-repositorio)
-17. [Problemas frecuentes](#-problemas-frecuentes)
-18. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
-
----
-
-## 🎯 Qué es y por qué existe
-
-En robótica, la **telemetría** es la forma de saber qué le pasa al robot *mientras* se mueve:
-qué motor calienta, cuánto esfuerzo hace cada articulación, hacia dónde está inclinado, cuánta
-batería le queda y qué patas tiene apoyadas. La cátedra tiene una herramienta de escritorio para
-eso, **electroSim** (Python + PyQt6). Este proyecto es **su versión web**.
-
-La gracia no es solo "verlo en el navegador". Es la arquitectura que eso obliga a pensar:
-
-```
- ┌───────────────┐   DDS / socket   ┌────────────────────┐   HTTP + WebSocket   ┌─────────────────────┐
- │ Robot real o  │ ───────────────► │  Backend FastAPI   │ ───────────────────► │  Dashboard web      │
- │ simulador     │                  │  (proveedor)       │   JSON normalizado   │  (visualizador)     │
- └───────────────┘                  └────────────────────┘                      └─────────────────────┘
-      fuente                            interfaz de servicio                         presentación
-```
-
-- El **backend** es el *proveedor de datos*: habla con el robot y publica un contrato estable.
-- El **frontend** es el *visualizador*: no sabe (ni le importa) si los datos vienen del robot, del
-  simulador MuJoCo o de un generador demo.
-- El **contrato** (`docs/API.md`) es lo único que los une. Por eso, el día de la visita al
-  laboratorio, **el mismo dashboard se conecta al robot real cambiando solo la IP**.
-
----
-
-## ⚡ Empezar en 1 minuto
-
-> Requisito único: **Python 3.10 o superior**. No hace falta el robot, ni MuJoCo, ni Node, ni
-> internet (después de instalar las dependencias).
-
-Un solo comando, **igual en Windows, macOS y Linux**:
-
-```bash
-python iniciar.py
-```
-
-(En Windows también funciona `py iniciar.py`, o doble clic en `iniciar.py` si Python está asociado
-a los archivos `.py`; en macOS/Linux puede hacer falta `python3`.)
-
-El script —escrito en Python, sin `.sh` ni `.bat`, para que no haya diferencias entre sistemas—
-crea un entorno virtual (`.venv`), instala las dependencias **solo la primera vez**, levanta el
-backend en **modo demo** (el robot "pasea" solo) y abre el navegador en
-**http://localhost:8001** recién cuando el servidor responde. Eso es todo.
-
-| Variante | Comando |
-|---|---|
-| Humanoide G1 (29 motores) | `python iniciar.py --robot g1` |
-| Robot real (laboratorio) | `python iniciar.py --real --interfaz eth0` |
-| Otro puerto | `python iniciar.py --puerto 8002` |
-| Sin abrir el navegador | `python iniciar.py --sin-navegador` |
-
-> 💡 **Para el día de la presentación:** corré `python iniciar.py` una vez antes, con internet.
-> A partir de ahí arranca sin conexión (fuentes, Chart.js y Three.js están incluidos en el repo).
-
-¿Preferís hacerlo a mano? Son tres comandos:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-```bash
-python backend/servidor.py --demo
-```
-
-```text
-Abrir http://localhost:8001 en el navegador
-```
-
----
-
 ## ✅ Cumplimiento de la consigna
 
 Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde está resuelto.
 
 | Requisito | Estado | Dónde / cómo |
 |---|:---:|---|
-| Levantar el servidor FastAPI de la cátedra y verificar los endpoints | ✅ | `backend/api/telemetry_server.py` sin modificar; `backend/tests/test_api.py` prueba **todos** los endpoints y el WebSocket con Go2 y G1 |
+| Levantar el servidor FastAPI de la cátedra y verificar los endpoints | ✅ | `backend/api/telemetry_server.py` de la cátedra, con una sola corrección ([hallazgo 3](#-hallazgos-tres-errores-en-el-material-de-la-cátedra)); `backend/tests/test_api.py` prueba **todos** los endpoints y el WebSocket con Go2 y G1 |
 | **Panel de motores**: temperatura con semáforo (verde < 40 °C, amarillo 40–60 °C, rojo > 60 °C), ángulo, velocidad, torque | ✅ | `tempLevel()` en `frontend/js/core/telemetryModel.js` (umbrales idénticos a electroSim, con prueba unitaria de los bordes 40 y 60) |
 | 12 motores para Go2, **29 para G1** | ✅ | El dashboard se arma con `GET /info` ("consultá /info en vez de asumir"); `python backend/servidor.py --demo --robot g1` |
 | **Panel IMU**: roll, pitch, yaw numéricos + gráfico histórico de **≥ 60 muestras** | ✅ | Consola: 150 muestras (≈ 15 s) con Chart.js · Cuerpo: 300 (30 s) en la línea de tiempo · Piloto: 120 en el osciloscopio. Historial en un buffer circular de 600 |
@@ -285,7 +287,8 @@ Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde e
 | Actualización automática: polling a `/telemetria` (**≤ 500 ms**) **o** WebSocket | ✅ | Los dos, intercambiables en caliente. Polling de 100/250/500 ms (tope forzado en el código: `MAX_POLL_INTERVAL_MS = 500`) |
 | Botón **Capturar muestra** | ✅ | Botón + tecla <kbd>C</kbd>; además **grabación continua** (<kbd>R</kbd>) |
 | Botón **Exportar CSV** con todas las capturas | ✅ | Botón + tecla <kbd>E</kbd>; formato estándar o "Excel en castellano" (`;` y coma decimal) |
-| Funciona en **modo demo** del servidor | ✅ | Tres fuentes: demo "paseo" (nuevo), demo original de la cátedra y simulador MuJoCo |
+| Funciona en **modo demo** del servidor | ✅ | Demo «paseo» (nueva, con marcha y temperaturas coherentes), además del demo original de la cátedra y del simulador MuJoCo |
+| *Modalidad*: **con robot real** el frontend no cambia, solo la fuente del backend | ✅ | Modo `--real` (lector DDS de la cátedra) y elección de la fuente desde el propio dashboard. Ver la [guía paso a paso](#-usar-el-dashboard-con-el-robot-real--paso-a-paso) |
 | *Extensión*: reemplazar polling por **WebSocket** | ✅ | `WebSocketTransport.js`, con reconexión automática (backoff exponencial con jitter) |
 | *Objetivo general*: patrones **Adapter, Observer, Facade** | ✅ | Ver [Patrones de diseño aplicados](#-patrones-de-diseño-aplicados) (más Strategy y Factory Method) |
 
@@ -295,21 +298,222 @@ Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde e
   de uso** con capturas anotadas, todo en una misma barra (teclas <kbd>1</kbd> a <kbd>5</kbd>).
 - **Gemelo digital 3D**: el modelo oficial de Unitree movido por los ángulos reales de los motores;
   botón **«Esquema | 3D real»** en las otras vistas (tecla <kbd>G</kbd>).
-- **Fuente de datos elegible desde el dashboard**: robot real, simulador MuJoCo, demo o
-  simulación en el navegador; Go2 o G1; en caliente.
+- **Fuente de datos y robot elegibles desde el dashboard**: robot real, simulador MuJoCo o demo;
+  Go2 o G1; en caliente, sin reiniciar nada.
 - **Funciona sin servidor** (simulación en el navegador) → publicado en
   [GitHub Pages](https://carlos-illobre.github.io/robot/app/).
 - Alarmas de temperatura, torque y batería **con histéresis** · tema claro y oscuro · atajos de
   teclado · adaptable a celular · **funciona sin internet** (fuentes, Chart.js, Three.js y modelos
   incluidos).
-- **Dos errores del material de la cátedra** encontrados, corregidos y documentados
-  ([Hallazgos](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)).
-- **48 pruebas automáticas** (unitarias de Python y JavaScript + E2E con navegador real) y CI.
-- Arranque en un paso multiplataforma (`python iniciar.py`).
+- **Tres errores del material de la cátedra** encontrados, corregidos y documentados
+  ([Hallazgos](#-hallazgos-tres-errores-en-el-material-de-la-cátedra)).
+- **51 pruebas automáticas** (unitarias de Python y JavaScript + E2E con navegador real) y CI.
+- Arranque en un paso multiplataforma (`python iniciar.py`) y versión **dockerizada** opcional
+  con el SDK de Unitree incluido.
 
 ---
 
-## 🛠 Instalación paso a paso
+## 🖥 Las cuatro vistas (y el manual)
+
+Las cuatro vistas muestran **los mismos datos de la misma conexión**: cambiar de vista no corta la
+conexión ni pierde el historial ni las capturas. Se cambian con la barra de arriba o con las teclas
+<kbd>1</kbd> a <kbd>5</kbd>. Por dentro es el patrón **Strategy**: cada vista es una estrategia de
+presentación que cumple el mismo contrato ([`frontend/js/views/README.md`](frontend/js/views/README.md)).
+
+| | Vista | Para qué | Lo distintivo |
+|:-:|---|---|---|
+| <kbd>1</kbd> | **Consola** | Analizar y corregir | Los **cuatro paneles de la consigna**, numerados y con un color cada uno; tabla con semáforo triple (punto, barra y número); gráficos Chart.js; umbral de torque editable |
+| <kbd>2</kbd> | **Cuerpo** | Entender de un vistazo | El robot **es** la interfaz: cada temperatura en su articulación, el apoyo en el pie, la batería en el cuerpo; línea de tiempo de 30 s con las capturas como alfileres |
+| <kbd>3</kbd> | **Piloto** | Proyectar en clase | Instrumental de cabina a pantalla completa: horizonte artificial, cinta de rumbo, anillo de motores, **sonido** opcional del trote y de las alarmas |
+| <kbd>4</kbd> | **Gemelo 3D** | Ver el robot de verdad | El **modelo 3D oficial de Unitree** moviéndose con los ángulos reales, anillos de semáforo en cada articulación, cámara orbitable |
+| <kbd>5</kbd> | **Manual** | Aprender a leerlo | Guía con conceptos (IMU, BMS, marcha), diagramas y **capturas anotadas** de cada vista |
+
+<p align="center"><img src="docs/img/hero-cuerpo-3d.png" alt="Vista Cuerpo con el modelo 3D real" width="85%"><br>
+<sub>Vista <b>Cuerpo</b> con el botón <b>«Esquema | 3D real»</b> en 3D: el modelo de Unitree en lugar del dibujo.</sub></p>
+
+### Esquema o 3D real
+
+En Consola, Cuerpo y Piloto el robot se puede ver como un **esquema** (SVG liviano) o como el
+**modelo 3D real** (botón «Esquema | 3D» o tecla <kbd>G</kbd>; la preferencia vale para todas las
+vistas y se recuerda). Es el mismo componente `RobotScene` del Gemelo 3D, con fondo transparente.
+Three.js y los modelos se descargan **recién la primera vez que alguien elige 3D**.
+
+### Cómo se hizo el Gemelo 3D
+
+1. **Modelos**: los oficiales de Unitree que trae el simulador de la cátedra (BSD-3), convertidos
+   a glTF binario y optimizados con meshoptimizer: el Go2 pasó de 28 MB y 197 k triángulos a
+   **655 KB**; el G1, de 18 MB a **1,35 MB** ([`tools/convert_robot_models.mjs`](tools/convert_robot_models.mjs)).
+2. **Cinemática**: la jerarquía de piezas, la posición de cada articulación y su eje de giro salen
+   del archivo MJCF de MuJoCo. Cada motor de la telemetría gira su articulación **por nombre**
+   (`FR_calf` → `FR_calf_joint`).
+3. **Suavizado**: los datos llegan a 10 Hz y se dibuja a la frecuencia de la pantalla, interpolando.
+4. **Calidad adaptativa**: mide cuánto tarda cada cuadro y baja la resolución, las sombras y los
+   cuadros por segundo si la máquina no da (por ejemplo, sin placa de video), para que el resto del
+   dashboard siga recibiendo los 10 datos por segundo.
+
+### El manual
+
+La quinta opción del menú es un **manual dentro del dashboard**: cómo arrancar, qué significa cada
+dato (motores y articulaciones, ángulo, velocidad, torque y temperatura, roll/pitch/yaw, SOC y
+celdas, la marcha al trote), qué es real y qué es simulado, y **cada vista con una captura
+anotada**: al pasar el mouse por una referencia se marca en la imagen. Las capturas y la posición
+de las marcas se regeneran con `node tools/capturas_manual.mjs`.
+
+---
+
+## 📖 Guía de uso
+
+### 🔀 Fuentes de datos
+
+La etiqueta junto al nombre del robot (arriba a la izquierda) dice siempre **de dónde vienen los
+datos**: `REAL` en verde (medidos) o `SIMULADO` en violeta. Haciendo clic se abre el selector:
+
+| Fuente | Qué es | Requisito |
+|---|---|---|
+| **Robot real** | El backend lee el robot por DDS | Notebook con cable al robot y `unitree_sdk2py` |
+| **Simulador MuJoCo** | El simulador 3D de la cátedra | Simulador de la cátedra abierto en la máquina del backend |
+| **Demo** | El robot pasea solo con datos coherentes: la calcula el servidor o, si no hay servidor, el navegador (es lo que usa GitHub Pages) | Nada |
+
+…y el robot: **Go2** (12 motores) o **G1** (29). El cambio es **en caliente** (sin reiniciar nada) y
+**transaccional**: el backend solo cambia si la fuente nueva entrega datos en 5 s; si no, sigue con
+la anterior y el dashboard muestra el motivo. Las fuentes que no están disponibles aparecen grises
+con la razón (por ejemplo: *«Falta el SDK de Unitree en la máquina del backend»*).
+
+Por detrás son dos rutas que agrega `backend/fuentes.py` sin modificar la API de la cátedra:
+`GET /fuentes` y `POST /fuente`. Como el cambio afecta a **todos** los dashboards conectados a ese
+servidor, el día de la visita se puede bloquear con `--fuente-fija`.
+
+**Desde la línea de comandos.** También se puede elegir la fuente al arrancar; el backend es
+siempre el mismo, lo que cambia es **de dónde lee**:
+
+El backend es siempre el mismo; lo que cambia es **de dónde lee**. El dashboard no se entera.
+
+| Comando | Fuente | Cuándo usarlo |
+|---|---|---|
+| `python backend/servidor.py --demo` | **Paseo simulado** (Go2) | Desarrollo, corrección, presentación. **Recomendado** |
+| `python backend/servidor.py --demo --robot g1` | Paseo simulado (G1, 29 motores) | Ver el dashboard con el humanoide |
+| `python backend/servidor.py --demo-catedra` | `DemoReader` original de la cátedra | Comparar con el demo provisto |
+| `python backend/servidor.py` | Simulador MuJoCo de la cátedra (socket local) | Con el entorno `UadeRobotLab/TP05` corriendo |
+| `python backend/servidor.py --real --interfaz eth0` | **Robot real** por DDS | En el laboratorio, con la notebook conectada al robot por cable |
+
+<details>
+<summary><b>Todas las opciones del servidor</b> (<code>python backend/servidor.py --help</code>)</summary>
+
+| Opción | Por defecto | Descripción |
+|---|---|---|
+| `--robot {go2,g1}` | `go2` | Robot a simular / leer |
+| `--puerto N` | `8001` | Puerto HTTP y WebSocket |
+| `--host IP` | `0.0.0.0` | Interfaz donde escuchar (`127.0.0.1` para que no se vea en la red) |
+| `--demo` | — | Paseo simulado sin MuJoCo |
+| `--demo-catedra` | — | Demo original de la cátedra |
+| `--real` | — | Robot real por DDS (necesita `unitree_sdk2py`) |
+| `--interfaz NOMBRE` | automática | Placa de red conectada al robot (`eth0`, `enp3s0`…), solo con `--real` |
+| `--fuente-fija` | — | No permitir cambiar la fuente desde el dashboard |
+
+`iniciar.py` acepta las mismas opciones, más `--sin-navegador` e `--instalar-sdk`.
+</details>
+
+### 🔁 Cambiar de robot (Go2 / G1)
+
+Clic en el **nombre del robot** (arriba a la izquierda, por ejemplo *Unitree Go2 EDU · 12 motores ▾*)
+y elegir **Unitree Go2** (12 motores, 4 patas) o **Unitree G1** (29 motores, 2 pies). Cambia al
+instante, con la misma fuente de datos, y las cinco vistas se rearman solas: el dashboard nunca
+asume 12 motores, todo sale de `GET /info`. Al arrancar: `python iniciar.py --robot g1`.
+
+### 💻 Ver el dashboard desde otra computadora
+
+El backend corre en una máquina (**A**, por ejemplo la notebook conectada al robot) y el dashboard
+se puede mirar desde cualquier otra de la misma red (**B**: otra notebook, un celular, el proyector).
+Pueden ser varias a la vez: la API es de solo lectura.
+
+**1. En la máquina A**, levantar el backend como siempre:
+
+```bash
+python iniciar.py
+```
+
+La consola muestra la dirección para las otras máquinas:
+
+```text
+  DASHBOARD  ->  http://localhost:8001
+  (desde otra maquina de la red: http://192.168.0.23:8001)
+```
+
+**2. En la máquina B**, abrir en el navegador **esa dirección**: `http://192.168.0.23:8001`.
+No hay que instalar nada ni escribir nada más: el backend sirve el dashboard y ya viene conectado
+a él.
+
+> Si el dashboard de B ya estaba abierto desde otro lado, hacé clic en el indicador de conexión
+> (arriba a la derecha) y escribí `http://192.168.0.23:8001` en **Servidor**, o agregá
+> `?server=http://192.168.0.23:8001` a la URL. Ojo: `demo` o `demo-g1` en ese campo significa
+> «simular en el navegador», no conectarse a otra máquina.
+
+**Si B no llega a A:**
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| La página no carga (*no se puede acceder al sitio*) | El **firewall** de A bloquea el puerto 8001 | Windows: la primera vez aparece un aviso de seguridad: tildar **Redes privadas** y permitir. Si ya se rechazó: *Firewall de Windows → Permitir una aplicación* → Python. Linux con ufw: `sudo ufw allow 8001/tcp`. macOS: *Ajustes → Red → Firewall → Opciones* → permitir Python |
+| La página no carga | A y B están en **redes distintas** (por ejemplo, la WiFi de invitados o datos del celular) | Conectar las dos a la misma red |
+| La página no carga | El backend se levantó con `--host 127.0.0.1` | Ese modo solo acepta conexiones de la propia máquina: arrancarlo sin esa opción (por defecto escucha en todas las interfaces) |
+| No sé la IP de A | — | La imprime el backend al arrancar. También: `ipconfig` (Windows) o `ip -br addr` (Linux) o *Ajustes → Red* (macOS) |
+| La IP que muestra no funciona | A tiene varias placas de red (WiFi y cable al robot) | Probar con la IP de la placa que está en la misma red que B (la del robot suele ser `192.168.123.x`) |
+
+> 💡 Para proyectar en clase: el backend en la notebook del robot, y el proyector conectado a otra
+> máquina abriendo `http://IP-DE-LA-NOTEBOOK:8001/?view=pilot` (la vista Piloto, pensada para verse
+> de lejos).
+
+### 🌐 GitHub Pages vs. robot real
+
+La versión publicada en **https://carlos-illobre.github.io/robot/app/** funciona **sin servidor**:
+genera los datos en el navegador (un port a JavaScript del demo «paseo»). Sirve para mirar y
+evaluar el dashboard sin instalar nada, pero **no puede conectarse al robot real**: GitHub Pages
+sirve la página por `https`, el backend del laboratorio es `http://` en la red local, y los
+navegadores **bloquean** que una página segura se conecte a un servidor no seguro (*mixed content*).
+
+| Dónde se abre | Datos posibles |
+|---|---|
+| GitHub Pages | Demo (calculada en el navegador) |
+| `python iniciar.py` (local) | Demo, simulador MuJoCo **y robot real** |
+
+### Conectar el dashboard a otro servidor
+
+Tres formas, de la más cómoda a la más manual:
+
+1. **Desde la URL**: `http://localhost:8001/?server=http://10.0.0.5:8001` — ideal para dejarlo
+   como marcador el día de la visita.
+2. **Desde la barra de conexión** del dashboard: escribir la dirección y presionar *Conectar*.
+   Se recuerda para la próxima vez.
+3. Si el dashboard se abre desde el mismo backend, usa automáticamente ese servidor.
+
+También se puede forzar el transporte: `?transport=polling` o `?transport=websocket`.
+
+### Capturar y exportar
+
+| Acción | Botón | Tecla | Qué hace |
+|---|---|:---:|---|
+| Capturar muestra | **Capturar** | <kbd>C</kbd> | Congela una copia completa del estado actual del robot |
+| Grabar | **Grabar** | <kbd>R</kbd> | Captura **todas** las muestras que llegan hasta que se vuelve a presionar |
+| Exportar | **Exportar CSV** | <kbd>E</kbd> | Descarga `telemetria_<robot>_<fecha>_<hora>.csv` con todas las capturas |
+
+> 💡 **Excel en castellano** usa `;` como separador y `,` como decimal. Activando la opción
+> *Formato Excel* el CSV se abre con doble clic sin pasar por "Datos → Desde texto".
+
+### ⌨️ Atajos de teclado
+
+| Tecla | Acción | | Tecla | Acción |
+|:-:|---|---|:-:|---|
+| <kbd>1</kbd>–<kbd>5</kbd> | Consola · Cuerpo · Piloto · Gemelo 3D · Manual | | <kbd>W</kbd> | WebSocket ↔ polling |
+| <kbd>C</kbd> | Capturar muestra | | <kbd>G</kbd> | Esquema ↔ 3D real |
+| <kbd>R</kbd> | Grabar / detener | | <kbd>T</kbd> | Tema claro / oscuro |
+| <kbd>E</kbd> | Exportar CSV | | <kbd>?</kbd> | Ayuda con todos los atajos |
+| <kbd>Espacio</kbd> | Pausar la vista (los datos se siguen recibiendo) | | <kbd>M</kbd> · <kbd>S</kbd> | En Piloto: tabla de motores · sonido |
+
+---
+
+## 🛠 Instalación detallada
+
+> Para la mayoría de los casos alcanza con [Empezar en 1 minuto](#-empezar-en-1-minuto)
+> (`python iniciar.py` hace todo esto solo). Esta sección es para quien prefiere hacerlo a mano.
 
 ### Requisitos
 
@@ -319,6 +523,8 @@ Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde e
 | Navegador moderno | Chrome, Edge o Firefox actuales | Dashboard | ✅ |
 | [Node.js](https://nodejs.org/) | 18 o superior | Solo para **desarrollar**: pruebas del frontend y E2E, y la conversión de los modelos 3D | ➖ |
 | [Git](https://git-scm.com/) | cualquiera | Clonar el repositorio (o bajar el ZIP) | ➖ |
+| SDK de Unitree | — | Solo para el **robot real** (`python iniciar.py --instalar-sdk`) | ➖ |
+| [Docker](https://docs.docker.com/get-docker/) | — | Solo para la [versión dockerizada](#-versión-dockerizada-opcional) | ➖ |
 
 > **Para usar el dashboard alcanza con Python y un navegador.** El frontend es JavaScript que
 > ejecuta el navegador tal cual (sin compilar ni empaquetar), así que Node no es necesario para
@@ -425,83 +631,6 @@ raíz hacia ahí: un solo proceso, un solo puerto, cero problemas de CORS.
 | El dashboard recibe datos | mirar el indicador de conexión | **En vivo · WebSocket · ~10 Hz** |
 | Las pruebas pasan | `python -m pytest backend/tests -q` y `npm test` | todo en verde |
 
----
-
-## 🖥 Las cuatro vistas (y el manual)
-
-Las cuatro vistas muestran **los mismos datos de la misma conexión**: cambiar de vista no corta la
-conexión ni pierde el historial ni las capturas. Se cambian con la barra de arriba o con las teclas
-<kbd>1</kbd> a <kbd>5</kbd>. Por dentro es el patrón **Strategy**: cada vista es una estrategia de
-presentación que cumple el mismo contrato ([`frontend/js/views/README.md`](frontend/js/views/README.md)).
-
-| | Vista | Para qué | Lo distintivo |
-|:-:|---|---|---|
-| <kbd>1</kbd> | **Consola** | Analizar y corregir | Los **cuatro paneles de la consigna**, numerados y con un color cada uno; tabla con semáforo triple (punto, barra y número); gráficos Chart.js; umbral de torque editable |
-| <kbd>2</kbd> | **Cuerpo** | Entender de un vistazo | El robot **es** la interfaz: cada temperatura en su articulación, el apoyo en el pie, la batería en el cuerpo; línea de tiempo de 30 s con las capturas como alfileres |
-| <kbd>3</kbd> | **Piloto** | Proyectar en clase | Instrumental de cabina a pantalla completa: horizonte artificial, cinta de rumbo, anillo de motores, **sonido** opcional del trote y de las alarmas |
-| <kbd>4</kbd> | **Gemelo 3D** | Ver el robot de verdad | El **modelo 3D oficial de Unitree** moviéndose con los ángulos reales, anillos de semáforo en cada articulación, cámara orbitable |
-| <kbd>5</kbd> | **Manual** | Aprender a leerlo | Guía con conceptos (IMU, BMS, marcha), diagramas y **capturas anotadas** de cada vista |
-
-<p align="center"><img src="docs/img/hero-cuerpo-3d.png" alt="Vista Cuerpo con el modelo 3D real" width="85%"><br>
-<sub>Vista <b>Cuerpo</b> con el botón <b>«Esquema | 3D real»</b> en 3D: el modelo de Unitree en lugar del dibujo.</sub></p>
-
-### Esquema o 3D real
-
-En Consola, Cuerpo y Piloto el robot se puede ver como un **esquema** (SVG liviano) o como el
-**modelo 3D real** (botón «Esquema | 3D» o tecla <kbd>G</kbd>; la preferencia vale para todas las
-vistas y se recuerda). Es el mismo componente `RobotScene` del Gemelo 3D, con fondo transparente.
-Three.js y los modelos se descargan **recién la primera vez que alguien elige 3D**.
-
-### Cómo se hizo el Gemelo 3D
-
-1. **Modelos**: los oficiales de Unitree que trae el simulador de la cátedra (BSD-3), convertidos
-   a glTF binario y optimizados con meshoptimizer: el Go2 pasó de 28 MB y 197 k triángulos a
-   **655 KB**; el G1, de 18 MB a **1,35 MB** ([`tools/convert_robot_models.mjs`](tools/convert_robot_models.mjs)).
-2. **Cinemática**: la jerarquía de piezas, la posición de cada articulación y su eje de giro salen
-   del archivo MJCF de MuJoCo. Cada motor de la telemetría gira su articulación **por nombre**
-   (`FR_calf` → `FR_calf_joint`).
-3. **Suavizado**: los datos llegan a 10 Hz y se dibuja a la frecuencia de la pantalla, interpolando.
-4. **Calidad adaptativa**: mide cuánto tarda cada cuadro y baja la resolución, las sombras y los
-   cuadros por segundo si la máquina no da (por ejemplo, sin placa de video), para que el resto del
-   dashboard siga recibiendo los 10 datos por segundo.
-
-### El manual
-
-La quinta opción del menú es un **manual dentro del dashboard**: cómo arrancar, qué significa cada
-dato (motores y articulaciones, ángulo, velocidad, torque y temperatura, roll/pitch/yaw, SOC y
-celdas, la marcha al trote), qué es real y qué es simulado, y **cada vista con una captura
-anotada**: al pasar el mouse por una referencia se marca en la imagen. Las capturas y la posición
-de las marcas se regeneran con `node tools/capturas_manual.mjs`.
-
----
-
-## 📖 Guía de uso
-
-### Elegir la fuente de datos
-
-El backend es siempre el mismo; lo que cambia es **de dónde lee**. El dashboard no se entera.
-
-| Comando | Fuente | Cuándo usarlo |
-|---|---|---|
-| `python backend/servidor.py --demo` | **Paseo simulado** (Go2) | Desarrollo, corrección, presentación. **Recomendado** |
-| `python backend/servidor.py --demo --robot g1` | Paseo simulado (G1, 29 motores) | Ver el dashboard con el humanoide |
-| `python backend/servidor.py --demo-catedra` | `DemoReader` original de la cátedra | Comparar con el demo provisto |
-| `python backend/servidor.py` | Simulador MuJoCo de la cátedra (socket local) | Con el entorno `UadeRobotLab/TP05` corriendo |
-| `python backend/servidor.py --real --interfaz eth0` | **Robot real** por DDS | En el laboratorio, con la notebook conectada al robot por cable |
-
-Opciones del servidor:
-
-| Opción | Por defecto | Descripción |
-|---|---|---|
-| `--robot {go2,g1}` | `go2` | Robot a simular / leer |
-| `--puerto N` | `8001` | Puerto HTTP y WebSocket |
-| `--host IP` | `0.0.0.0` | Interfaz donde escuchar (`127.0.0.1` para que no se vea en la red) |
-| `--demo` | — | Paseo simulado sin MuJoCo |
-| `--demo-catedra` | — | Demo original de la cátedra |
-| `--real` | — | Robot real por DDS (necesita `unitree_sdk2py`) |
-| `--interfaz NOMBRE` | automática | Placa de red conectada al robot (`eth0`, `enp3s0`…), solo con `--real` |
-| `--fuente-fija` | — | No permitir cambiar la fuente desde el dashboard |
-
 ### 🐳 Versión dockerizada (opcional)
 
 En [`docker/`](docker/README.md) hay una imagen de Docker que trae **el SDK de Unitree ya
@@ -514,111 +643,6 @@ docker compose -f docker/docker-compose.yml up --build demo
 Para el robot real hace falta Linux (el contenedor usa la red del equipo para ver el cable del
 robot). Todos los detalles, y qué se probó, en [`docker/README.md`](docker/README.md). La forma
 recomendada sigue siendo `python iniciar.py`.
-
-### 🔀 Elegir la fuente de datos desde el dashboard
-
-La etiqueta junto al nombre del robot (arriba a la izquierda) dice siempre **de dónde vienen los
-datos**: `REAL` en verde (medidos) o `SIMULADO` en violeta. Haciendo clic se abre el selector:
-
-| Fuente | Qué es | Requisito |
-|---|---|---|
-| **Robot real** | El backend lee el robot por DDS | Notebook con cable al robot y `unitree_sdk2py` |
-| **Simulador MuJoCo** | El simulador 3D de la cátedra | Simulador de la cátedra abierto en la máquina del backend |
-| **Demo** | El robot pasea solo con datos coherentes: la calcula el servidor o, si no hay servidor, el navegador (es lo que usa GitHub Pages) | Nada |
-
-…y el robot: **Go2** (12 motores) o **G1** (29). El cambio es **en caliente** (sin reiniciar nada) y
-**transaccional**: el backend solo cambia si la fuente nueva entrega datos en 5 s; si no, sigue con
-la anterior y el dashboard muestra el motivo. Las fuentes que no están disponibles aparecen grises
-con la razón (por ejemplo: *«Falta el SDK de Unitree en la máquina del backend»*).
-
-Por detrás son dos rutas que agrega `backend/fuentes.py` sin modificar la API de la cátedra:
-`GET /fuentes` y `POST /fuente`. Como el cambio afecta a **todos** los dashboards conectados a ese
-servidor, el día de la visita se puede bloquear con `--fuente-fija`.
-
-### 🤖 Con el robot real
-
-Está explicado paso a paso al principio:
-[Usar el dashboard con el robot real — paso a paso](#-usar-el-dashboard-con-el-robot-real--paso-a-paso).
-
-### 💻 Ver el dashboard desde otra computadora
-
-El backend corre en una máquina (**A**, por ejemplo la notebook conectada al robot) y el dashboard
-se puede mirar desde cualquier otra de la misma red (**B**: otra notebook, un celular, el proyector).
-Pueden ser varias a la vez: la API es de solo lectura.
-
-**1. En la máquina A**, levantar el backend como siempre:
-
-```bash
-python iniciar.py
-```
-
-La consola muestra la dirección para las otras máquinas:
-
-```text
-  DASHBOARD  ->  http://localhost:8001
-  (desde otra maquina de la red: http://192.168.0.23:8001)
-```
-
-**2. En la máquina B**, abrir en el navegador **esa dirección**: `http://192.168.0.23:8001`.
-No hay que instalar nada ni escribir nada más: el backend sirve el dashboard y ya viene conectado
-a él.
-
-> Si el dashboard de B ya estaba abierto desde otro lado, hacé clic en el indicador de conexión
-> (arriba a la derecha) y escribí `http://192.168.0.23:8001` en **Servidor**, o agregá
-> `?server=http://192.168.0.23:8001` a la URL. Ojo: `demo` o `demo-g1` en ese campo significa
-> «simular en el navegador», no conectarse a otra máquina.
-
-**Si B no llega a A:**
-
-| Síntoma | Causa probable | Solución |
-|---|---|---|
-| La página no carga (*no se puede acceder al sitio*) | El **firewall** de A bloquea el puerto 8001 | Windows: la primera vez aparece un aviso de seguridad: tildar **Redes privadas** y permitir. Si ya se rechazó: *Firewall de Windows → Permitir una aplicación* → Python. Linux con ufw: `sudo ufw allow 8001/tcp`. macOS: *Ajustes → Red → Firewall → Opciones* → permitir Python |
-| La página no carga | A y B están en **redes distintas** (por ejemplo, la WiFi de invitados o datos del celular) | Conectar las dos a la misma red |
-| La página no carga | El backend se levantó con `--host 127.0.0.1` | Ese modo solo acepta conexiones de la propia máquina: arrancarlo sin esa opción (por defecto escucha en todas las interfaces) |
-| No sé la IP de A | — | La imprime el backend al arrancar. También: `ipconfig` (Windows) o `ip -br addr` (Linux) o *Ajustes → Red* (macOS) |
-| La IP que muestra no funciona | A tiene varias placas de red (WiFi y cable al robot) | Probar con la IP de la placa que está en la misma red que B (la del robot suele ser `192.168.123.x`) |
-
-> 💡 Para proyectar en clase: el backend en la notebook del robot, y el proyector conectado a otra
-> máquina abriendo `http://IP-DE-LA-NOTEBOOK:8001/?view=pilot` (la vista Piloto, pensada para verse
-> de lejos).
-
-### 🌐 GitHub Pages vs. robot real
-
-La versión publicada en **https://carlos-illobre.github.io/robot/app/** funciona **sin servidor**:
-genera los datos en el navegador (un port a JavaScript del demo «paseo»). Sirve para mirar y
-evaluar el dashboard sin instalar nada, pero **no puede conectarse al robot real**: GitHub Pages
-sirve la página por `https`, el backend del laboratorio es `http://` en la red local, y los
-navegadores **bloquean** que una página segura se conecte a un servidor no seguro (*mixed content*).
-
-| Dónde se abre | Datos posibles |
-|---|---|
-| GitHub Pages | Demo (calculada en el navegador) |
-| `python iniciar.py` (local) | Demo, simulador MuJoCo **y robot real** |
-
-### Conectar el dashboard a otro servidor
-
-Tres formas, de la más cómoda a la más manual:
-
-1. **Desde la URL**: `http://localhost:8001/?server=http://10.0.0.5:8001` — ideal para dejarlo
-   como marcador el día de la visita.
-2. **Desde la barra de conexión** del dashboard: escribir la dirección y presionar *Conectar*.
-   Se recuerda para la próxima vez.
-3. Si el dashboard se abre desde el mismo backend, usa automáticamente ese servidor.
-
-También se puede forzar el transporte: `?transport=polling` o `?transport=websocket`.
-
-<!-- GUÍA DE CADA PANEL, ATAJOS Y CAPTURAS: se completa con el diseño final elegido -->
-
-### Capturar y exportar
-
-| Acción | Botón | Tecla | Qué hace |
-|---|---|:---:|---|
-| Capturar muestra | **Capturar** | <kbd>C</kbd> | Congela una copia completa del estado actual del robot |
-| Grabar | **Grabar** | <kbd>R</kbd> | Captura **todas** las muestras que llegan hasta que se vuelve a presionar |
-| Exportar | **Exportar CSV** | <kbd>E</kbd> | Descarga `telemetria_<robot>_<fecha>_<hora>.csv` con todas las capturas |
-
-> 💡 **Excel en castellano** usa `;` como separador y `,` como decimal. Activando la opción
-> *Formato Excel* el CSV se abre con doble clic sin pasar por "Datos → Desde texto".
 
 ---
 
@@ -647,7 +671,7 @@ flowchart LR
     PO[PollingTransport]
     N[normalizeFrame<br/>Adapter]
     B((EventBus<br/>Observer))
-    UI[Paneles: motores · IMU<br/>BMS · patas · capturas]
+    UI[Vistas: Consola · Cuerpo<br/>Piloto · Gemelo 3D]
   end
 
   R & M & P & D --> L --> A --> S
@@ -666,7 +690,7 @@ sequenceDiagram
   participant WS as WebSocketTransport
   participant TS as TelemetryService (Facade)
   participant Bus as EventBus (Observer)
-  participant UI as Paneles
+  participant UI as Vista activa
 
   Robot->>API: snapshot crudo (radianes, mV, cuaternión)
   API->>API: adaptar_telemetria() → JSON del contrato
@@ -788,8 +812,8 @@ implementa la misma interfaz que WebSocket y polling.
 
 ### 🏭 Factory Method — del lado del servidor
 
-`crear_lector(modo, robot)` en `backend/servidor.py` decide qué fuente de datos se inyecta
-(demo paseo, demo cátedra, simulador). El resto del backend recibe "un lector" y listo: es
+`crear_lector(modo, robot, interfaz)` en `backend/servidor.py` decide qué fuente de datos se
+inyecta (robot real por DDS, simulador MuJoCo, demo «paseo» o demo de la cátedra). El resto del backend recibe "un lector" y listo: es
 **inyección de dependencias** con `configurar(lector, modelo, modo)`.
 
 ---
@@ -850,6 +874,8 @@ no existe ningún endpoint que mueva el robot.
 | `GET` | `/fuerzas` | qué patas están apoyadas |
 | `GET` | `/info` | nombre y tipo del robot, cantidad y nombres de motores, patas, modo |
 | `WS` | `/ws` | el mismo JSON que `/telemetria`, empujado ~10 veces por segundo |
+| `GET` | `/fuentes` | *(agregada en este proyecto)* fuentes disponibles y por qué no lo están, placas de red |
+| `POST` | `/fuente` | *(agregada)* cambia la fuente y el robot en caliente: `{"modo": "real", "robot": "go2", "interfaz": "enp3s0"}` |
 
 ```json
 {
@@ -871,6 +897,9 @@ no existe ningún endpoint que mueva el robot.
 | `torque` | N·m | | `corriente` | mA |
 | `temperatura` | °C | | `celdas` | V |
 | `ts` | s desde que arrancó el servidor | | `fuerzas` | 1 = apoyada, 0 = en el aire |
+
+Las dos rutas agregadas viven en `backend/fuentes.py` y **no modifican** la API de la cátedra: deciden
+de dónde lee el backend, nunca mueven al robot.
 
 Errores: `400` (modelo inválido), `409` (se pidió un robot distinto del conectado), `503` (todavía
 no llegó telemetría). El contrato completo de la cátedra está en [`docs/API.md`](docs/API.md).
@@ -904,18 +933,22 @@ df.filter(like="_temperatura_C").max().sort_values(ascending=False).head(3)  # l
 
 ---
 
-## 🔎 Hallazgos: dos errores en el material de la cátedra
+## 🔎 Hallazgos: tres errores en el material de la cátedra
 
 Al mover el **modelo 3D oficial de Unitree** con la telemetría (vista Gemelo 3D) aparecieron dos
-inconsistencias en el código provisto. El modo demo las ocultaba porque genera cada ángulo **por
-nombre**; con datos reales o del simulador saltan a la vista.
+inconsistencias en el código provisto; el modo demo las ocultaba porque genera cada ángulo **por
+nombre**. La tercera apareció al correr el backend con **Python 3.10** (la versión de la imagen
+Docker y la que recomienda Unitree).
 
 | # | Qué | Evidencia (repositorio de la cátedra, `TP05/entorno/`) | Efecto | Corrección en este repo |
 |---|---|---|---|---|
 | 1 | **G1: los nombres de la cadera están invertidos.** `config.py` dice `hip_yaw, hip_roll, hip_pitch`; el orden real es `hip_pitch, hip_roll, hip_yaw` | `api/config.py:44` vs. actuadores de `sim/unitree_mujoco/unitree_robots/g1/g1_29dof.xml:387-399` y `sim/robots.py:115` (`G1_L_HIP_P = 0`) | Con el G1 real o el simulador, el dato rotulado *guiñada* de cadera es el *cabeceo* y viceversa (6 de 29 motores) | `backend/api/config.py` corregido, con comentario; prueba `test_g1_nombra_la_cadera_en_el_orden_real_de_unitree` |
 | 2 | **Go2 con el simulador: patas izquierda y derecha cruzadas.** El simulador publica `qpos` en el orden de cuerpos del modelo (FL, FR, RL, RR); el contrato es FR, FL, RR, RL | `sim/simulador.py:80,91` publica `qpos[7:]`; `go2.xml:78,112,147,182` declara FL, FR, RL, RR; `api/config.py:30` y los actuadores (`go2.xml:223`) usan FR, FL, RR, RL | Solo con el simulador: lo que se muestra como "delantera derecha" es la izquierda. **Con el robot real (DDS) no pasa** | Adapter `OrdenSimulador` en `backend/servidor.py` que reordena sin tocar el lector de la cátedra; prueba `test_simulador_go2_se_reordena_al_orden_del_sdk` |
+| 3 | **WebSocket roto en Python 3.10.** El servidor espera mensajes con `asyncio.wait_for(...)` y atrapa `except TimeoutError` | `api/telemetry_server.py`, función `websocket_endpoint`. En Python 3.10, `asyncio.TimeoutError` **no es** `TimeoutError` (se unificaron recién en 3.11) | Con Python 3.10, cada conexión WebSocket se cortaba después de **una** muestra y el dashboard reconectaba sin parar (el log se llenaba de `asyncio.exceptions.TimeoutError`). Con 3.11 o más nuevo no pasa | `except (asyncio.TimeoutError, TimeoutError)`; prueba `test_websocket_sigue_abierto_y_manda_muchas_muestras`, y el CI ahora corre el backend con **Python 3.10 y 3.12** |
 
-> **Alcance:** verificado leyendo y cruzando los archivos (configuración, modelo oficial y código
+> **Alcance del 3:** reproducido y verificado (31 muestras en 3 s con la corrección; 1 sola sin ella).
+>
+> **Alcance de 1 y 2:** verificado leyendo y cruzando los archivos (configuración, modelo oficial y código
 > del simulador coinciden entre sí y contradicen a `config.py`). No se pudo probar con un G1 real
 > ni con el simulador MuJoCo corriendo. Para confirmarlo en el laboratorio: con el G1 parado,
 > mover a mano solo la cadera hacia adelante y ver qué motor cambia.
@@ -964,11 +997,11 @@ npm run test:e2e
 
 | Suite | Cantidad | Qué verifica |
 |---|:-:|---|
-| **Backend** (`backend/tests/test_api.py`, pytest) | 18 | Todos los endpoints y el WebSocket respetan el contrato, con **Go2 y G1** · errores 400/409 · el paseo recorre los **tres colores del semáforo** · con el robot quieto apoya las **cuatro patas** y al trotar no · el yaw cambia al girar · cambio de fuente en caliente y fuente fija · `--real` sin SDK falla con un mensaje claro · los dos errores de la cátedra corregidos |
+| **Backend** (`backend/tests/test_api.py`, pytest) | 21 | Todos los endpoints y el WebSocket respetan el contrato, con **Go2 y G1** · errores 400/409 · el paseo recorre los **tres colores del semáforo** · con el robot quieto apoya las **cuatro patas** y al trotar no · el yaw cambia al girar · cambio de fuente en caliente y fuente fija · `--real` sin SDK falla con un mensaje claro · los dos errores de la cátedra corregidos · detección de la placa de red del robot · el WebSocket sigue abierto (regresión del error de Python 3.10) |
 | **Frontend unitarias** (`frontend/tests/*.test.js`, `node:test`, sin dependencias) | 24 | Bordes del semáforo (40 y 60 °C) · normalización tolerante a datos rotos · buffer circular · EventBus aísla errores · CSV (columnas, RFC 4180, formato Excel) · las alarmas solo avisan cambios · backoff de reconexión · URLs `http→ws` / `https→wss` · el polling nunca supera 500 ms ni superpone pedidos y se recupera de errores · la Facade normaliza y detecta cuando dejan de llegar datos · la simulación del navegador cumple el contrato y la marcha · histéresis de alarmas |
 | **E2E** (`e2e/dashboard.e2e.js`, Playwright) | 6 | Solo lo que una unitaria no puede: backend real ↔ navegador real (WebSocket y polling), las cinco vistas sin errores conservando historial y capturas, la descarga del CSV, el cambio de fuente Go2 ↔ G1, **la reconexión cuando el servidor se cae y vuelve**, y que nada se desborde a 390 px. Comparten un único navegador: corren en ~35 s |
 
-**Integración continua:** cada push corre las tres suites en GitHub Actions
+**Integración continua:** cada push corre las tres suites en GitHub Actions (el backend, con Python 3.10 y 3.12)
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ---
@@ -1005,7 +1038,7 @@ robot/
 │   ├── servidor.py              ← lanzador: elige la fuente de datos (Factory), sirve el dashboard
 │   ├── fuentes.py               ← GET /fuentes y POST /fuente: cambiar la fuente desde el dashboard
 │   ├── api/
-│   │   ├── telemetry_server.py  ← API REST + WebSocket (cátedra, sin modificar)
+│   │   ├── telemetry_server.py  ← API REST + WebSocket (cátedra, con el error de Python 3.10 corregido)
 │   │   ├── telemetry_adapter.py ← crudo del robot → JSON del contrato (cátedra)
 │   │   ├── telemetry_reader*.py ← lectores: simulador por socket, robot por DDS, demo (cátedra)
 │   │   ├── demo_paseo.py        ← NUEVO: demo con marcha, modelo térmico y batería
@@ -1137,3 +1170,4 @@ La consigna sugiere tres roles. Así se reparte este repositorio:
 - [Chart.js](https://www.chartjs.org/) 4.4.1 y [Three.js](https://threejs.org/) r169 — licencia MIT (`frontend/vendor/`).
 - Tipografías Inter, JetBrains Mono, Manrope, IBM Plex Mono y Space Grotesk — SIL Open Font License.
 - Íconos con trazos estilo [Lucide](https://lucide.dev/) — licencia ISC.
+
