@@ -1,0 +1,7 @@
+# Solo entra a la imagen lo necesario para correr (backend y frontend).
+**
+!backend/**
+!frontend/**
+backend/tests/**
+frontend/tests/**
+**/__pycache__/**

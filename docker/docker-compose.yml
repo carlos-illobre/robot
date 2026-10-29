@@ -1,0 +1,29 @@
+# Versión dockerizada (opcional). La forma recomendada sigue siendo `python iniciar.py`.
+# Uso: ver docker/README.md
+#
+#   docker compose -f docker/docker-compose.yml up demo
+#   ROBOT=go2 INTERFAZ=enp3s0 docker compose -f docker/docker-compose.yml --profile robot up robot
+
+services:
+  # Demo: funciona en cualquier sistema (Linux, Windows, macOS).
+  demo:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: tp05-dashboard
+    ports:
+      - "8001:8001"
+    command: ["--demo", "--robot", "${ROBOT:-go2}"]
+    restart: unless-stopped
+
+  # Robot real: SOLO en Linux. Usa la red del equipo (network_mode: host)
+  # porque DDS necesita ver la placa de red conectada al robot.
+  robot:
+    profiles: ["robot"]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: tp05-dashboard
+    network_mode: host
+    command: ["--real", "--robot", "${ROBOT:-go2}", "--interfaz", "${INTERFAZ:?Indicá la placa de red hacia el robot, p. ej. INTERFAZ=enp3s0}"]
+    restart: unless-stopped

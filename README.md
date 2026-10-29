@@ -502,6 +502,19 @@ Opciones del servidor:
 | `--interfaz NOMBRE` | automática | Placa de red conectada al robot (`eth0`, `enp3s0`…), solo con `--real` |
 | `--fuente-fija` | — | No permitir cambiar la fuente desde el dashboard |
 
+### 🐳 Versión dockerizada (opcional)
+
+En [`docker/`](docker/README.md) hay una imagen de Docker que trae **el SDK de Unitree ya
+compilado e instalado**, para no tener que instalarlo a mano:
+
+```bash
+docker compose -f docker/docker-compose.yml up --build demo
+```
+
+Para el robot real hace falta Linux (el contenedor usa la red del equipo para ver el cable del
+robot). Todos los detalles, y qué se probó, en [`docker/README.md`](docker/README.md). La forma
+recomendada sigue siendo `python iniciar.py`.
+
 ### 🔀 Elegir la fuente de datos desde el dashboard
 
 La etiqueta junto al nombre del robot (arriba a la izquierda) dice siempre **de dónde vienen los
@@ -1025,6 +1038,7 @@ robot/
 │   ├── API.md                   ← el contrato de la cátedra
 │   ├── img/                     ← capturas del README
 │   └── design/                  ← visor de maquetas (GitHub Pages) y las maquetas del director de arte
+├── docker/                      ← versión dockerizada opcional, con el SDK de Unitree incluido
 ├── .claude/                     ← skill de director de arte y agente maquetador
 └── .github/workflows/           ← CI (pruebas) y publicación en GitHub Pages
 ```
