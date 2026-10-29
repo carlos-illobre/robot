@@ -102,7 +102,9 @@ export class MotorRing {
         "g",
         { class: "pv-foot", "data-contact": "0" },
         s("title", {}, LEG_LABELS[foot.leg] ?? foot.leg),
-        s("circle", { cx: cx.toFixed(1), cy: cy.toFixed(1), r: 11 }),
+        s("circle", { class: "pv-foot__ring", cx: cx.toFixed(1), cy: cy.toFixed(1), r: 11 }),
+        // El relleno es un círculo aparte: "encenderlo" es animar solo su opacidad.
+        s("circle", { class: "pv-foot__dot", cx: cx.toFixed(1), cy: cy.toFixed(1), r: 11 }),
         s("text", { x: lx.toFixed(1), y: (ly + 5).toFixed(1), "text-anchor": "middle" }, foot.label),
       );
       feetLayer.append(g);

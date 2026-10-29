@@ -334,7 +334,7 @@ async function convert(id, srcRoot, outRoot) {
       } else {
         return; // cajas/esferas grandes: solo colisión
       }
-      const gNode = doc.createNode(`${a.name}#${gi}`).setTranslation(pos).setMesh(mesh);
+      const gNode = doc.createNode(`${a.name}#${gi}`).setTranslation(pos).setMesh(mesh).setExtras({ geom: ga.mesh ?? type });
       if (ga.quat) gNode.setRotation(toGltfQuat(normalizeQuat(nums(ga.quat))));
       node.addChild(gNode);
     });
