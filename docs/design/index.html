@@ -76,7 +76,7 @@
   }
 
   addEventListener("resize", fit);
-  fetch("mockups/index.json").then((r) => r.json()).then((json) => {
+  fetch("mockups/index.json", { cache: "no-store" }).then((r) => r.json()).then((json) => {
     data = json;
     screen = data.screens.find((s) => s.id === params.get("screen")) ?? data.screens[0];
     variant = screen?.variants.find((v) => v.id === params.get("variant")) ?? screen?.variants[0];
