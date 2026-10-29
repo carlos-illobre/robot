@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Telemetría Unitree · TP05</title>
+  <meta name="description" content="Dashboard web de telemetría en tiempo real para robots Unitree Go2 y G1 (TP05, Desarrollo de Aplicaciones II, UADE).">
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e1116'/%3E%3Cpath d='M6 18h4l3-8 4 14 3-9 2 3h4' fill='none' stroke='%2322d3ee' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shell.css">
+  <link rel="stylesheet" href="css/views/console.css">
+  <link rel="stylesheet" href="css/views/body.css">
+  <link rel="stylesheet" href="css/views/pilot.css">
+  <link rel="stylesheet" href="css/views/twin.css">
+  <!-- Chart.js local (vendor/): el dashboard funciona sin internet en el laboratorio -->
+  <script src="vendor/chart.umd.min.js" defer></script>
+  <!-- Three.js local para el Gemelo 3D: los módulos "three" se resuelven a vendor/ -->
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#view-root">Saltar al dashboard</a>
+
+  <header class="appbar" id="appbar" aria-label="Barra principal"></header>
+
+  <main id="view-root" class="view" tabindex="-1" aria-live="off">
+    <div class="boot">
+      <div class="boot__spinner" aria-hidden="true"></div>
+      <p>Conectando con el servidor de telemetría…</p>
+    </div>
+  </main>
+
+  <dialog id="help" class="dialog" aria-labelledby="help-title"></dialog>
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+  <noscript>
+    <p class="noscript">Este dashboard necesita JavaScript habilitado.</p>
+  </noscript>
+</body>
+</html>

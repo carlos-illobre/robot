@@ -31,6 +31,7 @@ const paths = {
   stop: '<rect x="5" y="5" width="14" height="14" rx="3"/>',
   tilt: '<path d="M2 12h20"/><path d="m4 16 16-8"/>',
   list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  cube: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
 };
 
