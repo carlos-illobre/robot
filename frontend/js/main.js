@@ -275,6 +275,13 @@ const actions = {
   switchView(id) {
     return switchView(id);
   },
+
+  /** Abre el manual en una sección (p. ej. desde el panel de fuentes). */
+  async openManual(section) {
+    window.history.replaceState(null, "", `${location.pathname}${location.search}#man-${section}`);
+    await switchView("manual");
+    view?.goTo?.(section);
+  },
 };
 
 /* ------------------------------------------------------------------ */

@@ -91,6 +91,40 @@ export const SECTIONS = [
 
   /* ---------------------------------------------------------------- */
   {
+    id: "fuentes",
+    level: 2,
+    toc: "Fuentes de datos (modos)",
+    title: "Fuentes de datos: ¿de dónde vienen los números?",
+    blocks: [
+      { type: "p", html: "El dashboard siempre muestra lo mismo, pero los datos pueden venir de cinco <b>fuentes</b>. La etiqueta junto al nombre del robot dice cuál se está usando: <b>REAL</b> en verde (datos medidos) o <b>SIMULADO</b> en violeta. Al hacer clic en el nombre del robot (o en esa etiqueta) se elige otra fuente y otro robot, sin reiniciar nada." },
+      {
+        type: "table",
+        head: ["Fuente", "Qué es", "Cuándo usarla", "Qué necesita"],
+        rows: [
+          ["<b>Robot real</b> <span style='color:var(--sem-ok)'>● medido</span>", "El servidor lee el robot por DDS, a través del cable de red.", "En el laboratorio, con el robot.", "Notebook conectada al robot por cable y el SDK de Unitree (<code>unitree_sdk2py</code>)."],
+          ["<b>Simulador MuJoCo</b>", "El simulador 3D de la cátedra, corriendo en la misma máquina que el servidor. Mueve el robot de verdad (sin física completa).", "Practicar con datos parecidos a los del robot.", "El simulador de la cátedra abierto (<code>INICIAR_TP05</code>)."],
+          ["<b>Demo «paseo»</b>", "Simulación de este proyecto: el robot pasea (camina, trota, gira, frena) y los datos son coherentes entre sí: si trota, suben el torque y la temperatura.", "Desarrollar, corregir y presentar. <b>Es la recomendada.</b>", "Nada."],
+          ["<b>Demo de la cátedra</b>", "El generador original de la cátedra: cada motor oscila con una senoidal, sin relación entre ellos.", "Comparar con lo que provee la cátedra.", "Nada."],
+          ["<b>Simulación en el navegador</b>", "La misma simulación «paseo», pero calculada dentro de la página: no hay servidor.", "Mirar el dashboard sin instalar nada (es lo que usa GitHub Pages).", "Nada. No puede conectarse al robot real."],
+        ],
+      },
+      {
+        type: "callout",
+        kind: "warn",
+        html: "<b>¿Por qué el robot 3D se ve en una pose rara con la «Demo de la cátedra»?</b> Esa demo mueve todos los motores alrededor de 0°. Para el Go2 eso es una pose imposible: patas estiradas y rodillas sin doblar. No es un error del dashboard: el modelo 3D muestra fielmente los ángulos que llegan. La <b>Demo «paseo»</b> genera los ángulos de un trote real, y por eso se ve natural.",
+      },
+      {
+        type: "list",
+        items: [
+          "Una fuente que <b>no está disponible</b> aparece gris con el motivo (por ejemplo: «Falta el SDK de Unitree en la máquina del backend»).",
+          "El cambio es <b>seguro</b>: el servidor solo pasa a la fuente nueva si entrega datos en 5 segundos; si no, sigue con la anterior.",
+          "Cambiar la fuente del servidor <b>afecta a todos los dashboards conectados</b> a ese servidor. Para evitarlo en una clase, el servidor se puede arrancar con <code>--fuente-fija</code>.",
+          "El <b>robot</b> (Go2 o G1) se elige en el mismo panel. Con el robot real tiene que coincidir con el que está conectado.",
+        ],
+      },
+    ],
+  },
+  {
     id: "conceptos",
     toc: "Conceptos",
     kicker: "2",

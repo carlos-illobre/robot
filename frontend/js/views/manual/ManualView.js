@@ -96,6 +96,11 @@ export default class ManualView {
     this.onConnection(this.ctx.state.connection);
   }
 
+  /** Lleva a una sección del manual (lo usa actions.openManual). */
+  goTo(id) {
+    this.#goTo(id);
+  }
+
   setInfo() {}
 
   update() {}

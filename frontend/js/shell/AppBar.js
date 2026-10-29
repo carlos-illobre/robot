@@ -132,7 +132,9 @@ export class AppBar {
     this.sourceSection = h(
       "section",
       { class: "popover__section" },
-      h("h3", {}, "Fuente de datos"),
+      h("div", { class: "popover__title" },
+        h("h3", {}, "Fuente de datos"),
+        h("button", { type: "button", class: "link-btn", onclick: () => { this.togglePopover(false); actions.openManual("fuentes"); } }, "¿Qué es cada fuente?")),
       this.sourceList,
       h("div", { class: "field" }, h("span", {}, "Robot"), this.robotSeg),
       this.ifaceField,
@@ -193,7 +195,10 @@ export class AppBar {
     const label = { real: "Robot real", simulador: "MuJoCo", demo: "Demo", "demo-catedra": "Demo cátedra", navegador: "Navegador" }[actual?.modo] ?? actual?.modo ?? "";
     this.modeEl.hidden = !label;
     this.modeEl.dataset.mode = actual?.medido ? "real" : "demo";
-    this.modeEl.innerHTML = `<span class="mode-chip__dot"></span>${actual?.medido ? "Real" : "Simulado"} · ${label}<span class="mode-chip__caret" aria-hidden="true">▾</span>`;
+    // Corta a propósito: "Real" o "Simulado". La fuente exacta, al pasar el mouse y en el panel.
+    this.modeEl.innerHTML = `<span class="mode-chip__dot"></span>${actual?.medido ? "Real" : "Simulado"}<span class="mode-chip__caret" aria-hidden="true">▾</span>`;
+    this.modeEl.title = `Fuente de datos: ${label} (clic para cambiar)`;
+    this.modeEl.setAttribute("aria-label", `Fuente de datos: ${label}. Cambiar`);
   }
 
   /** Pinta el selector de fuentes con lo que devolvió actions.loadSources(). */
