@@ -42,13 +42,13 @@ por **WebSocket** o **polling**.
 8. [El modo demo "paseo": física de juguete, coherente](#-el-modo-demo-paseo-física-de-juguete-coherente)
 9. [Contrato de la API](#-contrato-de-la-api)
 10. [Formato del CSV exportado](#-formato-del-csv-exportado)
-11. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
-12. [Pruebas y calidad](#-pruebas-y-calidad)
-13. [Hallazgos: errores en el material de la cátedra](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)
+11. [Hallazgos: errores en el material de la cátedra](#-hallazgos-dos-errores-en-el-material-de-la-cátedra)
+12. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
+13. [Pruebas y calidad](#-pruebas-y-calidad)
 14. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
-14. [Estructura del repositorio](#-estructura-del-repositorio)
-15. [Problemas frecuentes](#-problemas-frecuentes)
-16. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
+15. [Estructura del repositorio](#-estructura-del-repositorio)
+16. [Problemas frecuentes](#-problemas-frecuentes)
+17. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
 
 ---
 

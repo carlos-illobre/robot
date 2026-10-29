@@ -273,7 +273,7 @@
 
 /* Etiqueta flotante */
 .r3d-tip {
-  position: absolute; z-index: 5; top: 0; left: 0; width: max-content; max-width: min(300px, calc(100% - 16px));
+  position: absolute; z-index: 5; top: 0; left: 0; width: max-content; max-width: min(340px, calc(100% - 16px));
   padding: 10px 12px; border-radius: 12px; pointer-events: none;
   background: var(--r3d-surface); border: 1px solid var(--r3d-border); box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
   display: grid; gap: 2px; will-change: transform; font-size: 12px;
@@ -283,7 +283,7 @@
 .r3d-tip__sub { font: 500 11px/1.3 var(--font-mono); color: var(--r3d-muted); margin-bottom: 6px; }
 .r3d-tip dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 4px 14px; }
 .r3d-tip dt { color: var(--r3d-muted); }
-.r3d-tip dd { margin: 0; font-family: var(--font-mono); text-align: right; }
+.r3d-tip dd { margin: 0; font-family: var(--font-mono); text-align: right; white-space: nowrap; }
 .r3d-tip dd[data-level="ok"] { color: var(--sem-ok); }
 .r3d-tip dd[data-level="warn"] { color: var(--sem-warn); }
 .r3d-tip dd[data-level="crit"] { color: var(--sem-crit); }

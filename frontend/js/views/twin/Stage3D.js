@@ -16,20 +16,73 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 /**
- * ¿Hay WebGL? ¿Es por software? Se prueba con un contexto descartable que se
- * libera en el acto (los navegadores limitan cuántos contextos vivos hay).
+ * ¿Hay WebGL? ¿Es por software? Se prueba UNA vez por página con un contexto
+ * descartable. No se le llama loseContext(): con SwiftShader esa llamada
+ * bloquea el hilo principal entre 0,4 y 6 s (medido); el navegador lo
+ * recolecta solo al no tener referencias.
  */
+let probeCache = null;
 export function probeWebGL() {
+  if (probeCache) return probeCache;
   try {
     const c = document.createElement("canvas");
     const gl = c.getContext("webgl2") ?? c.getContext("webgl");
-    if (!gl) return { ok: false, software: false };
+    if (!gl) return (probeCache = { ok: false, software: false });
     const dbg = gl.getExtension("WEBGL_debug_renderer_info");
     const name = String(dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return { ok: true, software: /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name), renderer: name };
+    probeCache = { ok: true, software: /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name), renderer: name };
   } catch {
-    return { ok: false, software: false };
+    probeCache = { ok: false, software: false };
+  }
+  return probeCache;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pool de renderers                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Contextos WebGL libres para reutilizar. Crear un contexto cuesta ~0,3 s y
+ * destruirlo (forceContextLoss) hasta varios segundos sin placa de video, y
+ * en los dos casos el hilo principal queda bloqueado: el cambio de vista se
+ * congela y se pierden muestras. Por eso, al destruir una escena se libera
+ * TODO lo que ocupa memoria (geometrías, materiales, texturas, sombras,
+ * listas de dibujo) y solo el contexto vacío queda guardado para la próxima.
+ * Como máximo POOL_MAX contextos ociosos; el resto se descarta del todo.
+ */
+const POOL_MAX = 2;
+const pool = [];
+
+function acquireRenderer({ antialias, alpha }) {
+  const key = `${antialias}|${alpha}`;
+  for (let i = pool.length - 1; i >= 0; i--) {
+    const r = pool[i];
+    if (r.userData.key !== key) continue;
+    pool.splice(i, 1);
+    if (!r.getContext().isContextLost()) return r;
+  }
+  const r = new THREE.WebGLRenderer({ antialias, alpha, powerPreference: "high-performance" });
+  r.userData = { key };
+  return r;
+}
+
+function releaseRenderer(r) {
+  r.domElement.remove();
+  r.renderLists.dispose();
+  r.setRenderTarget(null);
+  if (pool.length < POOL_MAX && !r.getContext().isContextLost()) {
+    pool.push(r);
+  } else {
+    r.dispose();
+    r.forceContextLoss();
+  }
+}
+
+/** Libera también los contextos guardados (p. ej. al cerrar la página o en tests). */
+export function releaseIdleRenderers() {
+  for (const r of pool.splice(0)) {
+    r.dispose();
+    r.forceContextLoss();
   }
 }
 
@@ -76,11 +129,12 @@ export class Stage3D {
     this.tier = fixed >= 0 ? fixed : software ? 2 : 0;
     this.minTier = software && this.adaptive ? 1 : 0;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: this.tier <= 1, alpha: transparent, powerPreference: "high-performance" });
+    const renderer = acquireRenderer({ antialias: this.tier <= 1, alpha: transparent });
+    renderer.shadowMap.enabled = false;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
-    if (transparent) renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(0x000000, transparent ? 0 : 1);
     renderer.domElement.className = "r3d-canvas";
     renderer.domElement.setAttribute("aria-hidden", "true");
     host.prepend(renderer.domElement);
@@ -413,9 +467,9 @@ export class Stage3D {
     this.envTexture.dispose();
     this.key.shadow.map?.dispose();
     this.scene.environment = null;
-    this.renderer.dispose();
-    this.renderer.forceContextLoss();
-    this.renderer.domElement.remove();
+    // El contexto vacío vuelve al pool (ver acquireRenderer): destruirlo bloquearía el hilo.
+    releaseRenderer(this.renderer);
+    this.renderer = null;
     this.onTick = null;
   }
 }

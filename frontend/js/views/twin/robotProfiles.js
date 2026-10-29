@@ -64,7 +64,7 @@ export const PROFILES = {
       rgba && rgba[0] < 0.4
         ? { color: 0x24272e, roughness: 0.5, metalness: 0.2 }
         : { color: 0xc4c8d0, roughness: 0.36, metalness: 0.45 },
-    camera: { target: 0.6, distance: 2.2, minDistance: 0.7, maxDistance: 7 },
+    camera: { target: 0.62, distance: 2.4, minDistance: 0.7, maxDistance: 7 },
     floorSpeed: 0.55,
   },
 };
