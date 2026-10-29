@@ -168,6 +168,10 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
 .toast--info .icon { color: var(--shell-accent); }
 
 /* ---- Responsive ---- */
+/* Con poco ancho, primero se va el nombre del dashboard: el robot y su fuente importan más */
+@media (max-width: 1480px) {
+  .brand__name { display: none; }
+}
 @media (max-width: 1240px) {
   .brand__robot, .views__btn kbd { display: none; }
 }

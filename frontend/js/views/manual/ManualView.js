@@ -15,6 +15,10 @@ import { h, setText } from "../../ui/dom.js";
 import { icon } from "../../ui/icons.js";
 import { SECTIONS } from "./content.js";
 
+/** Posiciones de las marcas, medidas por tools/capturas_manual.mjs al sacar las capturas. */
+let marcas = null;
+const loadMarcas = () => (marcas ??= fetch("assets/manual/marcas.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : {})).catch(() => ({})));
+
 export default class ManualView {
   static id = "manual";
   static shortcuts = [
@@ -81,7 +85,14 @@ export default class ManualView {
     this.scroller.addEventListener("scroll", this.onScroll, { passive: true });
 
     const hash = location.hash.replace("#man-", "");
-    if (hash && SECTIONS.some((s) => s.id === hash)) requestAnimationFrame(() => this.#goTo(hash, false));
+    if (hash && SECTIONS.some((s) => s.id === hash)) {
+      // Se repite cuando terminan de cargar las imágenes, que cambian la altura de la página.
+      requestAnimationFrame(() => this.#goTo(hash, false));
+      const until = performance.now() + 2500; // después de eso, el usuario ya está leyendo
+      this.article.querySelectorAll("img").forEach((img) =>
+        img.addEventListener("load", () => performance.now() < until && this.#goTo(hash, false), { once: true }),
+      );
+    }
     this.onConnection(this.ctx.state.connection);
   }
 
@@ -205,21 +216,27 @@ export default class ManualView {
         src: b.src,
         alt: b.alt,
         loading: "lazy",
+        // Reserva el alto antes de cargar (las capturas de las vistas son de 1366×716).
+        style: b.strip ? undefined : { aspectRatio: b.ratio ?? "1366 / 716" },
         onerror: (e) => {
           e.currentTarget.closest(".man-shot").classList.add("is-missing");
         },
       }),
     );
-    b.markers?.forEach(([x, y], i) => {
+    const placeMarkers = (list) => list?.forEach((pos, i) => {
+      if (!pos) return;
+      const [x, y] = pos;
       const m = h("button", { type: "button", class: "man-marker", style: { left: `${x}%`, top: `${y}%` }, "aria-label": `Referencia ${i + 1}` }, String(i + 1));
       m.addEventListener("mouseenter", () => highlight(i + 1, true));
       m.addEventListener("mouseleave", () => highlight(i + 1, false));
       m.addEventListener("focus", () => highlight(i + 1, true));
       m.addEventListener("blur", () => highlight(i + 1, false));
       m.addEventListener("click", () => items[i]?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
-      markers.push(m);
+      markers[i] = m;
       stage.append(m);
     });
+    if (b.markers) placeMarkers(b.markers);
+    else if (b.marks) loadMarcas().then((all) => placeMarkers(all[b.marks]));
 
     const legend = h(
       "ol",

@@ -172,14 +172,14 @@ const actions = {
     history.clear();
     logEvent("info", `Conectando a ${isSimUrl(state.baseUrl) ? "la simulación del navegador" : state.baseUrl}`);
     await service.connect({ baseUrl: state.baseUrl, transport: state.transport, intervalMs: state.intervalMs });
-    await actions.loadSources();
+    await actions.loadSources({ probe: false });
   },
 
   /**
    * Fuentes de datos disponibles. Siempre incluye la simulación del navegador;
    * las del backend se le preguntan al último servidor usado.
    */
-  async loadSources() {
+  async loadSources({ probe = true } = {}) {
     const navegador = {
       modo: "navegador",
       nombre: "Simulación en el navegador",
@@ -190,14 +190,17 @@ const actions = {
     };
     let backend = null;
     let error = "";
+    const sim = isSimUrl(state.baseUrl);
     try {
+      // En la simulación del navegador no hay servidor: solo se le pregunta si el
+      // usuario abre el panel de fuentes (así no se ensucia la consola, p. ej. en GitHub Pages).
+      if (sim && !probe) throw new Error("sin-consulta");
       backend = await new ApiClient(state.backendUrl, { timeoutMs: 1500 }).fuentes();
     } catch (err) {
       error = /404/.test(err.message)
         ? "Este servidor no permite elegir la fuente (es el backend original de la cátedra)."
         : `No hay un servidor en ${state.backendUrl}.`;
     }
-    const sim = isSimUrl(state.baseUrl);
     const fuentes = backend
       ? backend.fuentes
       : ["real", "simulador", "demo"].map((modo) => ({ modo, nombre: { real: "Robot real", simulador: "Simulador MuJoCo", demo: "Demo «paseo»" }[modo], descripcion: "", disponible: false, motivo: error }));
@@ -460,7 +463,7 @@ const appBar = new AppBar(document.getElementById("appbar"), { state, actions })
 const initialView = new URLSearchParams(location.search).get("view") ?? settings.get("view") ?? VIEWS[0].id;
 await switchView(initialView);
 await service.connect({ baseUrl: state.baseUrl, transport: state.transport, intervalMs: state.intervalMs });
-actions.loadSources();
+actions.loadSources({ probe: false });
 
 // Para curiosear desde la consola del navegador (F12): tp05.state, tp05.history.tail(5)…
 window.tp05 = { state, history, captures, actions, service, bus };
