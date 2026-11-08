@@ -67,8 +67,10 @@ export async function threeSinGpu(importOriginal) {
 /** Contexto 2D que anota cada llamada. */
 export function fakeContext2D() {
   const gradient = { addColorStop: vi.fn() };
-  return {
+  const ctx = {
     gradient,
+    /** [strokeStyle, lineWidth] en el momento de cada stroke()/strokeRect(). */
+    strokes: [],
     fillStyle: null,
     strokeStyle: null,
     lineWidth: 0,
@@ -78,8 +80,10 @@ export function fakeContext2D() {
     beginPath: vi.fn(),
     moveTo: vi.fn(),
     lineTo: vi.fn(),
-    stroke: vi.fn(),
+    stroke: vi.fn(() => ctx.strokes.push([ctx.strokeStyle, ctx.lineWidth])),
   };
+  ctx.strokeRect = vi.fn(() => ctx.strokes.push([ctx.strokeStyle, ctx.lineWidth]));
+  return ctx;
 }
 
 /**
