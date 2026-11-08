@@ -293,6 +293,17 @@ def test_cambio_exitoso_reemplaza_y_cierra_el_lector_viejo(entorno, capsys):
     assert "[FUENTE] Ahora: Robot real · g1" in capsys.readouterr().out
 
 
+def test_fr016_interfaz_vacia_es_automatica(entorno):
+    nuevo = Lector("nuevo")
+    estado = _estado()
+    fabrica = Fabrica(nuevo)
+    c, _ = _cliente(fabrica, estado)
+    r = c.post("/fuente", json={"modo": "real", "interfaz": ""})
+    assert r.status_code == 200
+    assert fabrica.pedidos == [("real", "go2", None)]
+    assert estado["interfaz"] is None and r.json()["actual"]["interfaz"] is None
+
+
 @pytest.mark.parametrize("modo, informado", [("demo", "demo"), ("demo-catedra", "demo"), ("simulador", "simulador")])
 def test_los_dos_demos_se_informan_como_demo(entorno, modo, informado):
     nuevo = Lector("nuevo")
