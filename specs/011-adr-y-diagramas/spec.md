@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Branch** | `docs/adr-y-diagramas` |
-| **Estado** | 🔄 En curso |
+| **Estado** | ✅ Implementada |
 | **Creada** | 2026-11-08 |
 | **Relacionada con** | Constitución, principios I y VI · README, "Decisiones técnicas" y "Arquitectura" |
 
