@@ -27,9 +27,12 @@ describe("milliamps", () => {
     [4201.6, "4\u202f202 mA"],
     [1234567, "1\u202f234\u202f567 mA"],
     [-1234, "−1\u202f234 mA"],
-    [-0.4, "−0 mA"],
   ])("%d → %s", (v, txt) => {
     expect(milliamps(v)).toBe(txt);
+  });
+
+  test.each([-0.4, -0.49, -0])("FR-005: %s mA, que redondea a cero, da «0 mA» sin signo", (v) => {
+    expect(milliamps(v)).toBe("0 mA");
   });
 
   test.each([NaN, Infinity, -Infinity, undefined, null, "12"])("un valor no numérico (%s) se muestra como raya", (v) => {

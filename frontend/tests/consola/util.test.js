@@ -41,6 +41,10 @@ describe("grouped", () => {
     expect(grouped(n)).toBe(esperado);
   });
 
+  test.each([-0.5, -0.4, -0.01, -0])("FR-005: grouped(%s), que redondea a cero, da «0» sin signo", (n) => {
+    expect(grouped(n)).toBe("0");
+  });
+
   test("separa los miles con un espacio fino irrompible (U+202F), no con punto", () => {
     expect(grouped(1500)).toBe("1\u202F500");
     expect(grouped(1500)).not.toContain(".");

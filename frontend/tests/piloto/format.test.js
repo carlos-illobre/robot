@@ -79,6 +79,10 @@ describe("milliamps", () => {
     expect(milliamps(12.4)).toBe("12 mA");
   });
 
+  test.each([-0.4, -0.49, -0])("FR-005: %s mA, que redondea a cero, da «0 mA» sin signo", (v) => {
+    expect(milliamps(v)).toBe("0 mA");
+  });
+
   test("sin dato numérico devuelve una raya", () => {
     expect(milliamps(Number.NaN)).toBe("—");
     expect(milliamps(Infinity)).toBe("—");
