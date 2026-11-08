@@ -56,6 +56,12 @@ def test_archivo_ilegible_usa_el_puerto_de_siempre(monkeypatch, contenido):
     assert _puerto_del_simulador() == 8765
 
 
+@pytest.mark.parametrize("contenido", ["[9000]", '"9000"', "9000", "null"])
+def test_fr013_json_que_no_es_objeto_se_ignora(monkeypatch, contenido):
+    _archivo(monkeypatch, contenido)
+    assert _puerto_del_simulador() == 8765
+
+
 def test_sin_archivo_usa_el_puerto_de_siempre(monkeypatch):
     _archivo(monkeypatch, error=FileNotFoundError("no hay simulador"))
     assert _puerto_del_simulador() == 8765

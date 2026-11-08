@@ -39,7 +39,7 @@ def _puerto_del_simulador() -> int:
     try:
         with open(marca, encoding="utf-8") as f:
             return int(json.load(f).get("puerto", PUERTO))
-    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+    except (OSError, ValueError, TypeError, AttributeError, json.JSONDecodeError):
         return PUERTO
 
 

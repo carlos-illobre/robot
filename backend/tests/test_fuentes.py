@@ -68,6 +68,25 @@ def test_simulador_sin_el_lector_del_paquete(monkeypatch):
     assert fuentes._simulador_abierto() is False
 
 
+def test_fr013_get_fuentes_con_marca_que_no_es_objeto_no_da_500(monkeypatch):
+    import io
+
+    def rechazar(direccion, timeout):
+        raise ConnectionRefusedError()
+
+    monkeypatch.setattr(telemetry_reader, "open", lambda *a, **k: io.StringIO("[9000]"), raising=False)
+    monkeypatch.setattr(fuentes, "socket", SimpleNamespace(create_connection=rechazar))
+    monkeypatch.setattr(fuentes, "_sdk_instalado", lambda: True)
+    monkeypatch.setattr(fuentes, "interfaces_de_red", lambda: [])
+    app = FastAPI()
+    app.include_router(crear_router(lambda *a: None, lambda *a: None,
+                                    {"lector": None, "modo": "demo", "robot": "go2", "interfaz": None}))
+    r = TestClient(app).get("/fuentes")
+    assert r.status_code == 200
+    simulador = [f for f in r.json()["fuentes"] if f["modo"] == "simulador"][0]
+    assert (simulador["disponible"], simulador["motivo"]) == (False, MOTIVO_SIM)
+
+
 @pytest.fixture
 def entorno(monkeypatch):
     """Por defecto: con SDK y con simulador. Cada prueba cambia lo que necesita."""
