@@ -14,7 +14,7 @@ import { h, s, setText, fmt, clamp } from "../../ui/dom.js";
 import { tempLevel, motorGroup, LEG_LABELS } from "../../core/telemetryModel.js";
 
 /** "Delantera izquierda" → "Delantera izq." para que entre en la tarjeta. */
-const shortLeg = (leg) => (LEG_LABELS[leg] ?? leg).replace("izquierda", "izq.").replace("derecha", "der.");
+const shortLeg = (leg) => LEG_LABELS[leg].replace("izquierda", "izq.").replace("derecha", "der.");
 
 /**
  * Nombre corto para las filas del G1: el grupo ya dice el lado, así que
