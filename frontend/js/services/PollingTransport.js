@@ -36,21 +36,24 @@ export class PollingTransport {
     this.#stopped = true;
     clearTimeout(this.#timer);
     this.#abort?.abort();
+    this.#abort = null;
   }
 
   async #tick() {
     if (this.#stopped) return;
     const t0 = performance.now();
-    this.#abort = new AbortController();
+    // Cada ciclo es dueño de su controlador: si después de un stop() (y quizá un start())
+    // ya no es el actual, la respuesta o el error se descartan y el ciclo muere (spec 010 · FR-011).
+    const abort = (this.#abort = new AbortController());
     try {
-      const raw = await this.api.telemetria({ signal: this.#abort.signal });
-      if (this.#stopped) return;
+      const raw = await this.api.telemetria({ signal: abort.signal });
+      if (abort !== this.#abort) return;
       this.lastRttMs = performance.now() - t0;
       this.#failures = 0;
       this.onState("live");
       this.onData(raw, { rttMs: this.lastRttMs });
     } catch (err) {
-      if (this.#stopped) return;
+      if (abort !== this.#abort) return;
       this.#failures += 1;
       this.onState("reconnecting", err.message);
     }
