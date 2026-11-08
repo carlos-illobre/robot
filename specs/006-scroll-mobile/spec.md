@@ -56,7 +56,16 @@ desde cualquier punto **para** que la demostración sea fluida.
 2. **Dado** lo mismo, **cuando** uso dos dedos, **entonces** giro y acerco la cámara.
 3. **Dado** lo mismo, **cuando** toco una articulación, **entonces** se selecciona el motor (como antes).
 
-### HU-4 · En la computadora no cambia nada (P1)
+### HU-4 · Piloto legible en un teléfono real (P2)
+
+Hallado durante la medición: la vista Piloto del celular estaba diseñada para ~790 px de alto; en
+un iPhone 13 (612 px útiles) o un iPhone SE (500 px) el rumbo pisa a "Batería" y "Motor más
+caliente", y los datos de la batería pisan al osciloscopio.
+
+1. **Dado** un teléfono de menos de 780 px de alto útil, **cuando** abro Piloto, **entonces** ningún texto del instrumental se superpone con otro.
+2. **Dado** lo mismo, **cuando** arrastro hacia arriba, **entonces** la página baja hasta los botones de captura.
+
+### HU-5 · En la computadora no cambia nada (P1)
 
 1. **Dado** una pantalla de escritorio, **cuando** desplazo dentro de la tabla de motores, **entonces** se desplaza solo la tabla, como antes (el gesto no "se escapa" a la página).
 
@@ -68,6 +77,7 @@ desde cualquier punto **para** que la demostración sea fluida.
 | FR-002 | Ídem en la vista Cuerpo | ídem |
 | FR-003 | La tabla puede seguir desplazándose a lo ancho | ídem (gesto horizontal) |
 | FR-004 | En escritorio, las tablas mantienen `overscroll-behavior: contain` | revisión del CSS (las reglas nuevas están dentro de `@media`) |
+| FR-006 | En el celular, Piloto mide al menos 780 px de alto y la página se desplaza | E2E (caso Piloto: distancias entre rumbo, batería y osciloscopio ≥ 0) |
 | FR-005 | El modelo 3D **embebido** deja el gesto vertical de un dedo a la página; dos dedos giran y acercan | E2E (caso 3D) · el Gemelo 3D a pantalla completa no cambia |
 
 ## Criterios de éxito medibles

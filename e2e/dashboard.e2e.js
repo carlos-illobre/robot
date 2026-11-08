@@ -182,7 +182,7 @@ async function swipe(cdp, p, x, y, dx, dy) {
   await p.waitForTimeout(250);
 }
 
-// Spec 006 · FR-001, FR-002, FR-003, FR-005. La rueda del mouse no reproduce el error: hace falta el dedo.
+// Spec 006 · FR-001, FR-002, FR-003, FR-005, FR-006. La rueda del mouse no reproduce el error: hace falta el dedo.
 test("en el celular se desplaza con el dedo desde cualquier punto, también sobre la tabla de motores", async () => {
   const phone = await browser.newContext({ viewport: { width: 390, height: 664 }, hasTouch: true, isMobile: true, deviceScaleFactor: 1 });
   const p = await phone.newPage();
@@ -215,6 +215,16 @@ test("en el celular se desplaza con el dedo desde cualquier punto, también sobr
         assert.equal(await p.evaluate(() => window.scrollY), y);
       }
     }
+
+    // FR-006: en un teléfono bajo, el instrumental de Piloto no se pisa (rumbo vs. batería; batería vs. osciloscopio)
+    await p.goto(`${base()}/dashboard/?view=pilot`);
+    await p.waitForFunction(() => window.tp05?.state.latest, undefined, { timeout: 8000 });
+    await p.waitForTimeout(300);
+    const gaps = await p.evaluate(() => {
+      const r = (sel) => document.querySelector(`.view-pilot ${sel}`).getBoundingClientRect();
+      return { heading: r(".pv-battery .pv-label").top - r(".pv-heading__readout").bottom, osc: r(".pv-osc").top - r(".pv-battery__foot").bottom };
+    });
+    assert.ok(gaps.heading >= 0 && gaps.osc >= 0, `piloto: textos superpuestos ${JSON.stringify(gaps)}`);
 
     // FR-005: con el robot en 3D (Cuerpo), un dedo sobre el modelo desplaza la página
     await p.evaluate(() => localStorage.setItem("tp05-dashboard", JSON.stringify({ figure: "3d" })));

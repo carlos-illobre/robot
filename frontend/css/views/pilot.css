@@ -434,7 +434,9 @@
     --tape-top: 26cqh;
     --tape-h: 34cqh;
     --tape-w: 10px;
-    min-height: 600px;
+    /* Spec 006 · FR-006: el instrumental necesita ~780 px de alto para no pisarse. En teléfonos
+       más bajos (iPhone 13: 612 px útiles) la vista mantiene ese alto y la página se desplaza. */
+    min-height: 780px;
     font-size: 15px;
   }
   .view-pilot .pv-desk { display: none; }
