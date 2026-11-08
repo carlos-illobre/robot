@@ -428,7 +428,8 @@
   .view-body .bd-detail__v--big { font-size: 26px; }
   .view-body .bd-detail__v { font-size: 16px; }
   .view-body .bd-panel-head { padding: 14px 16px 4px; }
-  .view-body .bd-motors__scroll { overflow: auto visible; padding: 0 4px 8px; }
+  /* Spec 006: solo se desplaza a lo ancho; el gesto vertical es de la página */
+  .view-body .bd-motors__scroll { overflow-x: auto; overflow-y: hidden; overscroll-behavior: auto; padding: 0 4px 8px; }
   .view-body .bd-table { font-size: 13px; }
   .view-body .bd-table td, .view-body .bd-table tbody th { padding: 0 6px; height: 32px; }
   .view-body .bd-table thead th { padding: 4px 6px; white-space: normal; line-height: 1.2; }
