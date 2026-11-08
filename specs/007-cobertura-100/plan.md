@@ -32,6 +32,8 @@
 
 ## Decisiones
 
+> La decisión principal está registrada como [ADR-0004](../../docs/adr/0004-cobertura-unitaria-total.md) (cobertura del 100 % con Vitest + happy-dom y pytest-cov).
+
 | Decisión | Alternativa | Por qué |
 |---|---|---|
 | Vitest | `node --test --experimental-test-coverage` | No genera HTML ni lo soporta Stryker con análisis por prueba |

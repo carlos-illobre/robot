@@ -22,6 +22,8 @@ El índice lee `frontend/coverage-summary.json`, `backend/coverage.json`,
 
 ## Decisiones
 
+> La decisión principal está registrada como [ADR-0007](../../docs/adr/0007-reportes-en-github-pages.md) (publicación en GitHub Pages desde `main`).
+
 | Decisión | Alternativa | Por qué |
 |---|---|---|
 | Generar en la CI | Commitear los reportes | Los reportes son derivados: commitearlos ensucia el historial y quedan desactualizados |

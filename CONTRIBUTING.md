@@ -1,7 +1,8 @@
 # Cómo se trabaja en este repositorio
 
 El proyecto sigue **Spec-Driven Development** ([`specs/README.md`](specs/README.md)) y los
-principios de la [constitución](specs/constitution.md). Este archivo dice cómo se lleva eso a git.
+principios de la [constitución](specs/constitution.md). Las decisiones técnicas se registran como
+[ADR](docs/adr/README.md) y la arquitectura está dibujada en [`docs/arquitectura.md`](docs/arquitectura.md). Este archivo dice cómo se lleva eso a git.
 
 ## Branches
 
@@ -63,4 +64,9 @@ Una tarea se puede mergear solo si:
 - [ ] La cobertura unitaria sigue en **100 %** (`npm run coverage` y `npm run coverage:backend`).
 - [ ] El puntaje de mutación no baja del umbral (`npm run mutation` y `npm run mutation:backend`).
 - [ ] La documentación (README, manual, especificación) está al día.
+- [ ] Cada decisión técnica nueva (una biblioteca, un patrón, un formato, un cambio de proceso) tiene
+      su [ADR](docs/adr/README.md), enlazado desde el `plan.md`. Si la decisión cambia una anterior,
+      el ADR viejo pasa a "Reemplazada por ADR-NNNN".
+- [ ] Si cambia la estructura del sistema, los diagramas de [`docs/arquitectura.md`](docs/arquitectura.md)
+      siguen coincidiendo con el código.
 - [ ] El índice de [`specs/README.md`](specs/README.md) refleja el nuevo estado.

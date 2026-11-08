@@ -62,6 +62,7 @@ pruebas). Desde la 006 se escriben **antes** del código.
 | 008 | [Pruebas de mutación](008-pruebas-de-mutacion/spec.md) | ✅ Implementada | `test/mutation-testing` |
 | 009 | [Reportes de calidad en GitHub Pages](009-reportes-de-calidad/spec.md) | 🔄 En curso | `ci/pages-coverage` |
 | 010 | [Errores hallados por las pruebas](010-errores-hallados-por-las-pruebas/spec.md) | ✅ Implementada | `fix/hallazgos-frontend`, `fix/hallazgos-backend` |
+| 011 | [Decisiones de arquitectura (ADR) y diagramas](011-adr-y-diagramas/spec.md) | ✅ Implementada | `docs/adr-y-diagramas` |
 
 Las especificaciones nuevas se agregan a esta tabla en el mismo commit que las crea.
 

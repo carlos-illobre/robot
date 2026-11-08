@@ -27,9 +27,12 @@
 
 ## Decisiones y alternativas descartadas
 
-| Decisión | Alternativa | Por qué se eligió |
-|---|---|---|
-| | | |
+> Las decisiones chicas (de esta tarea) van en la tabla. Las que afectan a más de una tarea o
+> cuesta revertir se registran además como [ADR](../../docs/adr/README.md) y se enlazan acá.
+
+| Decisión | Alternativa | Por qué se eligió | ADR |
+|---|---|---|:-:|
+| | | | |
 
 ## Estrategia de pruebas
 
