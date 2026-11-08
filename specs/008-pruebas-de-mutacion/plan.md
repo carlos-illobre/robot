@@ -23,3 +23,22 @@
 Se fijan con la primera corrida completa sobre la suite con cobertura 100 % (spec 007): `break`
 queda unos puntos por debajo del puntaje medido, para que la CI no falle por ruido y sí falle si
 alguien agrega código sin pruebas que lo verifiquen.
+
+### Primera medición completa (2026-11-08)
+
+| | Mutantes | Detectados | Sobrevivientes | Puntaje | `break` |
+|---|:-:|:-:|:-:|:-:|:-:|
+| **Frontend** (Stryker, 57 archivos, 109 min) | 13 591 | 10 123 | 3 175 | **76,1 %** | 74 % |
+| **Backend** (mutmut) | ~2 500 | — | — | **92,8 %** | 90 % |
+
+Los archivos con más sobrevivientes son, sobre todo, **contenido estático** (textos del manual,
+íconos SVG, diagramas, perfiles de robots): las pruebas verifican que se renderiza, no cada cadena.
+Se dejan como trabajo futuro, en orden de impacto:
+
+| Archivo | Puntaje | Sobrevivientes |
+|---|:-:|:-:|
+| `views/manual/ManualView.js` | 0 % | 429 |
+| `views/manual/diagrams.js` | 6 % | 141 |
+| `views/manual/views-content.js` | 36 % | 141 |
+| `core/paseoSim.js` | 53 % | 209 |
+| `views/console/FeetPanel.js` | 58 % | 121 |

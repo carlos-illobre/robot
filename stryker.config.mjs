@@ -20,7 +20,7 @@ export default {
   htmlReporter: { fileName: "reports/mutation/frontend/index.html" },
   jsonReporter: { fileName: "reports/mutation/frontend/mutation.json" },
   // high: verde · low: amarillo · break: la CI falla por debajo (spec 008)
-  thresholds: { high: 90, low: 75, break: null },
+  thresholds: { high: 90, low: 75, break: 74 },
   concurrency: 4,
   timeoutMS: 10000,
   // Reutiliza resultados de la corrida anterior para los archivos que no cambiaron

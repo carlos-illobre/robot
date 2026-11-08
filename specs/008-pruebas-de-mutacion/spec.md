@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Branch** | `test/mutation-testing` |
-| **Estado** | 🔄 En curso |
+| **Estado** | ✅ Implementada |
 | **Creada** | 2026-11-08 |
 | **Relacionada con** | Constitución, principio III · Especificación 007 |
 
@@ -50,8 +50,8 @@ verifican comportamiento o solo recorren líneas.
 
 | ID | Métrica | Objetivo |
 |---|---|---|
-| SC-001 | Puntaje de mutación del frontend | ≥ umbral `break` (se fija con la primera medición completa, ver `plan.md`) |
-| SC-002 | Puntaje de mutación del backend | ≥ umbral `break` |
+| SC-001 | Puntaje de mutación del frontend | ≥ 74 % (`break` de Stryker). Medido: **76,1 %** |
+| SC-002 | Puntaje de mutación del backend | ≥ 90 % (`--minimo` de `tools/mutmut_html.py`). Medido: **92,8 %** |
 
 ## Fuera de alcance
 
