@@ -185,6 +185,20 @@ describe("connect", () => {
   });
 });
 
+describe("connect interrumpido", () => {
+  it("FR-012: si se desconecta mientras espera /info, no crea el temporizador de «sin datos»", async () => {
+    let responder;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((r) => (responder = r))));
+    const p = service.connect({ baseUrl: "http://x" });
+    service.disconnect();
+    responder(respuesta(INFO_GO2));
+    await p;
+    expect(vi.getTimerCount()).toBe(0);
+    vi.advanceTimersByTime(10_000);
+    expect(estados()).toEqual(["connecting", "offline"]);
+  });
+});
+
 describe("setTransport", () => {
   it("cambia de estrategia en caliente con la misma dirección", async () => {
     stubInfo();

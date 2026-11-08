@@ -67,8 +67,12 @@ export class TelemetryService {
     this.#setState("connecting", baseUrl);
 
     // /info primero: el dashboard se arma según el robot ("consultá /info en vez de asumir").
+    const transport = this.#transport;
     await this.refreshInfo();
-    this.#transport?.start();
+    // Si mientras tanto se desconectó (o se reconectó), este connect ya no manda:
+    // ni transporte ni vigilante de "sin datos" (spec 010 · FR-012).
+    if (this.#transport !== transport) return;
+    transport.start();
     this.#staleTimer = setInterval(() => this.#checkStale(), 500);
   }
 
