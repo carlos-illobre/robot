@@ -800,6 +800,17 @@ describe("BodyView › destroy", () => {
     expect(text(view.count)).toBe("0");
   });
 
+  test("FR-010: onTheme() después de destroy() no hace nada", () => {
+    const { view, ctx } = mount({}, { info: infoFor("go2") });
+    feed(view, ctx, [frame()]);
+    const draw = vi.spyOn(view.timeline, "draw");
+    const prev = view.palette;
+    view.destroy();
+    expect(() => view.onTheme("light")).not.toThrow();
+    expect(view.palette).toBe(prev);
+    expect(draw).not.toHaveBeenCalled();
+  });
+
   test("destruir sin montar no falla", () => {
     const view = new BodyView(makeCtx());
     expect(() => view.destroy()).not.toThrow();
