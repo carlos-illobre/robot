@@ -41,12 +41,12 @@ describe("Timeline › lienzo", () => {
     expect(WINDOW_MS).toBe(30_000);
   });
 
-  test("si el lienzo no tiene tamaño solo lo limpia", () => {
+  test("FR-009: si el lienzo no tiene tamaño solo lo limpia, pero cuenta las muestras", () => {
     const { tl, ctx } = setup(0, 0);
     draw(tl, { frames: timed(3) });
     expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 0, 0);
     expect(ctx.fillRect).not.toHaveBeenCalled();
-    expect(tl.count).toBeUndefined();
+    expect(tl.count).toBe(3);
     const { tl: tl2, ctx: ctx2 } = setup(300, 0);
     draw(tl2);
     expect(ctx2.fillRect).not.toHaveBeenCalled();

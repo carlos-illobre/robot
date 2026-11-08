@@ -354,6 +354,13 @@ describe("BodyView › update", () => {
     expect(text(view.sContacts)).toMatch(/^, .*pata/);
   });
 
+  test("FR-009: sin tamaño todavía, la línea de tiempo dice la cuenta real de muestras", () => {
+    const { view, ctx } = mount({}, { info: infoFor("go2") });
+    setBox(view.canvas, 0, 0);
+    feed(view, ctx, simFrames("go2", 12));
+    expect(text(view.tlSub)).toBe("últimos 30 s · 12 muestras");
+  });
+
   test("actualiza todas las zonas con muestras reales del G1", () => {
     const { view, ctx } = mount({}, { info: infoFor("g1") });
     const last = feed(view, ctx, simFrames("g1", 20));
