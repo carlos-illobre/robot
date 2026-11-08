@@ -66,15 +66,12 @@ function along(points, t) {
     seg.push(d);
     total += d;
   }
+  // Avanza tramo por tramo hasta el que contiene la distancia (o el último).
   let dist = t * total;
-  for (let i = 0; i < seg.length; i++) {
-    if (dist <= seg[i] || i === seg.length - 1) {
-      const k = seg[i] ? Math.min(1, dist / seg[i]) : 0;
-      return [points[i][0] + (points[i + 1][0] - points[i][0]) * k, points[i][1] + (points[i + 1][1] - points[i][1]) * k];
-    }
-    dist -= seg[i];
-  }
-  return points[0];
+  let i = 0;
+  while (i < seg.length - 1 && dist > seg[i]) dist -= seg[i++];
+  const k = Math.min(1, dist / seg[i]);
+  return [points[i][0] + (points[i + 1][0] - points[i][0]) * k, points[i][1] + (points[i + 1][1] - points[i][1]) * k];
 }
 
 /** Qué cuerpo dibujar según lo que informa /info. */

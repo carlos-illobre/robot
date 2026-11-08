@@ -39,7 +39,7 @@ def _puerto_del_simulador() -> int:
     try:
         with open(marca, encoding="utf-8") as f:
             return int(json.load(f).get("puerto", PUERTO))
-    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+    except (OSError, ValueError, TypeError, AttributeError, json.JSONDecodeError):
         return PUERTO
 
 
@@ -122,12 +122,13 @@ class TelemetryReader:
 
     def esperar_primer_dato(self, timeout: float = 5.0) -> bool:
         limite = time.monotonic() + timeout
-        while time.monotonic() < limite:
+        while True:
             with self._lock:
                 if self._snapshot is not None:
                     return True
+            if time.monotonic() >= limite:
+                return False
             time.sleep(0.1)
-        return False
 
     @property
     def mensajes_leidos(self) -> int:
@@ -141,5 +142,5 @@ class TelemetryReader:
 # El modo --demo no depende del transporte: se reusa el del laboratorio.
 try:
     from telemetry_reader_dds import DemoReader          # noqa: F401
-except ImportError:                                      # pragma: no cover
+except ImportError:                                      # sin el lector del laboratorio no hay demo
     DemoReader = None

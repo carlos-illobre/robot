@@ -187,11 +187,12 @@ class TelemetryReader:
 
     def esperar_primer_dato(self, timeout: float = 5.0) -> bool:
         limite = time.monotonic() + timeout
-        while time.monotonic() < limite:
+        while True:
             if self.obtener_snapshot() is not None:
                 return True
+            if time.monotonic() >= limite:
+                return False
             time.sleep(0.05)
-        return False
 
     @property
     def mensajes_leidos(self) -> int:
@@ -200,12 +201,14 @@ class TelemetryReader:
 
     def cerrar(self):
         sub, self._subscriber = self._subscriber, None
-        if sub is not None:
-            for metodo in ("Close", "close"):
-                fn = getattr(sub, metodo, None)
-                if callable(fn):
-                    fn()
-                    break
+        bms, self._sub_bms = self._sub_bms, None
+        for s in (sub, bms):
+            if s is not None:
+                for metodo in ("Close", "close"):
+                    fn = getattr(s, metodo, None)
+                    if callable(fn):
+                        fn()
+                        break
 
 
 class DemoReader:

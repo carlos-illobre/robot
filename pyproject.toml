@@ -6,14 +6,13 @@ addopts = "-q --cov --cov-branch --cov-report=term-missing:skip-covered --cov-re
 
 [tool.coverage.run]
 # Spec 007: todo el backend y el arranque multiplataforma.
-source = ["."]
 include = ["backend/*", "iniciar.py"]
 omit = ["backend/tests/*"]
 branch = true
 
 [tool.coverage.report]
-# Ratchet (spec 007): sube con cada branch de pruebas hasta 100.
-fail_under = 58
+# Spec 007: 100 % de líneas y ramas o la CI falla.
+fail_under = 100
 show_missing = true
 precision = 1
 

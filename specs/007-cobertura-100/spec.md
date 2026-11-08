@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Branch** | `test/vitest-cobertura` (herramientas) · `test/coverage-backend` · `test/coverage-frontend-*` (pruebas) |
-| **Estado** | 🔄 En curso |
+| **Estado** | ✅ Implementada |
 | **Creada** | 2026-11-08 |
 | **Relacionada con** | Constitución, principio III |
 

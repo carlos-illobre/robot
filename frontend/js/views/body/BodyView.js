@@ -322,7 +322,7 @@ export default class BodyView {
       h("span", { class: "bd-btn__icon", html: iconName ? icon(iconName, { size: 16 }) : "" }),
       h("span", { class: "bd-btn__label" }, label),
       ...children,
-      key ? h("kbd", { "aria-hidden": "true" }, key) : null,
+      h("kbd", { "aria-hidden": "true" }, key),
     );
     const { actions } = this.ctx;
     this.count = h("span", { class: "bd-count bd-num", "aria-label": "muestras capturadas" }, "0");
@@ -400,7 +400,7 @@ export default class BodyView {
   }
 
   #updateLegChips(frame) {
-    for (const [leg, c] of this.legChipEls ?? []) {
+    for (const [leg, c] of this.legChipEls) {
       const down = frame.fuerzas[leg] === 1;
       if (down === c.down) continue;
       c.down = down;
