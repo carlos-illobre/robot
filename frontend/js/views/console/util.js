@@ -12,7 +12,8 @@ export function setAttr(el, name, value) {
  */
 export function grouped(n) {
   const digits = Math.abs(Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return n <= -0.5 ? `−${digits}` : digits;
+  // Sin «−0»: el signo va solo si el valor redondeado no es cero (spec 010 · FR-005).
+  return Math.round(n) < 0 ? `−${digits}` : digits;
 }
 
 /** true si el usuario pidió menos movimiento en el sistema operativo. */

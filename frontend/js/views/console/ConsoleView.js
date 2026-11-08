@@ -90,6 +90,8 @@ export default class ConsoleView {
     this.imu.init();
 
     this.#unsubscribe.push(this.ctx.captures.subscribe((store) => this.#onCaptures(store)));
+    // Las capturas que ya había no son "nuevas": sin destello al entrar (spec 010 · FR-002).
+    this.#lastCaptures = this.ctx.captures.size;
     this.#onCaptures(this.ctx.captures);
     this.#setEndpoint(this.ctx.state.connection);
   }
@@ -371,7 +373,7 @@ export default class ConsoleView {
   #onCaptures(store) {
     const n = store.size;
     setText(this.countEl, String(n));
-    setText(this.clearBtn, n ? `Borrar las ${n} capturas` : "No hay capturas para borrar");
+    setText(this.clearBtn, n === 0 ? "No hay capturas para borrar" : n === 1 ? "Borrar la captura" : `Borrar las ${n} capturas`);
     this.clearBtn.disabled = n === 0;
     const last = store.samples.at(-1);
     setText(

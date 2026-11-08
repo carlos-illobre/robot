@@ -203,7 +203,8 @@ export class AppBar {
       h("p", { class: "robot-menu__head" }, "Robot"),
       item("go2", "Unitree Go2", "cuadrúpedo · 12 motores · 4 patas"),
       item("g1", "Unitree G1", "humanoide · 29 motores · 2 pies"),
-      h("button", { type: "button", class: "robot-menu__more", onclick: () => { this.toggleRobotMenu(false); this.togglePopover(true, "source"); } }, "Fuente de datos…"),
+      // stopPropagation: si el clic llega a `document`, el «clic afuera» del panel lo cierra (spec 010 · FR-001).
+      h("button", { type: "button", class: "robot-menu__more", onclick: (e) => { e.stopPropagation(); this.toggleRobotMenu(false); this.togglePopover(true, "source"); } }, "Fuente de datos…"),
     );
   }
 

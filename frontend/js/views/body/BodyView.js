@@ -212,6 +212,7 @@ export default class BodyView {
   }
 
   onTheme() {
+    if (!this.root) return; // ya destruida: no hay nodo del que leer los colores (spec 010 · FR-010)
     this.palette = this.#readPalette();
     this.fig?.applyTheme();
     if (this.latest) {

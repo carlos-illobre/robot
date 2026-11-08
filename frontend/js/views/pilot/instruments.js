@@ -214,7 +214,8 @@ export class ThermalScale {
     }
     setText(this.value, `${fmt(tempMax?.value, 1)}°`);
     setText(this.name, tempMax?.motor ?? "—");
-    setText(this.counts, `${frame.motores.length} motores · ${tempLevels.warn} tibios · ${tempLevels.crit} calientes`);
+    const n = (k, uno, varios) => `${k} ${k === 1 ? uno : varios}`;
+    setText(this.counts, `${frame.motores.length} motores · ${n(tempLevels.warn, "tibio", "tibios")} · ${n(tempLevels.crit, "caliente", "calientes")}`);
     setText(this.torque, `torque máx ${fmt(Math.abs(torqueMax?.value ?? NaN), 1)} N·m · ${torqueMax?.motor ?? "—"}`);
   }
 }

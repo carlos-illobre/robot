@@ -19,8 +19,10 @@ export const cardinal = (deg) => DIRS[Math.round(wrap360(deg) / 45) % 8];
  */
 export function milliamps(value) {
   if (!Number.isFinite(value)) return "—";
-  const abs = Math.round(Math.abs(value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return `${value < 0 ? "−" : ""}${abs} mA`;
+  const rounded = Math.round(Math.abs(value));
+  const abs = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  // Sin «−0 mA»: el signo va solo si el valor redondeado no es cero (spec 010 · FR-005).
+  return `${value < 0 && rounded > 0 ? "−" : ""}${abs} mA`;
 }
 
 /**

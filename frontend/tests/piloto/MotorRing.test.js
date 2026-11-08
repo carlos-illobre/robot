@@ -205,6 +205,19 @@ describe("update", () => {
     expect([w("FR_hip"), w("FR_thigh"), w("FR_calf"), w("FL_hip")]).toEqual(["6.0", "10.0", "10.0", "2.0"]);
   });
 
+  test("FR-008: con umbral de torque 0 el ancho es válido (escala con umbral mínimo de 1 N·m)", () => {
+    const { ring } = anillo(GO2);
+    const f = muestra("go2", (raw) => {
+      raw.motores.forEach((m) => (m.torque = 0));
+      raw.motores[1].torque = 0.5;
+    });
+    ring.update(f, { torqueRef: 0 });
+    const w = (n) => ring.byName.get(n).torque.getAttribute("stroke-width");
+    expect([w("FR_hip"), w("FR_thigh")]).toEqual(["2.0", "6.0"]);
+    expect([...ring.byName.values()].every((e) => e.torque.getAttribute("stroke-width") !== "NaN")).toBe(true);
+    expect(segEl(ring, "FR_thigh").hasAttribute("data-torque-alarm")).toBe(true); // 0,5 N·m supera el umbral 0
+  });
+
   test("marca alarma de torque solo por encima del umbral", () => {
     const { ring } = anillo(GO2);
     const f = muestra("go2", (raw) => {

@@ -142,7 +142,7 @@ export class ImuPanel {
     toPoints(samples, (f) => f.imu.yaw, this.points.yaw, { wrap: true });
     const span = samples.length > 1 ? samples.at(-1).ts - samples[0].ts : 0;
     this.chart.options.scales.x.min = Math.min(-span, -1);
-    setText(this.sub, `${samples.length} muestras · ${fmt(span, 0)} s`);
+    setText(this.sub, `${samples.length} ${samples.length === 1 ? "muestra" : "muestras"} · ${fmt(span, 0)} s`);
     this.chart.update("none");
   }
 

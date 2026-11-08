@@ -56,6 +56,10 @@ export class Timeline {
     const [W, H] = this.#fit();
     const x = this.ctx;
     x.clearRect(0, 0, W, H);
+    // La cuenta va antes de salir: sin tamaño todavía, la vista igual la muestra (spec 010 · FR-009).
+    const t0 = now - WINDOW_MS;
+    const visible = frames.filter((f, i) => f.receivedAt >= t0 || frames[i + 1]?.receivedAt >= t0);
+    this.count = visible.length;
     if (!W || !H) return;
 
     const compact = W < 560;
@@ -67,8 +71,6 @@ export class Timeline {
     const bottom = H - 18;              // lugar para el eje de tiempo
     const plotW = right - left;
     const X = (t) => right - ((now - t) / WINDOW_MS) * plotW;
-    const t0 = now - WINDOW_MS;
-    const visible = frames.filter((f, i) => f.receivedAt >= t0 || frames[i + 1]?.receivedAt >= t0);
 
     const legList = [...legs].sort((a, b) => LEG_ORDER.indexOf(a) - LEG_ORDER.indexOf(b));
     const tracks = [
@@ -103,7 +105,6 @@ export class Timeline {
 
     this.#captures(captures, { X, t0, top, bottom, now, P });
     this.#timeAxis({ left, right, plotW, H, P, compact });
-    this.count = visible.length;
   }
 
   /** Título dentro de la pista (en el celular no hay columna de títulos). */

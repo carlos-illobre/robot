@@ -700,13 +700,21 @@ describe("ConsoleView: pausa, grabación, tema e ilustración", () => {
 });
 
 describe("ConsoleView: capturas", () => {
+  test("FR-003: con una captura dice «Borrar la captura»; con más, «Borrar las N capturas»", () => {
+    montar();
+    ctx.captures.add(go2.at(-1), "grabacion");
+    expect(view.clearBtn.textContent).toBe("Borrar la captura");
+    ctx.captures.add(go2[0], "grabacion");
+    expect(view.clearBtn.textContent).toBe("Borrar las 2 capturas");
+  });
+
   test("cuenta las capturas y describe la última", () => {
     montar();
     const f = go2.at(-1);
     ctx.captures.add(f, "manual");
     const s1 = ctx.captures.samples[0];
     expect(view.countEl.textContent).toBe("1");
-    expect(view.clearBtn.textContent).toBe("Borrar las 1 capturas");
+    expect(view.clearBtn.textContent).toBe("Borrar la captura");
     expect(view.clearBtn.disabled).toBe(false);
     expect(view.captureInfo.textContent).toBe(`1 muestra capturada · última ${clock(s1.capturedAt).slice(0, 8)} (ts ${f.ts.toFixed(2)} s)`);
     ctx.captures.add(go2[0], "manual");
@@ -726,6 +734,22 @@ describe("ConsoleView: capturas", () => {
     view.mount(container);
     expect(view.countEl.textContent).toBe("2");
     expect(animate).not.toHaveBeenCalled();
+  });
+
+  test("FR-002: con capturas previas cuya última es manual, entrar a la vista no destella", () => {
+    const pre = crearCtx({ frames: go2 });
+    pre.captures.add(go2[0], "grabacion");
+    pre.captures.add(go2[1], "manual");
+    const animate = vi.spyOn(HTMLElement.prototype, "animate").mockImplementation(() => {});
+    ctx = pre;
+    view = new ConsoleView(pre);
+    container = document.createElement("div");
+    document.body.append(container);
+    view.mount(container);
+    expect(view.countEl.textContent).toBe("2");
+    expect(animate).not.toHaveBeenCalled();
+    pre.captures.add(go2[2], "manual");
+    expect(animate).toHaveBeenCalledTimes(2); // la captura nueva sí: destello y contador
   });
 
   test("una captura manual hace el destello de foto y late el contador", () => {

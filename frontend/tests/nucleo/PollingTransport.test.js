@@ -260,6 +260,33 @@ describe("stop", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("FR-011: stop() + start() con un pedido en vuelo deja un solo ciclo de polling", async () => {
+    const fetch = stubFetch({ demora: () => 100 });
+    const { t, onState, onData } = crear({ intervalMs: 250 });
+    t.start();
+    await vi.advanceTimersByTimeAsync(10);
+    t.stop();
+    t.start(); // el rechazo por abort del primer pedido llega recién ahora
+    await vi.advanceTimersByTimeAsync(990);
+    // 1 abortado + un pedido cada 250 ms (0, 250, 500, 750): un solo ciclo.
+    expect(fetch).toHaveBeenCalledTimes(5);
+    expect(onData).toHaveBeenCalledTimes(4);
+    expect(onState.mock.calls.map(([s]) => s)).not.toContain("reconnecting");
+    t.stop();
+  });
+
+  it("FR-011: la respuesta tardía de un pedido abortado se descarta tras volver a arrancar", async () => {
+    const fetch = stubFetch({ demora: (n) => (n === 1 ? 100 : 0), ignorarAbort: true, responder: (n) => respuesta({ n }) });
+    const { t, onData } = crear({ intervalMs: 250 });
+    t.start();
+    t.stop();
+    t.start();
+    await vi.advanceTimersByTimeAsync(990);
+    expect(onData.mock.calls.map(([d]) => d.n)).toEqual([2, 3, 4, 5]);
+    expect(fetch).toHaveBeenCalledTimes(5);
+    t.stop();
+  });
+
   it("se puede volver a arrancar después de detener", async () => {
     const fetch = stubFetch();
     const { t, onData } = crear();
