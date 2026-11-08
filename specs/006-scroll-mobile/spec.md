@@ -23,12 +23,17 @@ ni ningún contenedor interno.
 |---|:-:|---|
 | Consola | 8 | Tabla de motores (cabecera y filas) |
 | Cuerpo | 11 | Tabla de motores |
+| Cuerpo con el robot en **3D** | +6 | El modelo 3D completo (≈ 400 px arriba de la página) |
 | Piloto, Gemelo 3D, Manual | 0 | — |
 
 **Causa.** En el celular la página entera se desplaza, pero las tablas de motores conservan
 `overscroll-behavior: contain` y siguen siendo contenedores con desplazamiento propio (en la
 computadora tienen su propia barra). Un contenedor con `contain` **no le pasa el gesto a la
 página** cuando él mismo no tiene nada que desplazar en esa dirección: el dedo queda "atrapado".
+
+**Segunda causa (3D).** El CSS ya pedía `touch-action: pan-y` para el modelo 3D embebido (un dedo
+desplaza la página), pero `OrbitControls` de Three.js escribe `touch-action: none` como estilo
+*inline* sobre el canvas, que le gana a la hoja de estilos. Además, un dedo gira la cámara.
 
 ## Historias de usuario
 
@@ -45,7 +50,13 @@ desde cualquier punto **para** que la demostración sea fluida.
 
 1. **Dado** que la tabla es más ancha que la pantalla, **cuando** arrastro de costado sobre ella, **entonces** la tabla se desplaza a lo ancho (y la página no).
 
-### HU-3 · En la computadora no cambia nada (P1)
+### HU-3 · El robot 3D no atrapa el dedo (P1)
+
+1. **Dado** la vista Cuerpo con el robot en 3D en el celular, **cuando** arrastro con un dedo sobre el modelo, **entonces** la página se desplaza.
+2. **Dado** lo mismo, **cuando** uso dos dedos, **entonces** giro y acerco la cámara.
+3. **Dado** lo mismo, **cuando** toco una articulación, **entonces** se selecciona el motor (como antes).
+
+### HU-4 · En la computadora no cambia nada (P1)
 
 1. **Dado** una pantalla de escritorio, **cuando** desplazo dentro de la tabla de motores, **entonces** se desplaza solo la tabla, como antes (el gesto no "se escapa" a la página).
 
@@ -57,12 +68,13 @@ desde cualquier punto **para** que la demostración sea fluida.
 | FR-002 | Ídem en la vista Cuerpo | ídem |
 | FR-003 | La tabla puede seguir desplazándose a lo ancho | ídem (gesto horizontal) |
 | FR-004 | En escritorio, las tablas mantienen `overscroll-behavior: contain` | revisión del CSS (las reglas nuevas están dentro de `@media`) |
+| FR-005 | El modelo 3D **embebido** deja el gesto vertical de un dedo a la página; dos dedos giran y acercan | E2E (caso 3D) · el Gemelo 3D a pantalla completa no cambia |
 
 ## Criterios de éxito medibles
 
 | ID | Métrica | Objetivo |
 |---|---|---|
-| SC-001 | Puntos trabados en las cinco vistas, iPhone 13 y iPhone SE | **0** (antes: 19 y 17) |
+| SC-001 | Puntos trabados en las cinco vistas, iPhone 13 y iPhone SE, esquema y 3D | **0** (antes: 19, 17 y 25 con 3D) |
 
 ## Fuera de alcance
 

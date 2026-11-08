@@ -25,6 +25,7 @@ la página y el horizontal sigue moviendo la tabla.
 |---|---|
 | `frontend/css/views/console.css` | `@media (max-width: 1100px)` y `(max-width: 640px)`: `.cv-tablewrap` sin `contain` y sin eje vertical propio |
 | `frontend/css/views/body.css` | `@media (max-width: 900px)`: ídem `.bd-motors__scroll` |
+| `frontend/js/views/twin/Stage3D.js` | Si la escena es embebida (fondo transparente): `touches.ONE = null`, `TWO = DOLLY_ROTATE` y `touch-action: pan-y` inline después de crear `OrbitControls` |
 | `e2e/dashboard.e2e.js` | Prueba nueva con gestos táctiles reales (CDP `Input.dispatchTouchEvent`) |
 
 ## Decisiones y alternativas descartadas

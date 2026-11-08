@@ -8,12 +8,13 @@
 
 ## Fase 2 · Pruebas primero
 
-- [ ] T004 Prueba E2E con gestos táctiles que falla en Consola y Cuerpo (FR-001, FR-002, FR-003)
+- [ ] T004 Prueba E2E con gestos táctiles que falla en Consola y Cuerpo (FR-001, FR-002, FR-003, FR-005)
 
 ## Fase 3 · Implementación
 
 - [ ] T005 `console.css`: la tabla no retiene el gesto vertical (FR-001)
 - [ ] T006 `body.css`: ídem (FR-002)
+- [ ] T006b `Stage3D.js`: el 3D embebido no atrapa el dedo (FR-005)
 
 ## Fase 4 · Verificación
 
