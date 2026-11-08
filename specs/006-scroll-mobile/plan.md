@@ -31,6 +31,8 @@ la página y el horizontal sigue moviendo la tabla.
 
 ## Decisiones y alternativas descartadas
 
+> La decisión principal está registrada como [ADR-0006](../../docs/adr/0006-e2e-solo-lo-imprescindible.md) (E2E con gestos táctiles reales).
+
 | Decisión | Alternativa | Por qué se eligió |
 |---|---|---|
 | CSS dentro de las `@media` existentes | Quitar `contain` en todas las pantallas | En escritorio la tabla tiene su propia barra y `contain` evita que la página "salte" al llegar al final |

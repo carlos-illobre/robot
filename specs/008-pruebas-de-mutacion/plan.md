@@ -12,6 +12,8 @@
 
 ## Decisiones
 
+> La decisión principal está registrada como [ADR-0005](../../docs/adr/0005-pruebas-de-mutacion.md) (Stryker y mutmut, umbrales).
+
 | Decisión | Alternativa | Por qué |
 |---|---|---|
 | mutmut 3 | cosmic-ray | cosmic-ray corre la suite entera por cada mutante: con ~3000 mutantes, horas. mutmut 3 corre solo las pruebas que alcanzan la función mutada |

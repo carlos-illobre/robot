@@ -43,6 +43,6 @@ duplican.
 
 | Decisión | Alternativa | Por qué |
 |---|---|---|
-| ADR en `docs/adr/`, un archivo por decisión | Dejar la tabla del README | La tabla no tiene lugar para contexto, consecuencias ni estado (ADR-0001) |
+| ADR en `docs/adr/`, un archivo por decisión | Dejar la tabla del README | La tabla no tiene lugar para contexto, consecuencias ni estado ([ADR-0001](../../docs/adr/0001-registrar-decisiones-con-adr.md)) |
 | Mermaid | PlantUML, draw.io, imágenes | GitHub lo dibuja solo, es texto (se revisa en un diff) y no hace falta instalar nada (constitución, IV) |
 | La tabla del README queda, con un enlace por fila | Borrarla | Es el resumen que se lee en dos minutos; el ADR es el detalle |

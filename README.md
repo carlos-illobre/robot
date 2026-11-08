@@ -657,6 +657,9 @@ recomendada sigue siendo `python iniciar.py`.
 
 ## 🏛 Arquitectura
 
+> Más diagramas (contexto, contenedores, despliegue, clases de los patrones, estados de la
+> conexión, cambio de fuente en caliente, capas y entrega) en [**`docs/arquitectura.md`**](docs/arquitectura.md).
+
 ### Vista de componentes
 
 ```mermaid
@@ -726,7 +729,10 @@ sequenceDiagram
 ## 🧩 Patrones de diseño aplicados
 
 La consigna pide **Adapter, Observer y Facade** para desacoplar la fuente de datos de la
-presentación. Están los tres, y dos más que aparecieron naturalmente.
+presentación. Están los tres, y dos más que aparecieron naturalmente. Diagrama de clases en
+[`docs/arquitectura.md`](docs/arquitectura.md#clases-de-los-patrones); el porqué, en los ADR
+[0011](docs/adr/0011-patrones-adapter-observer-facade.md), [0012](docs/adr/0012-transporte-intercambiable.md),
+[0016](docs/adr/0016-vistas-como-estrategias.md) y [0019](docs/adr/0019-fuente-de-datos-inyectada-y-cambio-en-caliente.md).
 
 ### 🔌 Adapter — traducir formatos sin contaminar el resto
 
@@ -970,23 +976,27 @@ Docker y la que recomienda Unitree).
 
 ## 🧠 Decisiones técnicas y sus porqués
 
-| Decisión | Alternativa descartada | Por qué |
-|---|---|---|
-| **JavaScript sin framework**, módulos ES nativos | React / Vue + Vite | El TP es sobre integrar componentes a través de una interfaz. Sin framework se ve todo el flujo; sin paso de compilación, cualquiera abre el código y lo entiende |
-| **Chart.js incluido en el repo** (`frontend/vendor/`) | Cargarlo de un CDN | El laboratorio puede no tener internet. El dashboard funciona 100 % offline |
-| El backend **sirve el frontend** (`/dashboard`) | Abrir `index.html` con doble clic | Los módulos ES no cargan desde `file://`, y así no hay CORS ni un segundo servidor |
-| Polling con **`setTimeout` encadenado** | `setInterval` | Con `setInterval`, si el servidor tarda más que el intervalo las peticiones se apilan y llegan desordenadas |
-| Reconexión con **backoff exponencial + jitter** | Reintentar cada 1 s | 30 dashboards reconectando en el mismo milisegundo saturan al servidor recién levantado |
-| **Buffer circular** de 600 muestras | Un array que crece | A 10 Hz, una clase de 2 h son 72.000 muestras: memoria constante y `push` O(1) |
-| Dibujo agrupado con **`requestAnimationFrame`** | Redibujar en cada mensaje | Si llegan varias muestras en un cuadro de pantalla se dibuja una sola vez; con la pestaña oculta no se dibuja |
-| Gráficos con `animation: false` y `parsing: false` | Valores por defecto de Chart.js | A 10 Hz las animaciones solo agregan retraso visual; los datos ya llegan como `{x, y}` |
-| Sparklines en `<canvas>` propio | Un Chart.js por fila | 29 instancias de Chart.js a 10 Hz es demasiado para una notebook del laboratorio |
-| Lógica en `js/core/` **sin DOM** | Mezclar lógica y DOM | Se prueba en Node, sin navegador |
-| **Three.js y modelos locales**, cargados con `import()` solo al usar 3D | Cargar todo al inicio | ~700 kB que quien no usa 3D nunca descarga; funciona sin internet |
-| Modelos glTF + meshoptimizer | Los OBJ/STL originales (46 MB) | 2 MB en total: el Gemelo 3D aparece en menos de un segundo |
-| Descarga del modelo **sin confiar en `Content-Length`** | Reservar el buffer con ese tamaño | GitHub Pages comprime con gzip y el encabezado indica el tamaño comprimido (bug real encontrado al publicar) |
-| Alarmas con **histéresis** (60 °C → 58 °C) | Un umbral simple | Un motor que oscila en 60 °C no prende y apaga el aviso sin parar, como un termostato |
-| Scripts de uso en **Python** (`iniciar.py`) | `.sh` + `.bat` | Un solo script, igual en Windows, macOS y Linux |
+> Resumen. Cada decisión tiene su **ADR** (Architecture Decision Record) con el contexto, las
+> alternativas y las consecuencias: [**índice de las 22 decisiones**](docs/adr/README.md),
+> incluidas las de proceso y calidad (SDD, git, cobertura, mutación, E2E, publicación).
+
+| Decisión | Alternativa descartada | Por qué | ADR |
+|---|---|---|:-:|
+| **JavaScript sin framework**, módulos ES nativos | React / Vue + Vite | El TP es sobre integrar componentes a través de una interfaz. Sin framework se ve todo el flujo; sin paso de compilación, cualquiera abre el código y lo entiende | [0008](docs/adr/0008-javascript-sin-framework.md) |
+| **Chart.js incluido en el repo** (`frontend/vendor/`) | Cargarlo de un CDN | El laboratorio puede no tener internet. El dashboard funciona 100 % offline | [0009](docs/adr/0009-todo-en-el-repositorio-sin-internet.md) |
+| El backend **sirve el frontend** (`/dashboard`) | Abrir `index.html` con doble clic | Los módulos ES no cargan desde `file://`, y así no hay CORS ni un segundo servidor | [0010](docs/adr/0010-el-backend-sirve-el-frontend.md) |
+| Polling con **`setTimeout` encadenado** | `setInterval` | Con `setInterval`, si el servidor tarda más que el intervalo las peticiones se apilan y llegan desordenadas | [0013](docs/adr/0013-polling-encadenado-y-backoff.md) |
+| Reconexión con **backoff exponencial + jitter** | Reintentar cada 1 s | 30 dashboards reconectando en el mismo milisegundo saturan al servidor recién levantado | [0013](docs/adr/0013-polling-encadenado-y-backoff.md) |
+| **Buffer circular** de 600 muestras | Un array que crece | A 10 Hz, una clase de 2 h son 72.000 muestras: memoria constante y `push` O(1) | [0014](docs/adr/0014-rendimiento-del-dibujo.md) |
+| Dibujo agrupado con **`requestAnimationFrame`** | Redibujar en cada mensaje | Si llegan varias muestras en un cuadro de pantalla se dibuja una sola vez; con la pestaña oculta no se dibuja | [0014](docs/adr/0014-rendimiento-del-dibujo.md) |
+| Gráficos con `animation: false` y `parsing: false` | Valores por defecto de Chart.js | A 10 Hz las animaciones solo agregan retraso visual; los datos ya llegan como `{x, y}` | [0014](docs/adr/0014-rendimiento-del-dibujo.md) |
+| Sparklines en `<canvas>` propio | Un Chart.js por fila | 29 instancias de Chart.js a 10 Hz es demasiado para una notebook del laboratorio | [0014](docs/adr/0014-rendimiento-del-dibujo.md) |
+| Lógica en `js/core/` **sin DOM** | Mezclar lógica y DOM | Se prueba en Node, sin navegador | [0015](docs/adr/0015-nucleo-sin-dom.md) |
+| **Three.js y modelos locales**, cargados con `import()` solo al usar 3D | Cargar todo al inicio | ~700 kB que quien no usa 3D nunca descarga; funciona sin internet | [0016](docs/adr/0016-vistas-como-estrategias.md) |
+| Modelos glTF + meshoptimizer | Los OBJ/STL originales (46 MB) | 2 MB en total: el Gemelo 3D aparece en menos de un segundo | [0017](docs/adr/0017-gemelo-3d-gltf-local.md) |
+| Descarga del modelo **sin confiar en `Content-Length`** | Reservar el buffer con ese tamaño | GitHub Pages comprime con gzip y el encabezado indica el tamaño comprimido (bug real encontrado al publicar) | [0017](docs/adr/0017-gemelo-3d-gltf-local.md) |
+| Alarmas con **histéresis** (60 °C → 58 °C) | Un umbral simple | Un motor que oscila en 60 °C no prende y apaga el aviso sin parar, como un termostato | [0018](docs/adr/0018-alarmas-con-histeresis.md) |
+| Scripts de uso en **Python** (`iniciar.py`) | `.sh` + `.bat` | Un solo script, igual en Windows, macOS y Linux | [0022](docs/adr/0022-arranque-con-un-script-en-python.md) |
 
 ---
 
@@ -1170,6 +1180,9 @@ robot/
 ├── docs/
 │   ├── consigna.md              ← el enunciado
 │   ├── API.md                   ← el contrato de la cátedra
+│   ├── arquitectura.md          ← diagramas: contexto, contenedores, despliegue, clases, estados…
+│   ├── adr/                     ← decisiones de arquitectura (ADR), una por archivo
+│   ├── coverage/                ← índice de los reportes de cobertura y mutación (GitHub Pages)
 │   ├── img/                     ← capturas del README
 │   └── design/                  ← visor de maquetas (GitHub Pages) y las maquetas del director de arte
 ├── docker/                      ← versión dockerizada opcional, con el SDK de Unitree incluido
