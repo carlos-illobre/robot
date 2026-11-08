@@ -6,6 +6,8 @@ Las pruebas importan los módulos igual que el servidor: `backend/` y
 
 from __future__ import annotations
 
+import importlib
+import importlib.abc
 import importlib.util
 import sys
 from pathlib import Path
@@ -18,6 +20,43 @@ RAIZ = BASE.parent
 for _sub in (RAIZ, BASE, API):
     if str(_sub) not in sys.path:
         sys.path.insert(0, str(_sub))
+
+
+class _AliasCanonico(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    """`import config` → el módulo `backend.api.config` (solo bajo mutmut; spec 008).
+
+    El backend importa módulos "planos" (`from config import ROBOTS`) gracias a `sys.path`.
+    mutmut asocia cada prueba con sus mutantes por el nombre completo del módulo, derivado de
+    la ruta (`backend.api.config`): con este alias `import config` devuelve ese mismo módulo
+    y la asociación funciona. Fuera de mutmut no se instala y las pruebas importan como el
+    servidor.
+    """
+
+    @staticmethod
+    def canonico(nombre):
+        raiz = nombre.partition(".")[0]
+        if raiz == "api":
+            return "backend." + nombre
+        if (API / f"{raiz}.py").exists() or (API / raiz).is_dir():
+            return "backend.api." + nombre
+        if raiz != "tests" and (BASE / f"{raiz}.py").exists():
+            return "backend." + nombre
+        return None
+
+    def find_spec(self, nombre, path=None, target=None):
+        if self.canonico(nombre) is None:
+            return None
+        return importlib.util.spec_from_loader(nombre, self)
+
+    def create_module(self, spec):
+        return importlib.import_module(self.canonico(spec.name))
+
+    def exec_module(self, module):
+        """El módulo canónico ya se ejecutó al importarlo."""
+
+
+if "mutmut" in sys.modules:
+    sys.meta_path.insert(0, _AliasCanonico())
 
 
 def cargar_copia(ruta: Path, nombre: str):

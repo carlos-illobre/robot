@@ -12,7 +12,7 @@
     "test:e2e": "node --test --test-concurrency=1 e2e/*.e2e.js",
     "test:all": "npm run coverage && npm run coverage:backend && npm run test:e2e",
     "mutation": "stryker run",
-    "mutation:backend": "mutmut run --max-children 4; python tools/mutmut_html.py"
+    "mutation:backend": "mutmut run --max-children 4 && python tools/mutmut_html.py --minimo 90"
   },
   "engines": {
     "node": ">=22.12"
