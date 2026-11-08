@@ -95,11 +95,13 @@ export class PaseoSim {
   get tramo() {
     const total = GUION.reduce((a, [d]) => a + d, 0);
     let t = this.t % total;
-    for (const [d, v, g, label] of GUION) {
+    // t < total: si no cae en ningún tramo anterior, está en el último.
+    for (const [d, v, g, label] of GUION.slice(0, -1)) {
       if (t < d) return { v, g, label };
       t -= d;
     }
-    return { v: 0, g: 0, label: "quieto" };
+    const [, v, g, label] = GUION.at(-1);
+    return { v, g, label };
   }
 
   info() {
