@@ -40,6 +40,49 @@ function qualityFromUrl() {
   }
 }
 
+/**
+ * Dónde va la etiqueta (función pura, ver RobotScene#placeTip): AL COSTADO del
+ * robot, del lado de la articulación; si a los costados no entra, arriba o
+ * abajo; y si tampoco, lo más cerca posible.
+ * @param {{minX:number,maxX:number,minY:number,maxY:number}} box rectángulo del robot (px)
+ * @param {number} jx @param {number} jy articulación en pantalla (px)
+ * @param {number} W @param {number} H tamaño de la capa de la etiqueta (px)
+ * @param {number} tw @param {number} th tamaño de la etiqueta (px)
+ * @returns {{side: "right"|"left"|"top"|"bottom", x: number, y: number, ex: number, ey: number}}
+ *   esquina de la etiqueta y punto de su borde donde llega la línea guía
+ */
+export function placeLabel(box, jx, jy, W, H, tw, th) {
+  const M = 8;  // margen con el borde
+  const G = 28; // separación entre el robot y la etiqueta
+  const midX = (box.minX + box.maxX) / 2;
+
+  const fitsRight = box.maxX + G + tw <= W - M;
+  const fitsLeft = box.minX - G - tw >= M;
+  const preferRight = jx >= midX;
+  let x, y, side;
+  if ((preferRight && fitsRight) || (!fitsLeft && fitsRight)) {
+    side = "right"; x = box.maxX + G;
+  } else if (fitsLeft) {
+    side = "left"; x = box.minX - G - tw;
+  } else if (box.minY - G - th >= M) {
+    side = "top"; y = box.minY - G - th;
+  } else if (box.maxY + G + th <= H - M) {
+    side = "bottom"; y = box.maxY + G;
+  } else {
+    side = jx >= W / 2 ? "left" : "right"; // no entra en ningún lado: lo mejor posible
+    x = side === "right" ? jx + G : jx - G - tw;
+  }
+  if (side === "left" || side === "right") y = jy - th / 2;
+  else x = jx - tw / 2;
+  x = clamp(x, M, Math.max(M, W - tw - M));
+  y = clamp(y, M, Math.max(M, H - th - M));
+
+  // Punto de la etiqueta donde llega la línea: el borde que mira al robot.
+  const ex = side === "right" ? x : side === "left" ? x + tw : clamp(jx, x + 12, x + tw - 12);
+  const ey = side === "top" ? y + th : side === "bottom" ? y : clamp(jy, y + 14, y + th - 14);
+  return { side, x, y, ex, ey };
+}
+
 export class RobotScene {
   /** ¿Se puede mostrar 3D en este navegador? (para decidir si ofrecer el botón "3D"). */
   static isSupported() {
@@ -542,35 +585,8 @@ export class RobotScene {
       W = window.innerWidth;
       H = window.innerHeight;
     }
-    const M = 8;  // margen con el borde
-    const G = 28; // separación entre el robot y la etiqueta
-    const midX = (box.minX + box.maxX) / 2;
-
-    const fitsRight = box.maxX + G + tw <= W - M;
-    const fitsLeft = box.minX - G - tw >= M;
-    const preferRight = jx >= midX;
-    let x, y, side;
-    if ((preferRight && fitsRight) || (!fitsLeft && fitsRight)) {
-      side = "right"; x = box.maxX + G;
-    } else if (fitsLeft) {
-      side = "left"; x = box.minX - G - tw;
-    } else if (box.minY - G - th >= M) {
-      side = "top"; y = box.minY - G - th;
-    } else if (box.maxY + G + th <= H - M) {
-      side = "bottom"; y = box.maxY + G;
-    } else {
-      side = jx >= W / 2 ? "left" : "right"; // no entra en ningún lado: lo mejor posible
-      x = side === "right" ? jx + G : jx - G - tw;
-    }
-    if (side === "left" || side === "right") y = jy - th / 2;
-    else x = jx - tw / 2;
-    x = clamp(x, M, Math.max(M, W - tw - M));
-    y = clamp(y, M, Math.max(M, H - th - M));
+    const { x, y, ex, ey } = placeLabel(box, jx, jy, W, H, tw, th);
     this.tip.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
-
-    // Punto de la etiqueta donde llega la línea: el borde que mira al robot.
-    const ex = side === "right" ? x : side === "left" ? x + tw : clamp(jx, x + 12, x + tw - 12);
-    const ey = side === "top" ? y + th : side === "bottom" ? y : clamp(jy, y + 14, y + th - 14);
     this.lead.style.display = "";
     this.lead.setAttribute("viewBox", `0 0 ${W} ${H}`);
     this.leadLine.setAttribute("x1", jx.toFixed(1));
