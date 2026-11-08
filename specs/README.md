@@ -59,6 +59,7 @@ pruebas). Desde la 006 se escriben **antes** del código.
 | 005 | [Fuentes de datos intercambiables](005-fuentes-de-datos/spec.md) | ✅ Implementada | Retroactiva |
 | 006 | [Desplazamiento en el celular](006-scroll-mobile/spec.md) | ✅ Implementada | `fix/scroll-mobile` |
 | 007 | [Cobertura unitaria del 100 %](007-cobertura-100/spec.md) | 🔄 En curso | `test/vitest-cobertura`, `test/coverage-*` |
+| 008 | [Pruebas de mutación](008-pruebas-de-mutacion/spec.md) | 🔄 En curso | `test/mutation-testing` |
 
 Las especificaciones nuevas se agregan a esta tabla en el mismo commit que las crea.
 
