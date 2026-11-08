@@ -269,7 +269,7 @@ export class RobotScene {
     const canvas = this.stage.renderer.domElement;
     const lost = (e) => {
       e.preventDefault();
-      if (this.stage) this.#showMessage("lost");
+      this.#showMessage("lost");
     };
     canvas.addEventListener("webglcontextlost", lost);
     this._cleanups.push(() => canvas.removeEventListener("webglcontextlost", lost));
@@ -317,7 +317,6 @@ export class RobotScene {
   }
 
   #mapMotors() {
-    if (!this.rig || !this.info) return;
     const motors = this.rig.setMotors(this.info.motores_nombres ?? [], this.mapping);
     this.jointByMotor = motors.map((m) => (m.joint ? this.rig.joints.get(m.joint) : null));
     const missing = motors.filter((m) => !m.joint).map((m) => m.nombre);
@@ -500,11 +499,11 @@ export class RobotScene {
       minX = Math.min(minX, x); maxX = Math.max(maxX, x);
       minY = Math.min(minY, y); maxY = Math.max(maxY, y);
     };
-    for (const jt of this.rig?.joints.values() ?? []) {
+    for (const jt of this.rig.joints.values()) {
       jt.body.getWorldPosition(v);
       add();
     }
-    for (const c of this.rig?.allContacts ?? []) {
+    for (const c of this.rig.allContacts) {
       v.copy(c.local).applyMatrix4(c.body.matrixWorld);
       add();
     }
@@ -626,7 +625,7 @@ export class RobotScene {
     this.ovRetry.hidden = true;
     this.ovBar.setAttribute("aria-valuenow", String(pct));
     this.ovFill.style.transform = `scaleX(${progress})`;
-    setText(this.ovTitle, `Cargando el modelo 3D del ${this.profile?.label ?? "robot"}…`);
+    setText(this.ovTitle, `Cargando el modelo 3D del ${this.profile.label}…`);
     setText(this.ovText, `${pct} % · modelo oficial de Unitree, simplificado para la web`);
     this.opts.onStatus?.({ kind: "loading", progress });
   }
