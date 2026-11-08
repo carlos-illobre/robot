@@ -200,12 +200,14 @@ class TelemetryReader:
 
     def cerrar(self):
         sub, self._subscriber = self._subscriber, None
-        if sub is not None:
-            for metodo in ("Close", "close"):
-                fn = getattr(sub, metodo, None)
-                if callable(fn):
-                    fn()
-                    break
+        bms, self._sub_bms = self._sub_bms, None
+        for s in (sub, bms):
+            if s is not None:
+                for metodo in ("Close", "close"):
+                    fn = getattr(s, metodo, None)
+                    if callable(fn):
+                        fn()
+                        break
 
 
 class DemoReader:

@@ -324,9 +324,27 @@ def test_cerrar_usa_close_y_es_idempotente(sdk):
     assert r._subscriber is None
 
 
+def test_fr015_cerrar_tambien_cierra_el_suscriptor_de_la_bateria(sdk):
+    r = TelemetryReader("go2")
+    low, bms = sdk.suscriptores
+    r.cerrar()
+    r.cerrar()
+    assert (low.cerrado, bms.cerrado) == (1, 1)
+    assert r._subscriber is None and r._sub_bms is None
+
+
+def test_fr015_cerrar_sin_suscriptor_de_bateria(sdk):
+    r = TelemetryReader("go2")
+    low = sdk.suscriptores[0]
+    r._sub_bms = None   # como queda si el tópico de la batería no se pudo abrir
+    r.cerrar()
+    assert low.cerrado == 1
+
+
 def test_cerrar_con_un_sdk_que_usa_close_en_minuscula():
     llamadas = []
     r = object.__new__(TelemetryReader)
+    r._sub_bms = None
     r._subscriber = SimpleNamespace(Close="no es invocable", close=lambda: llamadas.append("close"))
     r.cerrar()
     assert llamadas == ["close"]
@@ -334,6 +352,7 @@ def test_cerrar_con_un_sdk_que_usa_close_en_minuscula():
 
 def test_cerrar_un_suscriptor_sin_metodo_de_cierre():
     r = object.__new__(TelemetryReader)
+    r._sub_bms = None
     r._subscriber = SimpleNamespace()
     r.cerrar()
     assert r._subscriber is None
@@ -342,6 +361,7 @@ def test_cerrar_un_suscriptor_sin_metodo_de_cierre():
 def test_cerrar_prefiere_Close_y_no_llama_a_los_dos():
     llamadas = []
     r = object.__new__(TelemetryReader)
+    r._sub_bms = None
     r._subscriber = SimpleNamespace(Close=lambda: llamadas.append("Close"), close=lambda: llamadas.append("close"))
     r.cerrar()
     assert llamadas == ["Close"]
