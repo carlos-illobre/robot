@@ -1035,7 +1035,7 @@ npm run test:e2e
 | Suite | Cantidad | Qué verifica |
 |---|:-:|---|
 | **Backend** (`backend/tests/test_api.py`, pytest) | 21 | Todos los endpoints y el WebSocket respetan el contrato, con **Go2 y G1** · errores 400/409 · el paseo recorre los **tres colores del semáforo** · con el robot quieto apoya las **cuatro patas** y al trotar no · el yaw cambia al girar · cambio de fuente en caliente y fuente fija · `--real` sin SDK falla con un mensaje claro · los dos errores de la cátedra corregidos · detección de la placa de red del robot · el WebSocket sigue abierto (regresión del error de Python 3.10) |
-| **Frontend unitarias** (`frontend/tests/*.test.js`, `node:test`, sin dependencias) | 24 | Bordes del semáforo (40 y 60 °C) · normalización tolerante a datos rotos · buffer circular · EventBus aísla errores · CSV (columnas, RFC 4180, formato Excel) · las alarmas solo avisan cambios · backoff de reconexión · URLs `http→ws` / `https→wss` · el polling nunca supera 500 ms ni superpone pedidos y se recupera de errores · la Facade normaliza y detecta cuando dejan de llegar datos · la simulación del navegador cumple el contrato y la marcha · histéresis de alarmas |
+| **Frontend unitarias** (`frontend/tests/*.test.js`, Vitest + happy-dom) | 24 | Bordes del semáforo (40 y 60 °C) · normalización tolerante a datos rotos · buffer circular · EventBus aísla errores · CSV (columnas, RFC 4180, formato Excel) · las alarmas solo avisan cambios · backoff de reconexión · URLs `http→ws` / `https→wss` · el polling nunca supera 500 ms ni superpone pedidos y se recupera de errores · la Facade normaliza y detecta cuando dejan de llegar datos · la simulación del navegador cumple el contrato y la marcha · histéresis de alarmas |
 | **E2E** (`e2e/dashboard.e2e.js`, Playwright) | 7 | Solo lo que una unitaria no puede: backend real ↔ navegador real (WebSocket y polling), las cinco vistas sin errores conservando historial y capturas, la descarga del CSV, el cambio de fuente Go2 ↔ G1, **la reconexión cuando el servidor se cae y vuelve**, que nada se desborde a 390 px y que **en el celular la página se desplace con el dedo desde cualquier punto** (gestos táctiles reales). Comparten un único navegador: corren en ~35 s |
 
 **Integración continua:** cada push corre las tres suites en GitHub Actions (el backend, con Python 3.10 y 3.12)
@@ -1100,7 +1100,7 @@ robot/
 │   │   ├── robots/              ← modelos 3D de Unitree optimizados (.glb) + licencia BSD-3
 │   │   └── manual/              ← capturas del manual y posición de sus marcas
 │   ├── vendor/                  ← Chart.js 4.4.1 y Three.js r169 (MIT), para funcionar sin internet
-│   └── tests/                   ← pruebas unitarias (node:test)
+│   └── tests/                   ← pruebas unitarias (Vitest)
 ├── e2e/                         ← pruebas de punta a punta (Playwright)
 ├── specs/                       ← SDD: constitución, plantillas y una especificación por tarea
 ├── CONTRIBUTING.md              ← branches, commits y definición de terminado

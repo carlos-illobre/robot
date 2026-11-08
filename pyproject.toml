@@ -1,0 +1,25 @@
+# Configuración de las herramientas de Python (no es un paquete instalable).
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "-q --cov --cov-branch --cov-report=term-missing:skip-covered --cov-report=html --cov-report=xml"
+
+[tool.coverage.run]
+# Spec 007: todo el backend y el arranque multiplataforma.
+source = ["."]
+include = ["backend/*", "iniciar.py"]
+omit = ["backend/tests/*"]
+branch = true
+
+[tool.coverage.report]
+# Ratchet (spec 007): sube con cada branch de pruebas hasta 100.
+fail_under = 58
+show_missing = true
+precision = 1
+
+[tool.coverage.html]
+directory = "coverage/backend"
+title = "Cobertura del backend · TP05"
+
+[tool.coverage.xml]
+output = "coverage/backend/coverage.xml"
