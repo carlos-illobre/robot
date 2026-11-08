@@ -554,7 +554,10 @@ describe("bucle de dibujo y calidad adaptativa", () => {
     s.onTick = () => true;
     s.start();
     clock.frames(90, 40);
-    expect(s.tier).toBeGreaterThanOrEqual(1);
+    // a 30 fps, 40 ms entre cuadros ya está dentro del presupuesto: se queda en "media"
+    expect(s.quality).toBe("media");
+    clock.frames(200, 40);
+    expect(s.quality).toBe("media");
   });
 
   test("baja hasta 'mínima' y ahí se queda", () => {
