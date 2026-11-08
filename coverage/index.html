@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reportes de calidad · TP05</title>
+  <meta name="description" content="Cobertura de pruebas unitarias y pruebas de mutación del dashboard de telemetría Unitree (frontend y backend).">
+  <meta name="color-scheme" content="light dark">
+  <!-- Spec 009: índice de los reportes que genera .github/workflows/pages.yml -->
+  <style>
+    :root {
+      --bg: #f6f7f9; --panel: #ffffff; --text: #171a21; --muted: #5b6372; --line: #e2e5eb;
+      --accent: #2f5bea; --ok: #18794e; --warn: #9a6200; --crit: #b42318; --track: #e9ecf1;
+      --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 6px 20px rgba(16, 24, 40, .06);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1016; --panel: #151a22; --text: #e8ebf1; --muted: #98a1b2; --line: #262d39;
+        --accent: #7aa2ff; --ok: #4ade80; --warn: #fbbf24; --crit: #f87171; --track: #222936;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 20px rgba(0, 0, 0, .25);
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+    a { color: var(--accent); }
+    header p { margin: 4px 0 0; color: var(--muted); }
+    h1 { margin: 0; font-size: clamp(24px, 4vw, 32px); letter-spacing: -.01em; }
+    h2 { margin: 36px 0 12px; font-size: 18px; }
+    .meta { font: 13px/1.4 ui-monospace, "JetBrains Mono", monospace; color: var(--muted); margin-top: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+    .card {
+      display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px;
+      background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); color: inherit; text-decoration: none;
+      transition: border-color .15s, transform .15s;
+    }
+    .card:hover, .card:focus-visible { border-color: var(--accent); transform: translateY(-1px); }
+    .card__top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .card__kind { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .card h3 { margin: 0; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .big { font: 700 30px/1 ui-monospace, "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+    .big[data-level="ok"] { color: var(--ok); } .big[data-level="warn"] { color: var(--warn); } .big[data-level="crit"] { color: var(--crit); }
+    .bars { display: grid; gap: 6px; font-size: 12.5px; }
+    .bar { display: grid; grid-template-columns: 92px 1fr 52px; align-items: center; gap: 8px; }
+    .bar span:first-child { color: var(--muted); }
+    .bar i { display: block; height: 6px; border-radius: 6px; background: var(--track); overflow: hidden; }
+    .bar i b { display: block; height: 100%; background: var(--ok); }
+    .bar.is-bad i b { background: var(--crit); }
+    .bar span:last-child { text-align: right; font-family: ui-monospace, monospace; }
+    .go { margin-top: auto; font-weight: 600; color: var(--accent); }
+    .explain { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+    .explain div { padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); }
+    .explain h3 { margin: 0 0 6px; font-size: 15px; }
+    .explain p { margin: 0; color: var(--muted); font-size: 14px; }
+    code { font: 13px ui-monospace, "JetBrains Mono", monospace; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p><a href="../">← Sitio del proyecto</a> · <a href="../app/">Dashboard</a> · <a href="https://github.com/carlos-illobre/robot">Repositorio</a></p>
+    <h1 style="margin-top:14px">Reportes de calidad</h1>
+    <p>Cobertura de las pruebas unitarias y pruebas de mutación del dashboard de telemetría Unitree.
+      Se generan en GitHub Actions con cada merge a <code>main</code>.</p>
+    <p class="meta" id="commit">Commit: —</p>
+  </header>
+
+  <h2>Cobertura de las pruebas unitarias</h2>
+  <div class="grid">
+    <a class="card" href="frontend/index.html" data-kind="cov" data-src="frontend/coverage-summary.json">
+      <div class="card__top"><span class="card__kind">Frontend · Vitest</span><span class="big" data-slot="main">—</span></div>
+      <h3>JavaScript del navegador</h3>
+      <p>Vistas, servicios, núcleo y shell (<code>frontend/js/</code>). Archivo por archivo, línea por línea.</p>
+      <div class="bars" data-slot="bars"></div>
+      <span class="go">Ver reporte →</span>
+    </a>
+    <a class="card" href="backend/index.html" data-kind="pycov" data-src="backend/coverage.json">
+      <div class="card__top"><span class="card__kind">Backend · pytest-cov</span><span class="big" data-slot="main">—</span></div>
+      <h3>Python (FastAPI)</h3>
+      <p>API, lectores del robot y del simulador, demo, fuentes y el arranque <code>iniciar.py</code>.</p>
+      <div class="bars" data-slot="bars"></div>
+      <span class="go">Ver reporte →</span>
+    </a>
+  </div>
+
+  <h2>Pruebas de mutación</h2>
+  <div class="grid">
+    <a class="card" href="mutation/frontend/index.html" data-kind="stryker" data-src="mutation/frontend/mutation.json">
+      <div class="card__top"><span class="card__kind">Frontend · Stryker</span><span class="big" data-slot="main">—</span></div>
+      <h3>¿Las pruebas detectan errores?</h3>
+      <p>Cada mutante es un error introducido a propósito. El reporte muestra cuáles detectaron las pruebas y cuáles no.</p>
+      <div class="bars" data-slot="bars"></div>
+      <span class="go">Ver reporte →</span>
+    </a>
+    <a class="card" href="mutation/backend/index.html" data-kind="mutmut" data-src="mutation/backend/mutation.json">
+      <div class="card__top"><span class="card__kind">Backend · mutmut</span><span class="big" data-slot="main">—</span></div>
+      <h3>¿Las pruebas detectan errores?</h3>
+      <p>Lo mismo para Python, con el cambio exacto de cada mutante que sobrevivió.</p>
+      <div class="bars" data-slot="bars"></div>
+      <span class="go">Ver reporte →</span>
+    </a>
+  </div>
+
+  <h2>Cómo leerlos</h2>
+  <div class="explain">
+    <div><h3>Cobertura</h3><p>Qué porcentaje del código <strong>ejecutan</strong> las pruebas: líneas, ramas (cada <code>if</code> por sus dos caminos), funciones y sentencias. El objetivo del proyecto es 100 % en todo (especificación 007).</p></div>
+    <div><h3>Mutación</h3><p>Si las pruebas <strong>detectarían un error</strong>. Se cambia el código (<code>&gt;</code> por <code>&gt;=</code>, <code>+</code> por <code>-</code>, se borra una llamada) y se corren las pruebas: si ninguna falla, el mutante sobrevive (especificación 008).</p></div>
+    <div><h3>Por qué los dos</h3><p>Una prueba sin aserciones llega al 100 % de cobertura y no prueba nada. La mutación lo pone en evidencia.</p></div>
+  </div>
+
+  <footer>TP05 · Desarrollo de Aplicaciones II · UADE. Especificación: <a href="https://github.com/carlos-illobre/robot/blob/main/specs/009-reportes-de-calidad/spec.md">009</a>.</footer>
+</main>
+<script type="module">
+  const level = (p) => (p >= 90 ? "ok" : p >= 75 ? "warn" : "crit");
+  const fmt = (p) => `${p.toFixed(1).replace(".", ",")} %`;
+  const pct = (a, b) => (b ? (100 * a) / b : 100);
+
+  function paint(card, main, bars) {
+    const big = card.querySelector('[data-slot="main"]');
+    big.textContent = fmt(main);
+    big.dataset.level = level(main);
+    card.querySelector('[data-slot="bars"]').innerHTML = bars
+      .map(([name, p, bad]) => `<div class="bar${bad ? " is-bad" : ""}"><span>${name}</span><i><b style="width:${Math.max(0, Math.min(100, p))}%"></b></i><span>${fmt(p)}</span></div>`)
+      .join("");
+  }
+
+  const readers = {
+    // Vitest / istanbul: coverage-summary.json
+    cov: (d) => {
+      const t = d.total;
+      const bars = [["Líneas", t.lines.pct], ["Ramas", t.branches.pct], ["Funciones", t.functions.pct], ["Sentencias", t.statements.pct]];
+      return [Math.min(...bars.map((b) => b[1])), bars];
+    },
+    // coverage.py: coverage.json
+    pycov: (d) => {
+      const t = d.totals;
+      const lines = pct(t.covered_lines, t.num_statements);
+      const branches = pct(t.covered_branches, t.num_branches);
+      return [t.percent_covered, [["Líneas", lines], ["Ramas", branches]]];
+    },
+    // Stryker: esquema mutation-testing-report-schema
+    stryker: (d) => {
+      let killed = 0, timeout = 0, survived = 0, nocov = 0;
+      for (const f of Object.values(d.files)) for (const m of f.mutants) {
+        if (m.status === "Killed") killed++;
+        else if (m.status === "Timeout") timeout++;
+        else if (m.status === "Survived") survived++;
+        else if (m.status === "NoCoverage") nocov++;
+      }
+      const total = killed + timeout + survived + nocov;
+      const score = pct(killed + timeout, total);
+      return [score, [["Detectados", score], ["Sobreviven", pct(survived, total), true], ["Sin cubrir", pct(nocov, total), true]]];
+    },
+    // tools/mutmut_html.py
+    mutmut: (d) => [d.puntaje, [["Detectados", d.puntaje]]],
+  };
+
+  for (const card of document.querySelectorAll(".card[data-src]")) {
+    fetch(card.dataset.src)
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => paint(card, ...readers[card.dataset.kind](d)))
+      .catch(() => {}); // sin resumen: queda el enlace al reporte
+  }
+
+  fetch("commit.json")
+    .then((r) => r.json())
+    .then(({ sha, fecha }) => {
+      const el = document.getElementById("commit");
+      el.innerHTML = `Commit: <a href="https://github.com/carlos-illobre/robot/commit/${sha}">${sha.slice(0, 7)}</a> · ${fecha}`;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>

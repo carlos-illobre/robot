@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="es-AR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetría Unitree · Consola</title>
+<style>
+@font-face { font-family: 'Inter'; src: url('fonts/Inter-300-800.woff2') format('woff2'); font-weight: 300 800; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('fonts/JetBrainsMono-400-700.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+
+/* Paleta "Grafito": oscuro por defecto (proyector, laboratorio con luz baja). */
+:root, :root[data-theme="dark"] {
+  --bg: #0A0C0F; --panel: #111418; --panel-2: #171B21; --line: #222831; --line-2: #2D343E;
+  --text: #E8EBEF; --text-2: #A1A9B4; --text-3: #737C87;
+  --ok: #34C47C; --warn: #F5B83D; --hot: #FF5A52;
+  --ok-bg: rgba(52,196,124,.12); --warn-bg: rgba(245,184,61,.12); --hot-bg: rgba(255,90,82,.14);
+  --accent: #5B8CFF; --accent-ink: #fff; --accent-bg: rgba(91,140,255,.14);
+  --s1: #7AA7FF; --s2: #C792EA; --s3: #E9E2D0;
+  --foot: #E8EBEF; --sky: #1A2B44; --ground: #2A231B;
+  --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px rgba(0,0,0,.25);
+}
+:root[data-theme="light"] {
+  --bg: #F3F4F6; --panel: #FFFFFF; --panel-2: #F7F8FA; --line: #E4E7EB; --line-2: #D3D8DF;
+  --text: #0D1117; --text-2: #4F5864; --text-3: #6F7883;
+  --ok: #17924F; --warn: #B87D00; --hot: #D9302A;
+  --ok-bg: rgba(23,146,79,.10); --warn-bg: rgba(184,125,0,.10); --hot-bg: rgba(217,48,42,.09);
+  --accent: #2F5BEA; --accent-ink: #fff; --accent-bg: rgba(47,91,234,.10);
+  --s1: #2F6FEB; --s2: #8B4FD8; --s3: #6B5B3A;
+  --foot: #0D1117; --sky: #CFE0F5; --ground: #E8DCC8;
+  --shadow: 0 1px 2px rgba(16,24,40,.05), 0 4px 16px rgba(16,24,40,.04);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font: 14px/1.4 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+.num, td.n, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+button { font: inherit; color: inherit; }
+kbd { font: 500 12px 'JetBrains Mono', monospace; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--text-2); background: var(--panel-2); }
+
+/* ---------- Barra superior ---------- */
+.top { height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.brand { white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 650; letter-spacing: -.01em; }
+.brand svg.logo { width: 28px; height: 28px; }
+.seg { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); }
+.seg button { white-space: nowrap; border: 0; background: none; padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 550; color: var(--text-2); cursor: pointer; display: flex; gap: 6px; align-items: center; }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+:root[data-theme="light"] .seg button[aria-pressed="true"] { background: #fff; }
+.state { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+.state b { color: var(--text); font-weight: 600; }
+.gait { width: 18px; height: 18px; display: inline-grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.gait i { border-radius: 2px; background: var(--line-2); transition: background-color .08s; }
+.gait i.on { background: var(--text); }
+.link { white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); position: relative; }
+.dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: ping 1.6s ease-out infinite; }
+.dot.paused { background: var(--text-3); } .dot.paused::after { animation: none; }
+.dot.lost { background: var(--hot); }
+@keyframes ping { from { transform: scale(1); opacity: .6; } to { transform: scale(2.6); opacity: 0; } }
+.spacer { flex: 1; }
+.btn { white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--panel-2); font-size: 13px; font-weight: 600; cursor: pointer; transition: transform .12s, background-color .12s; }
+.btn:hover { background: var(--line); }
+.btn:active { transform: scale(.97); }
+.btn kbd { margin-left: 2px; }
+.btn.primary { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+.btn.primary kbd { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.25); color: #fff; }
+.btn.icon { width: 36px; padding: 0; justify-content: center; }
+.count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--accent-bg); color: var(--accent); font: 600 12px 'JetBrains Mono', monospace; display: inline-grid; place-items: center; }
+.count.bump { animation: bump .35s ease-out; }
+@keyframes bump { 40% { transform: scale(1.35); } }
+
+/* ---------- Franja de estado (alarmas) ---------- */
+.alert { height: 36px; white-space: nowrap; overflow: hidden; display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 13px; color: var(--text-2); border-bottom: 1px solid var(--line); transition: background-color .3s; }
+.alert .i { color: var(--ok); }
+.alert.hot { background: var(--hot-bg); color: var(--text); border-bottom-color: color-mix(in srgb, var(--hot) 40%, transparent); }
+.alert.hot .i { color: var(--hot); animation: pulse 1.2s ease-in-out infinite; }
+.alert.lost { background: var(--warn-bg); color: var(--text); }
+.alert.lost .i { color: var(--warn); }
+.alert b { font-weight: 650; }
+.alert .go { margin-left: 8px; color: var(--accent); cursor: pointer; background: none; border: 0; padding: 0; font-size: 13px; font-weight: 600; }
+@keyframes pulse { 50% { opacity: .35; } }
+
+/* ---------- Grilla ---------- */
+main { height: calc(100% - 56px - 36px - 28px); display: grid; grid-template-columns: 548px 1fr; grid-template-rows: 1fr 1fr; gap: 12px; padding: 12px 16px; transition: opacity .3s, filter .3s; }
+main.stale { opacity: .45; filter: saturate(.3); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.ph { display: flex; align-items: center; gap: 8px; padding: 12px 16px 8px; }
+.ph h2 { margin: 0; font-size: 14px; font-weight: 650; letter-spacing: -.005em; }
+.ph .sub { white-space: nowrap; color: var(--text-3); font-size: 12px; }
+.ph .i { color: var(--text-3); }
+#motors { grid-row: 1 / span 2; }
+.right2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-height: 0; }
+.legend { white-space: nowrap; display: flex; gap: 12px; font-size: 12px; color: var(--text-3); }
+.legend span { display: inline-flex; align-items: center; gap: 4px; }
+.sw { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Tabla de motores */
+.tablewrap { flex: 1; overflow: auto; min-height: 0; padding: 0 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { position: sticky; top: 0; background: var(--panel); z-index: 1; text-align: right; font-weight: 550; font-size: 12px; color: var(--text-3); padding: 4px 8px 6px; border-bottom: 1px solid var(--line); }
+thead th:first-child, thead th.l { text-align: left; }
+tbody td { padding: 0 8px; height: 24px; text-align: right; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); white-space: nowrap; }
+td.name { text-align: left; font-weight: 500; cursor: pointer; }
+td.name .chk { display: inline-block; width: 10px; height: 10px; border-radius: 3px; border: 1.5px solid var(--line-2); margin-right: 8px; vertical-align: -1px; }
+tr.sel td.name .chk { border-color: transparent; background: var(--c); }
+tr.grp td { height: 22px; font-size: 12px; color: var(--text-3); text-align: left; font-weight: 550; padding-top: 4px; border-bottom: 0; }
+tr.grp .contact { margin-left: 8px; font-weight: 500; }
+tr.grp .contact.down { color: var(--text-2); }
+tbody tr.m:hover { background: var(--panel-2); }
+tr.m.hot { background: var(--hot-bg); }
+.temp { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.temp .v { width: 42px; text-align: right; }
+.tbar { width: 64px; height: 6px; border-radius: 3px; background: var(--panel-2); position: relative; overflow: hidden; }
+.tbar::before, .tbar::after { content: ''; position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line-2); }
+.tbar::before { left: 30%; } .tbar::after { left: 70%; }
+.tbar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; transform-origin: left; width: 100%; transition: transform .2s linear; }
+.lamp { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.ok { --c: var(--ok); } .warn { --c: var(--warn); } .hot { --c: var(--hot); }
+.lamp, .tbar i { background: var(--c); }
+.temp.hot .v { color: var(--hot); font-weight: 650; }
+.tq { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.tq .bar { width: 40px; height: 4px; border-radius: 2px; background: var(--panel-2); overflow: hidden; }
+.tq .bar i { display: block; height: 100%; width: 100%; background: var(--text-3); transform-origin: left; transition: transform .2s linear; }
+.mchart { border-top: 1px solid var(--line); padding: 8px 16px 12px; height: 150px; display: flex; flex-direction: column; }
+.mchart .hdr { white-space: nowrap; display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-3); margin-bottom: 4px; }
+.mchart .hdr b { color: var(--text-2); font-weight: 600; }
+canvas { display: block; width: 100%; flex: 1; min-height: 0; }
+
+/* IMU */
+.imu-body { flex: 1; display: grid; grid-template-columns: 156px 1fr; gap: 16px; padding: 0 16px 12px; min-height: 0; }
+.horizon { width: 148px; height: 148px; border-radius: 50%; overflow: hidden; position: relative; border: 1px solid var(--line-2); align-self: center; }
+.horizon svg { width: 100%; height: 100%; display: block; }
+.imu-right { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+.stat .lbl { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+.stat .val { font-size: 26px; font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
+.stat .val small { font-size: 13px; color: var(--text-3); margin-left: 2px; }
+.chips { display: flex; gap: 4px; margin-left: auto; }
+.chip { border: 1px solid var(--line-2); background: none; border-radius: 999px; padding: 2px 10px; font-size: 12px; color: var(--text-3); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { color: var(--text); background: var(--panel-2); }
+.chip .sw { background: var(--c); }
+.compass { width: 26px; height: 26px; }
+
+/* Batería */
+.bms-body { flex: 1; padding: 0 16px 12px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.bms-top { display: flex; gap: 16px; align-items: center; }
+.ring { width: 96px; height: 96px; position: relative; flex: none; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.ring .c b { font-size: 26px; font-weight: 500; letter-spacing: -.02em; display: block; line-height: 1; }
+.ring .c span { font-size: 12px; color: var(--text-3); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; align-items: baseline; }
+.kv dt { color: var(--text-3); font-size: 12px; }
+.kv dd { margin: 0; text-align: right; font-weight: 500; }
+.cells { display: grid; gap: 4px; flex: 1; min-height: 64px; align-items: end; }
+.cell { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.cell .bar { width: 100%; max-width: 22px; flex: 1; background: var(--panel-2); border-radius: 4px; position: relative; overflow: hidden; }
+.cell .bar i { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; background: var(--text-3); transform-origin: bottom; border-radius: 4px; transition: transform .3s; }
+.cell.min .bar i { background: var(--warn); }
+.cell span { font-size: 12px; color: var(--text-3); }
+.cellhdr { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-3); }
+
+/* Patas */
+.feet-body { flex: 1; display: grid; grid-template-columns: 132px 1fr; gap: 12px; padding: 0 16px 12px; min-height: 0; align-items: center; }
+.robot-top { width: 132px; }
+.robot-top .foot { transition: fill .08s, transform .12s; transform-box: fill-box; transform-origin: center; }
+.robot-top .foot.down { fill: var(--foot); transform: scale(1.08); }
+.robot-top .foot.air { fill: none; transform: scale(.82); }
+.legs-list { display: grid; gap: 6px; font-size: 13px; }
+.legrow { display: grid; grid-template-columns: 28px 1fr 64px; align-items: center; gap: 8px; }
+.legrow b { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 12px; }
+.legrow .st { font-size: 12px; color: var(--text-3); text-align: right; }
+.legrow .st.down { color: var(--text); }
+.strip { height: 12px; display: grid; grid-template-columns: repeat(40, 1fr); gap: 0; border-radius: 3px; overflow: hidden; }
+.strip i { background: var(--panel-2); }
+.strip i.on { background: var(--text-2); }
+.nofeet { grid-column: 1 / -1; text-align: center; color: var(--text-3); font-size: 13px; }
+
+/* Barra inferior */
+.status { height: 28px; display: flex; align-items: center; gap: 16px; padding: 0 16px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--line); background: var(--panel); white-space: nowrap; overflow: hidden; }
+.status .keys { margin-left: auto; display: flex; gap: 12px; }
+.status .keys span { display: inline-flex; gap: 4px; align-items: center; }
+.status kbd { font-size: 12px; padding: 0 4px; }
+
+/* Toast y ayuda */
+.toast { position: fixed; left: 50%; bottom: 44px; transform: translate(-50%, 16px); opacity: 0; background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: transform .2s, opacity .2s; pointer-events: none; display: flex; align-items: center; gap: 8px; z-index: 20; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+.flash { position: fixed; inset: 0; pointer-events: none; border: 3px solid var(--accent); opacity: 0; z-index: 19; }
+.flash.go { animation: flash .45s ease-out; }
+@keyframes flash { 10% { opacity: 1; } 100% { opacity: 0; } }
+.dlg { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; place-items: center; z-index: 30; }
+.dlg.open { display: grid; }
+.dlg .box { width: 420px; max-width: calc(100% - 32px); background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; padding: 16px 20px 20px; }
+.dlg h3 { margin: 0 0 12px; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+.dlg dl { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin: 0; font-size: 14px; }
+.dlg dd { margin: 0; text-align: right; }
+.only-phone { display: none; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 640px) {
+  body { overflow: auto; font-size: 15px; }
+  .top { height: auto; flex-wrap: wrap; gap: 8px 12px; padding: 12px 16px; position: sticky; top: 0; z-index: 5; }
+  .top .brand span.t { display: none; }
+  .hide-phone { display: none !important; }
+  .only-phone { display: initial; }
+  .seg button { font-size: 14px; padding: 4px 10px; }
+  .state, .link { font-size: 14px; }
+  .alert { height: auto; white-space: normal; align-items: flex-start; min-height: 44px; font-size: 14px; padding: 8px 16px; position: sticky; top: 101px; z-index: 4; background: var(--bg); }
+  .alert.hot { background: color-mix(in srgb, var(--hot) 16%, var(--bg)); }
+  .alert .go { font-size: 14px; }
+  .alert .i { margin-top: 2px; }
+  #alertTxt { flex: 1; }
+  main { height: auto; display: flex; flex-direction: column; padding: 12px 12px 104px; }
+  #feet { order: 1; } #bms { order: 2; } #imu { order: 3; } #motors { order: 4; }
+  .right2 { display: contents; }
+  .ph { flex-wrap: wrap; }
+  #imu .ph .sub { display: none; }
+  .ph h2 { font-size: 16px; } .ph .sub, .legend { font-size: 14px; }
+  .tablewrap { overflow: visible; }
+  table { font-size: 14px; }
+  thead th { font-size: 14px; top: 0; }
+  .tbar { display: none; }
+  .tq .bar { display: none; }
+  td.n.ang, th.ang { display: none; }
+  .mchart { height: 200px; }
+  .mchart .hdr { font-size: 14px; }
+  .imu-body { grid-template-columns: 1fr; justify-items: center; }
+  .imu-right { width: 100%; }
+  .imu-right canvas { height: 150px; flex: none; }
+  .stat .lbl, .chip, .kv dt, .cell span, .cellhdr, .legrow .st, .legrow b { font-size: 14px; }
+  .kv { font-size: 15px; }
+  .feet-body { grid-template-columns: 120px 1fr; }
+  .cells { min-height: 72px; flex: none; height: 96px; }
+  .status { display: none; }
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--line); display: grid; grid-template-columns: 52px 1fr auto; gap: 8px; z-index: 10; }
+  .dock .btn { height: 52px; font-size: 15px; border-radius: 12px; justify-content: center; }
+  .dock .btn.primary { font-size: 16px; }
+  .toast { bottom: 96px; font-size: 14px; }
+}
+@media (min-width: 641px) { .dock { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="9" y="7" width="14" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11 4 7M23 11l5-4M9 21l-5 4M23 21l5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="11" r="1.6" fill="currentColor"/></svg>
+    <span class="t">Unitree</span>
+  </div>
+  <div class="seg" role="group" aria-label="Robot">
+    <button data-model="go2" aria-pressed="true">Go2</button>
+    <button data-model="g1" aria-pressed="false">G1</button>
+  </div>
+  <div class="state" title="Deducido de las velocidades de los motores">
+    <span class="gait" aria-hidden="true"><i data-l="FL"></i><i data-l="FR"></i><i data-l="RL"></i><i data-l="RR"></i></span>
+    <b id="walk">Caminando</b><span class="hide-phone" id="walkSub">trote</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="link">
+    <span class="dot" id="liveDot"></span>
+    <span id="linkTxt" class="num">En vivo · 10 Hz</span>
+  </div>
+  <div class="seg hide-phone" role="group" aria-label="Transporte">
+    <button data-tr="ws" aria-pressed="true"><svg class="i"><use href="#i-radio-tower"/></svg>WebSocket</button>
+    <button data-tr="poll" aria-pressed="false"><svg class="i"><use href="#i-refresh-cw"/></svg>Polling</button>
+  </div>
+  <button class="btn hide-phone" id="pauseBtn" title="Pausar (Espacio)"><svg class="i"><use href="#i-pause"/></svg><span>Pausar</span></button>
+  <button class="btn primary hide-phone" id="capBtn"><svg class="i"><use href="#i-camera"/></svg>Capturar<kbd>C</kbd></button>
+  <button class="btn hide-phone" id="expBtn"><svg class="i"><use href="#i-download"/></svg>CSV <span class="count" id="cnt">0</span><kbd>E</kbd></button>
+  <button class="btn icon hide-phone" id="themeBtn" title="Tema (T)"><svg class="i"><use href="#i-sun"/></svg></button>
+  <button class="btn icon hide-phone" id="helpBtn" title="Atajos (?)"><svg class="i"><use href="#i-keyboard"/></svg></button>
+  <button class="btn icon only-phone" id="trPhone" title="Cambiar transporte"><svg class="i"><use href="#i-radio-tower"/></svg></button>
+</header>
+
+<div class="alert" id="alert" role="status"><svg class="i"><use href="#i-activity"/></svg><span id="alertTxt">Todo en rango</span></div>
+
+<main id="main">
+  <section class="panel" id="motors">
+    <div class="ph">
+      <svg class="i"><use href="#i-cpu"/></svg><h2>Motores</h2><span class="sub" id="mSub">12 · Go2</span>
+      <div class="spacer"></div>
+      <div class="legend hide-phone"><span><i class="sw" style="background:var(--ok)"></i>&lt; 40</span><span><i class="sw" style="background:var(--warn)"></i>40–60</span><span><i class="sw" style="background:var(--hot)"></i>&gt; 60 °C</span></div>
+      <div class="seg" role="group" aria-label="Orden"><button data-sort="body" aria-pressed="true">Por pata</button><button data-sort="temp" aria-pressed="false">Por calor</button></div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="l">Motor</th><th>Temperatura</th><th class="ang">Ángulo °</th><th>Vel. rad/s</th><th>Torque N·m</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="mchart">
+      <div class="hdr"><b>Temperatura de los motores elegidos</b><span class="hide-phone">· 60 s · tocá una fila para sumarla</span></div>
+      <canvas id="mCanvas"></canvas>
+    </div>
+  </section>
+
+  <section class="panel" id="imu">
+    <div class="ph">
+      <svg class="i"><use href="#i-rotate-3d"/></svg><h2>Inclinación (IMU)</h2><span class="sub">120 muestras · 12 s</span>
+      <div class="chips">
+        <button class="chip" data-s="roll" aria-pressed="true" style="--c:var(--s1)"><i class="sw"></i>Roll</button>
+        <button class="chip" data-s="pitch" aria-pressed="true" style="--c:var(--s2)"><i class="sw"></i>Pitch</button>
+        <button class="chip" data-s="yaw" aria-pressed="false" style="--c:var(--s3)"><i class="sw"></i>Yaw</button>
+      </div>
+    </div>
+    <div class="imu-body">
+      <div class="horizon" aria-label="Horizonte artificial">
+        <svg viewBox="-80 -80 160 160">
+          <g id="hz">
+            <rect x="-200" y="-200" width="400" height="200" fill="var(--sky)"/>
+            <rect x="-200" y="0" width="400" height="200" fill="var(--ground)"/>
+            <line x1="-200" x2="200" y1="0" y2="0" stroke="var(--text)" stroke-width="1.2"/>
+            <g stroke="var(--text-2)" stroke-width="1" opacity=".8">
+              <line x1="-14" x2="14" y1="-24" y2="-24"/><line x1="-8" x2="8" y1="-12" y2="-12"/>
+              <line x1="-8" x2="8" y1="12" y2="12"/><line x1="-14" x2="14" y1="24" y2="24"/>
+            </g>
+          </g>
+          <path d="M-44 0h28l6 8 6-8h28" fill="none" stroke="var(--warn)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle r="2.5" fill="var(--warn)"/>
+          <text x="0" y="-62" text-anchor="middle" font-size="11" fill="var(--text-2)" font-family="JetBrains Mono">×4</text>
+        </svg>
+      </div>
+      <div class="imu-right">
+        <div class="stats">
+          <div class="stat"><div class="lbl"><i class="sw" style="background:var(--s1)"></i>Roll</div><div class="val num"><span id="roll">0,0</span><small>°</small></div></div>
+          <div class="stat"><div class="lbl"><i class="sw" style="background:var(--s2)"></i>Pitch</div><div class="val num"><span id="pitch">0,0</span><small>°</small></div></div>
+          <div class="stat"><div class="lbl">
+            <svg class="compass" viewBox="-13 -13 26 26"><circle r="11" fill="none" stroke="var(--line-2)"/><g id="needle"><path d="M0-9 3 0H-3Z" fill="var(--hot)"/><path d="M0 9 3 0H-3Z" fill="var(--text-3)"/></g></svg>
+            Yaw <span id="yawDir"></span></div><div class="val num"><span id="yaw">0</span><small>°</small></div></div>
+        </div>
+        <canvas id="imuCanvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <div class="right2">
+    <section class="panel" id="bms">
+      <div class="ph"><svg class="i"><use href="#i-battery"/></svg><h2>Batería</h2><span class="sub" id="bmsSub">descargando</span></div>
+      <div class="bms-body">
+        <div class="bms-top">
+          <div class="ring">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="var(--panel-2)" stroke-width="8"/><circle id="socArc" cx="50" cy="50" r="44" fill="none" stroke="var(--text)" stroke-width="8" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="40"/></svg>
+            <div class="c"><div><b class="num" id="soc">87</b><span>% carga</span></div></div>
+          </div>
+          <dl class="kv">
+            <dt>Corriente</dt><dd class="num" id="cur">−4 912 mA</dd>
+            <dt>Temperatura</dt><dd class="num" id="btemp">31,2 °C</dd>
+            <dt>Autonomía</dt><dd class="num" id="eta">≈ 1 h 40 min</dd>
+          </dl>
+        </div>
+        <div class="cellhdr"><span id="cellTitle">Celdas · 8</span><span class="num" id="cellDelta">Δ 41 mV</span></div>
+        <div class="cells" id="cells"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="feet">
+      <div class="ph"><svg class="i"><use href="#i-footprints"/></svg><h2>Patas</h2><span class="sub" id="feetSub">2 apoyadas</span></div>
+      <div class="feet-body" id="feetBody">
+        <svg class="robot-top" viewBox="0 0 132 168" aria-label="Go2 visto desde arriba">
+          <g fill="none" stroke="var(--text-3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M46 46 34 44 22 26M86 46l12-2 12-18M46 122l-12 2-12 18M86 122l12 2 12 18"/>
+          </g>
+          <g fill="var(--panel)" stroke="var(--text-3)" stroke-width="2">
+            <circle cx="34" cy="44" r="3.5"/><circle cx="98" cy="44" r="3.5"/><circle cx="34" cy="124" r="3.5"/><circle cx="98" cy="124" r="3.5"/>
+          </g>
+          <rect x="40" y="30" width="52" height="108" rx="16" fill="var(--panel-2)" stroke="var(--text-2)" stroke-width="2"/>
+          <rect x="47" y="40" width="38" height="88" rx="10" fill="none" stroke="var(--line-2)" stroke-width="1.5"/>
+          <path d="M50 30c0-10 7-16 16-16s16 6 16 16" fill="var(--panel-2)" stroke="var(--text-2)" stroke-width="2"/>
+          <circle cx="60" cy="22" r="2.2" fill="var(--text-2)"/><circle cx="72" cy="22" r="2.2" fill="var(--text-2)"/>
+          <g fill="var(--panel)" stroke="var(--text-2)" stroke-width="2"><circle cx="46" cy="46" r="4"/><circle cx="86" cy="46" r="4"/><circle cx="46" cy="122" r="4"/><circle cx="86" cy="122" r="4"/></g>
+          <path d="M58 76h16M58 84h16M58 92h16" stroke="var(--line-2)" stroke-width="2" stroke-linecap="round"/>
+          <g stroke="var(--foot)" stroke-width="2">
+            <circle class="foot" id="f-FL" cx="22" cy="26" r="9"/>
+            <circle class="foot" id="f-FR" cx="110" cy="26" r="9"/>
+            <circle class="foot" id="f-RL" cx="22" cy="142" r="9"/>
+            <circle class="foot" id="f-RR" cx="110" cy="142" r="9"/>
+          </g>
+          <g font-family="JetBrains Mono" font-size="12" fill="var(--text-2)" text-anchor="middle">
+            <text x="14" y="66">FL</text><text x="118" y="66">FR</text><text x="14" y="108">RL</text><text x="118" y="108">RR</text>
+          </g>
+          <text x="66" y="164" font-size="12" text-anchor="middle" fill="var(--text-3)" font-family="Inter">▲ frente</text>
+        </svg>
+        <div class="legs-list" id="legsList"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="status">
+  <span class="mono" id="endpoint">ws://10.0.0.5:8001/ws</span>
+  <span class="mono" id="tsTxt">ts 0,00 s</span>
+  <span id="lastCap">Sin muestras capturadas</span>
+  <div class="keys">
+    <span><kbd>C</kbd> capturar</span><span><kbd>E</kbd> exportar</span><span><kbd>Espacio</kbd> pausar</span>
+    <span><kbd>W</kbd> transporte</span><span><kbd>G</kbd> robot</span><span><kbd>T</kbd> tema</span><span><kbd>?</kbd> ayuda</span>
+  </div>
+</footer>
+
+<div class="dock">
+  <button class="btn" id="pauseBtnP" aria-label="Pausar"><svg class="i"><use href="#i-pause"/></svg></button>
+  <button class="btn primary" id="capBtnP"><svg class="i"><use href="#i-camera"/></svg>Capturar</button>
+  <button class="btn" id="expBtnP"><svg class="i"><use href="#i-download"/></svg>CSV <span class="count" id="cntP">0</span></button>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast"></div>
+<div class="dlg" id="help" role="dialog" aria-modal="true" aria-label="Atajos de teclado">
+  <div class="box">
+    <h3>Atajos de teclado <button class="btn icon" id="helpClose" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></h3>
+    <dl>
+      <dt>Capturar muestra</dt><dd><kbd>C</kbd></dd>
+      <dt>Exportar CSV con todas las capturas</dt><dd><kbd>E</kbd></dd>
+      <dt>Pausar / seguir</dt><dd><kbd>Espacio</kbd></dd>
+      <dt>WebSocket ↔ polling</dt><dd><kbd>W</kbd></dd>
+      <dt>Go2 ↔ G1</dt><dd><kbd>G</kbd></dd>
+      <dt>Ordenar motores por temperatura</dt><dd><kbd>S</kbd></dd>
+      <dt>Tema claro / oscuro</dt><dd><kbd>T</kbd></dd>
+      <dt>Simular corte de conexión (demo)</dt><dd><kbd>D</kbd></dd>
+      <dt>Esta ayuda</dt><dd><kbd>?</kbd></dd>
+    </dl>
+  </div>
+</div>
+
+<script src="icons.js"></script>
+<script src="sim.js"></script>
+<script>
+(function () {
+  'use strict';
+  Tele.initTheme('dark');
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = Tele.fmt;
+  var sim = new UnitreeSim({ modelo: 'go2' });
+  var state = { sort: 'body', selected: ['RL_calf', 'FR_calf', 'FL_thigh'], series: { roll: true, pitch: true, yaw: false },
+    samples: [], imuHist: [], tempHist: {}, contactHist: { FR: [], FL: [], RR: [], RL: [] }, last: null, lastAt: 0 };
+  var SEL_COLORS = ['var(--s1)', 'var(--s2)', 'var(--s3)'];
+  var css = function (v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); };
+
+  /* ---- Tabla ---- */
+  var rows = {};
+  function buildTable(f) {
+    var tb = $('tbody'); tb.innerHTML = ''; rows = {};
+    var list = f.motores.slice();
+    var groups = [];
+    if (state.sort === 'temp') {
+      list.sort(function (a, b) { return b.temperatura - a.temperatura; });
+      groups = [{ name: null, items: list }];
+    } else if (f.modelo === 'go2') {
+      ['FR', 'FL', 'RR', 'RL'].forEach(function (l) { groups.push({ leg: l, name: l + ' · ' + Tele.LEG_NAMES[l], items: list.filter(function (m) { return m.nombre.indexOf(l) === 0; }) }); });
+    } else {
+      ['Pierna izquierda', 'Pierna derecha', 'Cintura', 'Brazo izquierdo', 'Brazo derecho'].forEach(function (g) { groups.push({ name: g, items: list.filter(function (m) { return Tele.groupG1(m.nombre) === g; }) }); });
+    }
+    groups.forEach(function (g) {
+      if (g.name) {
+        var gr = document.createElement('tr'); gr.className = 'grp';
+        gr.innerHTML = '<td colspan="5">' + g.name + (g.leg ? '<span class="contact" data-leg="' + g.leg + '"></span>' : '') + '</td>';
+        tb.appendChild(gr);
+      }
+      g.items.forEach(function (m) {
+        var tr = document.createElement('tr'); tr.className = 'm'; tr.dataset.name = m.nombre;
+        tr.innerHTML = '<td class="name"><span class="chk"></span>' + m.nombre + '</td>' +
+          '<td><span class="temp"><span class="lamp"></span><span class="tbar"><i></i></span><span class="v num"></span></span></td>' +
+          '<td class="n ang"></td><td class="n vel"></td><td><span class="tq"><span class="bar"><i></i></span><span class="num tv"></span></span></td>';
+        tr.addEventListener('click', function () { toggleSel(m.nombre); });
+        tb.appendChild(tr);
+        rows[m.nombre] = { tr: tr, temp: tr.querySelector('.temp'), v: tr.querySelector('.v'), bar: tr.querySelector('.tbar i'),
+          ang: tr.querySelector('.ang'), vel: tr.querySelector('.vel'), tq: tr.querySelector('.tv'), tqb: tr.querySelector('.tq .bar i') };
+      });
+    });
+    paintSel();
+  }
+  function toggleSel(name) {
+    var i = state.selected.indexOf(name);
+    if (i >= 0) state.selected.splice(i, 1);
+    else { if (state.selected.length >= 3) state.selected.shift(); state.selected.push(name); }
+    paintSel();
+  }
+  function paintSel() {
+    Object.keys(rows).forEach(function (n) {
+      var i = state.selected.indexOf(n);
+      rows[n].tr.classList.toggle('sel', i >= 0);
+      if (i >= 0) rows[n].tr.style.setProperty('--c', SEL_COLORS[i]); else rows[n].tr.style.removeProperty('--c');
+    });
+  }
+  function updateTable(f) {
+    f.motores.forEach(function (m) {
+      var r = rows[m.nombre]; if (!r) return;
+      var s = Tele.semaforo(m.temperatura);
+      r.temp.className = 'temp ' + s;
+      r.tr.classList.toggle('hot', s === 'hot');
+      r.v.textContent = fmt(m.temperatura, 1);
+      r.bar.style.transform = 'scaleX(' + Math.max(0.02, Math.min(1, (m.temperatura - 25) / 50)) + ')';
+      r.ang.textContent = fmt(m.angulo, 1);
+      r.vel.textContent = fmt(m.velocidad, 2);
+      r.tq.textContent = fmt(m.torque, 1);
+      r.tqb.style.transform = 'scaleX(' + Math.min(1, m.torque / 20) + ')';
+    });
+    document.querySelectorAll('tr.grp .contact').forEach(function (el) {
+      var d = f.fuerzas[el.dataset.leg] === 1; el.textContent = d ? '· apoyada' : '· en el aire'; el.classList.toggle('down', d);
+    });
+  }
+
+  /* ---- Gráficos (canvas) ---- */
+  function setupCanvas(c) {
+    var r = c.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    if (c.width !== Math.round(r.width * d) || c.height !== Math.round(r.height * d)) { c.width = Math.round(r.width * d); c.height = Math.round(r.height * d); }
+    var ctx = c.getContext('2d'); ctx.setTransform(d, 0, 0, d, 0, 0);
+    return { ctx: ctx, w: r.width, h: r.height };
+  }
+  function lineChart(c, opts) {
+    var g = setupCanvas(c), ctx = g.ctx, W = g.w, H = g.h;
+    var padL = 34, padR = opts.right ? 36 : 8, padT = 6, padB = 16;
+    ctx.clearRect(0, 0, W, H);
+    var y = function (v) { return padT + (opts.max - v) / (opts.max - opts.min) * (H - padT - padB); };
+    ctx.font = '12px JetBrains Mono, monospace'; ctx.textBaseline = 'middle';
+    (opts.bands || []).forEach(function (b) {
+      ctx.fillStyle = b.color; ctx.globalAlpha = 0.07;
+      ctx.fillRect(padL, y(Math.min(b.to, opts.max)), W - padL - padR, y(Math.max(b.from, opts.min)) - y(Math.min(b.to, opts.max)));
+      ctx.globalAlpha = 1;
+    });
+    ctx.strokeStyle = css('--line'); ctx.lineWidth = 1; ctx.fillStyle = css('--text-3');
+    opts.ticks.forEach(function (t) {
+      ctx.beginPath(); ctx.moveTo(padL, Math.round(y(t)) + .5); ctx.lineTo(W - padR, Math.round(y(t)) + .5); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.fillText(fmt(t, 0), padL - 6, y(t));
+    });
+    if (opts.right) {
+      ctx.textAlign = 'left';
+      opts.right.ticks.forEach(function (t) { ctx.fillText(t + '°', W - padR + 6, padT + (opts.right.max - t) / (opts.right.max - opts.right.min) * (H - padT - padB)); });
+    }
+    ctx.textAlign = 'left'; ctx.fillText(opts.xLabel || '', padL, H - 6);
+    ctx.textAlign = 'right'; ctx.fillText('ahora', W - padR, H - 6);
+    opts.series.forEach(function (s) {
+      var n = opts.n, data = s.data; if (!data.length) return;
+      var yy = s.axis === 'right' ? function (v) { return padT + (opts.right.max - v) / (opts.right.max - opts.right.min) * (H - padT - padB); } : y;
+      ctx.beginPath(); ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 1.75; ctx.lineJoin = 'round';
+      ctx.setLineDash(s.dash || []);
+      var started = false, prev = null;
+      for (var i = 0; i < data.length; i++) {
+        var x = padL + (n - data.length + i) / (n - 1) * (W - padL - padR);
+        var v = data[i];
+        if (s.wrap && prev != null && Math.abs(v - prev) > 180) { started = false; }
+        if (!started) { ctx.moveTo(x, yy(v)); started = true; } else ctx.lineTo(x, yy(v));
+        prev = v;
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+      var lx = padL + (n - 1) / (n - 1) * (W - padL - padR), lv = data[data.length - 1];
+      ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(lx, yy(lv), 3, 0, 7); ctx.fill();
+    });
+  }
+  function drawImu() {
+    var h = state.imuHist, series = [];
+    if (state.series.roll) series.push({ data: h.map(function (x) { return x.roll; }), color: css('--s1') });
+    if (state.series.pitch) series.push({ data: h.map(function (x) { return x.pitch; }), color: css('--s2') });
+    if (state.series.yaw) series.push({ data: h.map(function (x) { return x.yaw; }), color: css('--s3'), axis: 'right', dash: [4, 3], wrap: true, width: 1.5 });
+    lineChart($('imuCanvas'), { n: 120, min: -6, max: 6, ticks: [-5, 0, 5], series: series, xLabel: '−12 s',
+      right: state.series.yaw ? { min: 0, max: 360, ticks: [0, 180, 360] } : null });
+  }
+  function drawMotors() {
+    var series = state.selected.map(function (n, i) {
+      return { data: state.tempHist[n] || [], color: css(SEL_COLORS[i].slice(4, -1)) };
+    });
+    lineChart($('mCanvas'), { n: 600, min: 25, max: 70, ticks: [30, 40, 50, 60], series: series, xLabel: '−60 s',
+      bands: [{ from: 40, to: 60, color: css('--warn') }, { from: 60, to: 70, color: css('--hot') }] });
+  }
+
+  /* ---- Batería y patas ---- */
+  function buildCells(n) {
+    var c = $('cells'); c.innerHTML = ''; c.style.gridTemplateColumns = 'repeat(' + n + ', 1fr)';
+    for (var i = 0; i < n; i++) { var d = document.createElement('div'); d.className = 'cell'; d.innerHTML = '<div class="bar"><i></i></div><span class="num"></span>'; c.appendChild(d); }
+    $('cellTitle').textContent = 'Celdas · ' + n;
+  }
+  function buildLegs(f) {
+    var L = $('legsList'); L.innerHTML = '';
+    var has = Object.keys(f.fuerzas || {}).length > 0;
+    document.querySelector('.robot-top').style.display = has ? '' : 'none';
+    if (!has) { L.innerHTML = '<div class="nofeet">El G1 no reporta contacto de patas.<br>Se muestra cuando el robot lo informa.</div>'; return; }
+    ['FL', 'FR', 'RL', 'RR'].forEach(function (l) {
+      var r = document.createElement('div'); r.className = 'legrow'; r.dataset.leg = l;
+      r.innerHTML = '<b>' + l + '</b><div class="strip">' + new Array(41).join('<i></i>') + '</div><span class="st"></span>';
+      L.appendChild(r);
+    });
+  }
+
+  /* ---- Ciclo ---- */
+  var built = null;
+  function onFrame(f) {
+    state.last = f; state.lastAt = performance.now();
+    if (built !== f.modelo) {
+      built = f.modelo;
+      var hist = sim.history.slice(0, -1);
+      state.imuHist = hist.slice(-119).map(function (x) { return x.imu; });
+      state.tempHist = {};
+      hist.forEach(function (x) { x.motores.forEach(function (m) { (state.tempHist[m.nombre] = state.tempHist[m.nombre] || []).push(m.temperatura); }); });
+      ['FR', 'FL', 'RR', 'RL'].forEach(function (l) { state.contactHist[l] = hist.slice(-39).map(function (x) { return x.fuerzas[l] === 1; }); });
+      state.selected = f.modelo === 'go2' ? ['RL_calf', 'FR_calf', 'FL_thigh'] : ['left_knee', 'right_knee', 'left_hip_pitch'];
+      buildTable(f); buildCells(f.bms.celdas.length); buildLegs(f);
+      $('mSub').textContent = f.motores.length + ' · ' + (f.modelo === 'go2' ? 'Go2' : 'G1');
+    }
+    var a = Tele.analyze(f);
+    // Historia
+    state.imuHist.push(f.imu); if (state.imuHist.length > 120) state.imuHist.shift();
+    var reps = sim.transport === 'ws' ? 1 : Math.round(sim.pollMs / 100);
+    f.motores.forEach(function (m) {
+      var h = state.tempHist[m.nombre] || (state.tempHist[m.nombre] = []);
+      for (var k = 0; k < reps; k++) h.push(m.temperatura);
+      while (h.length > 600) h.shift();
+    });
+    ['FR', 'FL', 'RR', 'RL'].forEach(function (l) {
+      var h = state.contactHist[l]; h.push(f.fuerzas[l] === 1); if (h.length > 40) h.shift();
+    });
+    if (state.sort === 'temp' && f.ts * 10 % 10 < 1) buildTable(f);
+    updateTable(f);
+    // IMU
+    $('roll').textContent = Tele.signed(f.imu.roll, 1);
+    $('pitch').textContent = Tele.signed(f.imu.pitch, 1);
+    $('yaw').textContent = fmt(f.imu.yaw, 0);
+    var dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+    $('yawDir').textContent = dirs[Math.round(f.imu.yaw / 45) % 8];
+    $('needle').setAttribute('transform', 'rotate(' + f.imu.yaw + ')');
+    $('hz').setAttribute('transform', 'rotate(' + (-f.imu.roll * 4) + ') translate(0 ' + (f.imu.pitch * 4) + ')');
+    // Batería
+    $('soc').textContent = f.bms.soc;
+    $('socArc').style.strokeDashoffset = 276.5 * (1 - f.bms.soc / 100);
+    $('socArc').style.stroke = f.bms.soc < 20 ? css('--hot') : css('--text');
+    $('cur').textContent = (f.bms.corriente < 0 ? '−' : '') + Math.abs(f.bms.corriente).toLocaleString('es-AR') + ' mA';
+    $('btemp').textContent = fmt(f.bms.temperatura, 1) + ' °C';
+    var mins = Math.max(0, Math.round(f.bms.soc / 100 * 8000 / Math.max(300, Math.abs(f.bms.corriente)) * 60));
+    $('eta').textContent = '≈ ' + Math.floor(mins / 60) + ' h ' + String(mins % 60).padStart(2, '0') + ' min';
+    $('bmsSub').textContent = f.bms.corriente < 0 ? 'descargando' : 'cargando';
+    var cells = $('cells').children;
+    f.bms.celdas.forEach(function (v, i) {
+      var el = cells[i]; if (!el) return;
+      el.classList.toggle('min', v === a.cellMin && a.cellDelta > 0.025);
+      el.querySelector('i').style.transform = 'scaleY(' + Math.max(0.05, (v - 3.3) / (4.2 - 3.3)) + ')';
+      el.querySelector('span').textContent = fmt(v, 2);
+    });
+    $('cellDelta').textContent = 'mín. ' + fmt(a.cellMin, 2) + ' V · Δ ' + Math.round(a.cellDelta * 1000) + ' mV';
+    // Patas
+    if (a.hasFeet) {
+      ['FR', 'FL', 'RR', 'RL'].forEach(function (l) {
+        var d = f.fuerzas[l] === 1, el = $('f-' + l);
+        el.setAttribute('class', 'foot ' + (d ? 'down' : 'air'));
+        var row = document.querySelector('.legrow[data-leg="' + l + '"]');
+        if (row) {
+          var st = row.querySelector('.st'); st.textContent = d ? 'apoyada' : 'en el aire'; st.classList.toggle('down', d);
+          var cells2 = row.querySelectorAll('.strip i'), h = state.contactHist[l];
+          for (var i = 0; i < 40; i++) cells2[i].classList.toggle('on', !!h[h.length - 40 + i]);
+        }
+        var gi = document.querySelector('.gait i[data-l="' + l + '"]'); gi.classList.toggle('on', d);
+      });
+      $('feetSub').textContent = a.feetDown.length + ' de 4 apoyadas · últimos 4 s';
+    } else {
+      $('feetSub').textContent = 'no disponible en G1';
+      document.querySelectorAll('.gait i').forEach(function (g) { g.classList.remove('on'); });
+    }
+    $('walk').textContent = a.walking ? 'Caminando' : 'Quieto';
+    $('walkSub').textContent = a.walking ? (Math.abs(f.imu.ay) > 0.05 ? 'doblando' : (a.hasFeet ? 'trote' : 'marcha')) : 'en reposo';
+    // Alarmas
+    renderAlert(a, f);
+    $('tsTxt').textContent = 'ts ' + fmt(f.ts, 2) + ' s';
+    drawImu(); drawMotors();
+  }
+  function renderAlert(a, f) {
+    var al = $('alert'), use = al.querySelector('use');
+    if (sim.status === 'lost' || sim.status === 'reconnecting') return;
+    if (a.alarms.length) {
+      al.className = 'alert hot'; use.setAttribute('href', '#i-triangle-alert');
+      var m = a.hot.sort(function (x, y) { return y.temperatura - x.temperatura; });
+      $('alertTxt').innerHTML = '<b>' + m.map(function (x) { return x.nombre + ' a ' + fmt(x.temperatura, 1) + ' °C'; }).join(' · ') + '</b> — supera 60 °C. Conviene frenar el robot para que enfríe.' +
+        '<button class="go" id="goHot">Ver en la tabla</button>';
+      $('goHot').onclick = function () { var r = rows[m[0].nombre]; if (r) r.tr.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    } else {
+      al.className = 'alert'; use.setAttribute('href', '#i-activity');
+      $('alertTxt').innerHTML = 'Todo en rango · el motor más caliente es <b>' + a.hottest.nombre + '</b> a ' + fmt(a.hottest.temperatura, 1) + ' °C · batería ' + f.bms.soc + ' %';
+    }
+  }
+  sim.on(onFrame);
+
+  /* ---- Conexión ---- */
+  sim.onStatus(function (s) {
+    var dot = $('liveDot'), al = $('alert');
+    dot.className = 'dot' + (s === 'paused' ? ' paused' : (s === 'lost' || s === 'reconnecting') ? ' lost' : '');
+    $('main').classList.toggle('stale', s === 'lost' || s === 'reconnecting');
+    var tr = sim.transport === 'ws' ? 'WebSocket' : 'Polling';
+    if (s === 'lost' || s === 'reconnecting') {
+      al.className = 'alert lost'; al.querySelector('use').setAttribute('href', '#i-wifi-off');
+      $('alertTxt').innerHTML = s === 'lost' ? '<b>Conexión perdida</b> — los datos que ves están congelados. Reintentando cada 1 s…' : '<b>Reconectando…</b>';
+    }
+    document.querySelectorAll('[data-tr]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.tr === sim.transport)); });
+    $('endpoint').textContent = sim.transport === 'ws' ? 'ws://10.0.0.5:8001/ws' : 'GET http://10.0.0.5:8001/telemetria · cada ' + sim.pollMs + ' ms';
+    $('pauseBtn').querySelector('span').textContent = s === 'paused' ? 'Seguir' : 'Pausar';
+    $('pauseBtn').querySelector('use').setAttribute('href', s === 'paused' ? '#i-play' : '#i-pause');
+    $('pauseBtnP').querySelector('use').setAttribute('href', s === 'paused' ? '#i-play' : '#i-pause');
+    linkText();
+  });
+  function linkText() {
+    var s = sim.status, tr = sim.transport === 'ws' ? 'WebSocket' : 'Polling';
+    $('linkTxt').textContent = s === 'paused' ? 'En pausa · ' + tr : s === 'lost' ? 'Sin conexión' : s === 'reconnecting' ? 'Reconectando…' :
+      'En vivo · ' + fmt(sim.hz(), 0) + ' Hz · ' + sim.latency() + ' ms';
+  }
+  setInterval(linkText, 1000);
+
+  /* ---- Acciones ---- */
+  var toastT;
+  function toast(html) { var t = $('toast'); t.innerHTML = html; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 2200); }
+  function capture() {
+    if (!state.last) return;
+    state.samples.push({ at: new Date(), frame: JSON.parse(JSON.stringify(state.last)) });
+    var n = state.samples.length;
+    ['cnt', 'cntP'].forEach(function (id) { var c = $(id); c.textContent = n; c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump'); });
+    var fl = $('flash'); fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+    $('lastCap').textContent = n + (n === 1 ? ' muestra capturada' : ' muestras capturadas') + ' · última ' + Tele.clock(new Date()) + ' (ts ' + fmt(state.last.ts, 2) + ' s)';
+    toast('<svg class="i"><use href="#i-camera"/></svg>Muestra ' + n + ' capturada · ts ' + fmt(state.last.ts, 2) + ' s');
+  }
+  function exportCsv() {
+    if (!state.samples.length) { toast('Todavía no capturaste muestras: tocá Capturar (C)'); return; }
+    var name = Tele.download(state.samples);
+    toast('<svg class="i"><use href="#i-download"/></svg>' + name + ' · ' + state.samples.length + ' muestras');
+  }
+  function setModel(m) {
+    sim.setModel(m); built = null;
+    document.querySelectorAll('[data-model]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.model === m)); });
+    state.samples = []; $('cnt').textContent = $('cntP').textContent = '0';
+    $('lastCap').textContent = 'Sin muestras capturadas';
+  }
+  function toggleTransport() { sim.setTransport(sim.transport === 'ws' ? 'poll' : 'ws'); toast(sim.transport === 'ws' ? 'WebSocket: los datos llegan solos, ~10 por segundo' : 'Polling: se pide /telemetria cada 500 ms'); }
+  function setSort(s) {
+    state.sort = s;
+    document.querySelectorAll('[data-sort]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.sort === s)); });
+    if (state.last) { buildTable(state.last); updateTable(state.last); }
+  }
+  function theme() { var t = Tele.toggleTheme(); $('themeBtn').querySelector('use').setAttribute('href', t === 'light' ? '#i-moon' : '#i-sun'); if (state.last) { drawImu(); drawMotors(); } }
+  function help(open) { $('help').classList.toggle('open', open); }
+
+  $('capBtn').onclick = $('capBtnP').onclick = capture;
+  $('expBtn').onclick = $('expBtnP').onclick = exportCsv;
+  $('pauseBtn').onclick = $('pauseBtnP').onclick = function () { sim.togglePaused(); };
+  $('themeBtn').onclick = theme;
+  $('helpBtn').onclick = function () { help(true); };
+  $('helpClose').onclick = function () { help(false); };
+  $('help').onclick = function (e) { if (e.target === this) help(false); };
+  $('trPhone').onclick = toggleTransport;
+  document.querySelectorAll('[data-model]').forEach(function (b) { b.onclick = function () { setModel(b.dataset.model); }; });
+  document.querySelectorAll('[data-tr]').forEach(function (b) { b.onclick = function () { if (sim.transport !== b.dataset.tr) toggleTransport(); }; });
+  document.querySelectorAll('[data-sort]').forEach(function (b) { b.onclick = function () { setSort(b.dataset.sort); }; });
+  document.querySelectorAll('.chip').forEach(function (b) {
+    b.onclick = function () { var k = b.dataset.s; state.series[k] = !state.series[k]; b.setAttribute('aria-pressed', String(state.series[k])); drawImu(); };
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key.toLowerCase();
+    if (k === 'escape') return help(false);
+    if (k === 'c') capture();
+    else if (k === 'e') exportCsv();
+    else if (k === ' ') { e.preventDefault(); sim.togglePaused(); }
+    else if (k === 'w') toggleTransport();
+    else if (k === 'g') setModel(sim.modelo === 'go2' ? 'g1' : 'go2');
+    else if (k === 's') setSort(state.sort === 'body' ? 'temp' : 'body');
+    else if (k === 't') theme();
+    else if (k === 'd') sim.drop(4);
+    else if (e.key === '?') help(!$('help').classList.contains('open'));
+  });
+  window.addEventListener('resize', function () { drawImu(); drawMotors(); });
+  if (document.documentElement.getAttribute('data-theme') === 'light') $('themeBtn').querySelector('use').setAttribute('href', '#i-moon');
+})();
+</script>
+</body>
+</html>

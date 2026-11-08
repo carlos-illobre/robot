@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="es-AR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetría Unitree · Piloto</title>
+<style>
+@font-face { font-family: 'Space Grotesk'; src: url('fonts/SpaceGrotesk-300-700.woff2') format('woff2'); font-weight: 300 700; font-display: block; }
+@font-face { font-family: 'JetBrains Mono'; src: url('fonts/JetBrainsMono-400-700.woff2') format('woff2'); font-weight: 400 700; font-display: block; }
+
+/* Paleta "Cabina": noche por defecto (proyector, aula a oscuras); modo día para laboratorio con luz. */
+:root, :root[data-theme="dark"] {
+  --bg: #05070A; --sky-top: #070E19; --sky: #0E1D31; --ground: #17120C; --ground-bot: #0B0906;
+  --hud: #E9EEF5; --hud-2: rgba(233,238,245,.62); --hud-3: rgba(233,238,245,.36); --hud-4: rgba(233,238,245,.12);
+  --ok: #3DDC84; --warn: #FFC23D; --hot: #FF4D4D;
+  --accent: #7CC4FF; --s1: #7CC4FF; --s2: #D59BFF;
+  --glass: rgba(10,14,20,.72); --line: rgba(233,238,245,.14);
+}
+:root[data-theme="light"] {
+  --bg: #E9EDF2; --sky-top: #EEF3F9; --sky: #D9E5F2; --ground: #EADFCD; --ground-bot: #F2ECE2;
+  --hud: #0B1220; --hud-2: rgba(11,18,32,.68); --hud-3: rgba(11,18,32,.45); --hud-4: rgba(11,18,32,.10);
+  --ok: #128A4C; --warn: #A87400; --hot: #D62C2C;
+  --accent: #1C6FD1; --s1: #1C6FD1; --s2: #8A3FD0;
+  --glass: rgba(255,255,255,.8); --line: rgba(11,18,32,.14);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--hud); font: 14px/1.4 'Space Grotesk', system-ui, sans-serif; -webkit-font-smoothing: antialiased; user-select: none; }
+canvas#hud { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+kbd { font: 600 12px 'JetBrains Mono', monospace; min-width: 22px; height: 22px; padding: 0 6px; display: inline-grid; place-items: center; border-radius: 5px; border: 1px solid var(--hud-3); color: var(--hud); }
+.corner { position: fixed; top: 16px; display: flex; align-items: center; gap: 12px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--hud-2); z-index: 2; }
+.corner.l { left: 20px; } .corner.r { right: 20px; }
+.corner b { color: var(--hud); font-weight: 600; letter-spacing: .06em; }
+.seg { display: inline-flex; border: 1px solid var(--hud-3); border-radius: 6px; overflow: hidden; }
+.seg button { background: none; border: 0; padding: 4px 10px; font-size: 12px; letter-spacing: .1em; font-weight: 600; color: var(--hud-2); }
+.seg button[aria-pressed="true"] { background: var(--hud); color: var(--bg); }
+.link { display: inline-flex; gap: 8px; align-items: center; }
+.led { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.led.paused { background: var(--hud-3); box-shadow: none; }
+.led.lost { background: var(--hot); box-shadow: 0 0 10px var(--hot); }
+.hb { background: none; border: 1px solid var(--hud-3); color: var(--hud-2); height: 30px; min-width: 30px; padding: 0 8px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+.hb[aria-pressed="true"] { color: var(--bg); background: var(--hud); border-color: var(--hud); }
+.count { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.hints { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 18px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--hud-2); white-space: nowrap; z-index: 2; }
+.hints span { display: inline-flex; gap: 6px; align-items: center; }
+.hints .main kbd { border-color: var(--accent); color: var(--accent); }
+.frame { position: fixed; inset: 0; pointer-events: none; border: 2px solid var(--hot); opacity: 0; z-index: 3; box-shadow: inset 0 0 60px color-mix(in srgb, var(--hot) 35%, transparent); }
+.frame.on { animation: alarm 1.4s ease-in-out infinite; }
+@keyframes alarm { 0%, 100% { opacity: .25; } 50% { opacity: .9; } }
+.shutter { position: fixed; inset: 0; pointer-events: none; z-index: 4; opacity: 0; border: 10px solid var(--accent); }
+.shutter.go { animation: sh .5s ease-out; }
+@keyframes sh { 0% { opacity: 1; transform: scale(1.02); } 100% { opacity: 0; transform: scale(1); } }
+.note { position: fixed; left: 50%; top: 92px; transform: translate(-50%, -8px); opacity: 0; transition: .2s; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; background: var(--glass); border: 1px solid var(--line); padding: 6px 14px; border-radius: 6px; z-index: 5; white-space: nowrap; }
+.note.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Hoja con la tabla de motores (M) */
+.sheet { position: fixed; top: 0; right: 0; bottom: 0; width: 520px; max-width: 100%; background: var(--glass); backdrop-filter: blur(16px); border-left: 1px solid var(--line); transform: translateX(100%); transition: transform .25s cubic-bezier(.2,.8,.2,1); z-index: 6; padding: 20px 20px 16px; display: flex; flex-direction: column; }
+.sheet.open { transform: none; }
+.sheet h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+.sheet p { margin: 0 0 12px; color: var(--hud-2); font-size: 13px; }
+.sheet .tw { overflow: auto; flex: 1; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: right; font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--hud-2); padding: 6px 8px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--glass); }
+th:first-child, td:first-child { text-align: left; }
+td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--hud-4); font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+td .lamp { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; background: var(--c); }
+tr.hot td { color: var(--hot); }
+.ok { --c: var(--ok); } .warn { --c: var(--warn); } .hot { --c: var(--hot); }
+.dlg { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; place-items: center; z-index: 8; }
+.dlg.open { display: grid; }
+.dlg .box { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; width: 440px; max-width: calc(100% - 32px); }
+.dlg h3 { margin: 0 0 12px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; display: flex; justify-content: space-between; }
+.dlg dl { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin: 0; }
+.dlg dd { margin: 0; }
+.pbar { display: none; }
+
+@media (max-width: 640px) {
+  body { font-size: 15px; }
+  .corner { top: 12px; font-size: 14px; gap: 8px; }
+  .corner.l { left: 12px; } .corner.r { right: 12px; }
+  .corner .desk, .hints { display: none; }
+  .seg button { font-size: 14px; padding: 4px 10px; }
+  .hb { font-size: 14px; height: 34px; min-width: 34px; }
+  .note { top: 124px; font-size: 14px; }
+  th { font-size: 14px; } table { font-size: 14px; }
+  .sheet { width: 100%; padding: 16px; }
+  .sheet p { font-size: 14px; }
+  .pbar { display: grid; position: fixed; left: 0; right: 0; bottom: 0; padding: 0 20px 20px; grid-template-columns: 1fr auto 1fr; align-items: center; z-index: 2; }
+  .pbar .sb { background: none; border: 0; color: var(--hud-2); font-size: 14px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .pbar .sb .i { width: 22px; height: 22px; }
+  .cap { width: 76px; height: 76px; border-radius: 50%; border: 2px solid var(--accent); background: none; display: grid; place-items: center; padding: 0; box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .cap i { width: 60px; height: 60px; border-radius: 50%; background: var(--accent); display: block; transition: transform .12s; }
+  .cap:active i { transform: scale(.86); }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<canvas id="hud" aria-label="Horizonte, rumbo, anillo de motores, batería y temperaturas"></canvas>
+
+<div class="corner l">
+  <div class="seg" role="group" aria-label="Robot"><button data-model="go2" aria-pressed="true">GO2</button><button data-model="g1" aria-pressed="false">G1</button></div>
+  <span class="link"><span class="led" id="led"></span><b class="mono" id="linkTxt">WS · 10 Hz</b></span>
+  <span class="desk mono" id="tsTxt">ts 0,00</span>
+</div>
+<div class="corner r">
+  <span class="desk">Muestras <span class="count" id="cnt">0</span></span>
+  <button class="hb" id="sndBtn" aria-pressed="false" title="Sonido (S)"><svg class="i"><use href="#i-volume-x"/></svg><span class="desk">Sonido</span></button>
+  <button class="hb" id="tblBtn" title="Tabla de motores (M)"><svg class="i"><use href="#i-list"/></svg><span class="desk">Tabla</span></button>
+  <button class="hb desk" id="themeBtn" title="Modo día / noche (T)"><svg class="i"><use href="#i-sun"/></svg></button>
+  <button class="hb desk" id="helpBtn" title="Ayuda (?)">?</button>
+</div>
+
+<div class="hints">
+  <span class="main"><kbd>Espacio</kbd>capturar</span>
+  <span class="main"><kbd>E</kbd>exportar CSV</span>
+  <span><kbd>P</kbd>pausa</span>
+  <span><kbd>M</kbd>tabla</span>
+  <span><kbd>S</kbd>sonido</span>
+  <span><kbd>W</kbd>ws / polling</span>
+  <span><kbd>T</kbd>día / noche</span>
+  <span><kbd>?</kbd></span>
+</div>
+
+<div class="pbar">
+  <button class="sb" id="tblP"><svg class="i"><use href="#i-list"/></svg>Tabla</button>
+  <button class="cap" id="capP" aria-label="Capturar muestra"><i></i></button>
+  <button class="sb" id="expP"><svg class="i"><use href="#i-download"/></svg>CSV <span class="count" id="cntP">0</span></button>
+</div>
+
+<div class="frame" id="frame"></div>
+<div class="shutter" id="shutter"></div>
+<div class="note" id="note"></div>
+
+<aside class="sheet" id="sheet" aria-label="Tabla de motores">
+  <h3>Motores <button class="hb" id="sheetClose" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></h3>
+  <p>Semáforo: verde &lt; 40 °C · amarillo 40–60 °C · rojo &gt; 60 °C. Tocá un motor para marcarlo en el anillo.</p>
+  <div class="tw"><table><thead><tr><th>Motor</th><th>Temp °C</th><th>Ángulo °</th><th>Vel rad/s</th><th>Torque N·m</th></tr></thead><tbody id="tbody"></tbody></table></div>
+</aside>
+<div class="dlg" id="help"><div class="box">
+  <h3>Cabina · atajos <button class="hb" id="helpClose" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button></h3>
+  <dl>
+    <dt>Capturar muestra</dt><dd><kbd>Espacio</kbd> o <kbd>C</kbd></dd>
+    <dt>Exportar CSV</dt><dd><kbd>E</kbd></dd>
+    <dt>Pausa</dt><dd><kbd>P</kbd></dd>
+    <dt>Tabla de motores</dt><dd><kbd>M</kbd></dd>
+    <dt>Sonido: pisadas y alarma</dt><dd><kbd>S</kbd></dd>
+    <dt>WebSocket ↔ polling</dt><dd><kbd>W</kbd></dd>
+    <dt>Go2 ↔ G1</dt><dd><kbd>G</kbd></dd>
+    <dt>Día / noche</dt><dd><kbd>T</kbd></dd>
+    <dt>Simular corte (demo)</dt><dd><kbd>D</kbd></dd>
+  </dl>
+</div></div>
+
+<script src="icons.js"></script>
+<script src="sim.js"></script>
+<script>
+(function () {
+  'use strict';
+  Tele.initTheme('dark');
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = Tele.fmt, RM = Tele.reducedMotion();
+  var cv = $('hud'), ctx = cv.getContext('2d');
+  var sim = new UnitreeSim({ modelo: 'go2' });
+  var st = { f: null, hist: [], samples: [], sel: null, sound: false, prevFeet: {}, disp: { roll: 0, pitch: 0, yaw: 0, temps: {}, soc: 87 } };
+  var C = {};
+  function readColors() {
+    var s = getComputedStyle(document.documentElement);
+    ['bg', 'sky-top', 'sky', 'ground', 'ground-bot', 'hud', 'hud-2', 'hud-3', 'hud-4', 'ok', 'warn', 'hot', 'accent', 's1', 's2', 'glass'].forEach(function (k) { C[k] = s.getPropertyValue('--' + k).trim(); });
+  }
+  readColors();
+  var semC = function (t) { return C[Tele.semaforo(t)]; };
+
+  /* ---------- Disposición del anillo ---------- */
+  function ringLayout(f) {
+    var segs = [];
+    if (f.modelo === 'go2') {
+      var Q = { FR: [-85, -5, 1], FL: [-95, -175, -1], RR: [85, 5, -1], RL: [95, 175, 1] };
+      Object.keys(Q).forEach(function (l) {
+        var a0 = Q[l][0], a1 = Q[l][1], step = (a1 - a0) / 3;
+        ['hip', 'thigh', 'calf'].forEach(function (p, i) {
+          var s = a0 + step * i, e = s + step;
+          segs.push({ name: l + '_' + p, a0: Math.min(s, e) + 1.5, a1: Math.max(s, e) - 1.5, group: l });
+        });
+      });
+    } else {
+      var G = { 'Brazo izquierdo': [-85, -5], 'Pierna izquierda': [5, 72], 'Cintura': [78, 102], 'Pierna derecha': [108, 175], 'Brazo derecho': [-175, -95] };
+      Object.keys(G).forEach(function (g) {
+        var names = f.motores.filter(function (m) { return Tele.groupG1(m.nombre) === g; }).map(function (m) { return m.nombre; });
+        var a0 = G[g][0], a1 = G[g][1], step = (a1 - a0) / names.length;
+        names.forEach(function (n, i) { segs.push({ name: n, a0: a0 + step * i + 1, a1: a0 + step * (i + 1) - 1, group: g }); });
+      });
+    }
+    return segs;
+  }
+  var segs = [];
+
+  /* ---------- Dibujo ---------- */
+  var W, H, dpr, phone;
+  function resize() {
+    dpr = window.devicePixelRatio || 1; W = innerWidth; H = innerHeight; phone = W < 640;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize(); addEventListener('resize', resize);
+  var D2R = Math.PI / 180;
+  function geo() {
+    if (phone) return { cx: W / 2, cy: H * 0.43, R: Math.min(W * 0.3, 128), tapeL: 22, tapeR: W - 22, tapeTop: H * 0.24, tapeH: H * 0.36, headY: 74, headW: W - 40, oscTop: H - 188, oscH: 60 };
+    return { cx: W / 2, cy: H * 0.47, R: Math.min(W, H) * 0.235, tapeL: 64, tapeR: W - 64, tapeTop: H * 0.22, tapeH: H * 0.5, headY: 74, headW: Math.min(620, W - 480), oscTop: H - 122, oscH: 70 };
+  }
+  function text(t, x, y, o) {
+    o = o || {};
+    ctx.font = (o.w || 500) + ' ' + (o.s || 12) + 'px ' + (o.mono ? 'JetBrains Mono' : 'Space Grotesk');
+    ctx.fillStyle = o.c || C.hud; ctx.textAlign = o.a || 'left'; ctx.textBaseline = o.b || 'alphabetic';
+    if (o.ls) { try { ctx.letterSpacing = o.ls + 'px'; } catch (e) { /* sin soporte */ } }
+    ctx.fillText(t, x, y);
+    try { ctx.letterSpacing = '0px'; } catch (e) { /* sin soporte */ }
+  }
+  function draw() {
+    var f = st.f; if (!f) return;
+    var g = geo(), d = st.disp, k = RM ? 1 : 0.22;
+    d.roll += (f.imu.roll - d.roll) * k; d.pitch += (f.imu.pitch - d.pitch) * k;
+    var dy = ((f.imu.yaw - d.yaw + 540) % 360) - 180; d.yaw = (d.yaw + dy * k + 360) % 360;
+    d.soc += (f.bms.soc - d.soc) * k;
+    var lost = sim.status === 'lost' || sim.status === 'reconnecting';
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    if (lost) ctx.filter = 'grayscale(1) brightness(.6)';
+    // Horizonte (×4) que ocupa toda la pantalla
+    ctx.save();
+    ctx.translate(g.cx, g.cy);
+    ctx.rotate(-d.roll * 4 * D2R);
+    var off = d.pitch * 4 * 6, big = Math.hypot(W, H);
+    var sky = ctx.createLinearGradient(0, -big, 0, off); sky.addColorStop(0, C['sky-top']); sky.addColorStop(1, C.sky);
+    ctx.fillStyle = sky; ctx.fillRect(-big, -big, big * 2, big + off);
+    var gr = ctx.createLinearGradient(0, off, 0, big); gr.addColorStop(0, C.ground); gr.addColorStop(1, C['ground-bot']);
+    ctx.fillStyle = gr; ctx.fillRect(-big, off, big * 2, big);
+    ctx.strokeStyle = C['hud-3']; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-big, off); ctx.lineTo(big, off); ctx.stroke();
+    // Escalera de cabeceo
+    [-10, -5, 5, 10].forEach(function (p) {
+      var y = off - p * 24, w = Math.abs(p) === 5 ? 36 : 60;
+      ctx.strokeStyle = C['hud-4']; ctx.beginPath(); ctx.moveTo(-g.R - 30 - w, y); ctx.lineTo(-g.R - 30, y); ctx.moveTo(g.R + 30, y); ctx.lineTo(g.R + 30 + w, y); ctx.stroke();
+    });
+    ctx.restore();
+
+    drawHeading(g, d.yaw);
+    drawRing(g, f);
+    drawBattery(g, f, d);
+    drawTemps(g, f);
+    drawOsc(g);
+    ctx.restore();
+    if (lost) {
+      text(sim.status === 'lost' ? 'SIN ENLACE' : 'RECONECTANDO', g.cx, g.cy - g.R - 44, { s: phone ? 22 : 30, w: 700, a: 'center', c: C.hot, ls: 6 });
+    }
+  }
+  function drawHeading(g, yaw) {
+    var x0 = g.cx - g.headW / 2, y = g.headY, span = phone ? 90 : 120, ppd = g.headW / span;
+    ctx.save(); ctx.beginPath(); ctx.rect(x0, y - 30, g.headW, 48); ctx.clip();
+    for (var a = Math.floor((yaw - span / 2) / 5) * 5; a <= yaw + span / 2; a += 5) {
+      var x = g.cx + (a - yaw) * ppd, n = ((a % 360) + 360) % 360, major = n % 30 === 0;
+      var edge = 1 - Math.min(1, Math.abs(a - yaw) / (span / 2)); ctx.globalAlpha = 0.25 + edge * 0.75;
+      ctx.strokeStyle = C.hud; ctx.lineWidth = major ? 1.5 : 1; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + (major ? 12 : 6)); ctx.stroke();
+      if (major) { var lab = { 0: 'N', 90: 'E', 180: 'S', 270: 'O' }[n]; text(lab || String(n), x, y - 6, { s: lab ? 14 : 12, w: lab ? 700 : 500, a: 'center', mono: !lab, c: lab ? C.hud : C['hud-2'] }); }
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+    ctx.fillStyle = C.bg; ctx.strokeStyle = C.hud; ctx.lineWidth = 1.5;
+    var bw = 72; ctx.beginPath(); ctx.roundRect(g.cx - bw / 2, y + 18, bw, 28, 4); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(g.cx - 6, y + 18); ctx.lineTo(g.cx, y + 12); ctx.lineTo(g.cx + 6, y + 18); ctx.fillStyle = C.hud; ctx.fill();
+    text(fmt(st.f.imu.yaw, 0).padStart(3, '0') + '°', g.cx, y + 38, { s: 16, w: 600, a: 'center', mono: true });
+    text('RUMBO', g.cx - bw / 2 - 10, y + 37, { s: 12, a: 'right', c: C['hud-2'], ls: 2 });
+  }
+  function arc(cx, cy, r, a0, a1, w, color, alpha) {
+    ctx.globalAlpha = alpha == null ? 1 : alpha; ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'butt';
+    ctx.beginPath(); ctx.arc(cx, cy, r, a0 * D2R, a1 * D2R); ctx.stroke(); ctx.globalAlpha = 1;
+  }
+  function drawRing(g, f) {
+    var R = g.R, cx = g.cx, cy = g.cy, t = performance.now() / 1000;
+    var byName = {}; f.motores.forEach(function (m) { byName[m.nombre] = m; });
+    // Mira central
+    ctx.strokeStyle = C['hud-3']; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, R + 14, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, R - 30, 0, 7); ctx.strokeStyle = C['hud-4']; ctx.stroke();
+    // Silueta y patas
+    var fe = f.fuerzas || {}, hasFeet = Object.keys(fe).length > 0, s = R / 180;
+    ctx.save(); ctx.translate(cx, cy);
+    ctx.strokeStyle = C['hud-2']; ctx.lineWidth = 2; ctx.fillStyle = C.glass;
+    if (f.modelo === 'go2') {
+      ctx.lineWidth = 3; ctx.strokeStyle = C['hud-3']; ctx.lineCap = 'round';
+      [[-1, -1, 'FL'], [1, -1, 'FR'], [-1, 1, 'RL'], [1, 1, 'RR']].forEach(function (q) {
+        ctx.beginPath(); ctx.moveTo(q[0] * 26 * s, q[1] * 54 * s); ctx.lineTo(q[0] * (R - 44) * 0.707, q[1] * (R - 44) * 0.707); ctx.stroke();
+      });
+      ctx.lineWidth = 2; ctx.strokeStyle = C['hud-2'];
+      ctx.beginPath(); ctx.roundRect(-30 * s, -66 * s, 60 * s, 132 * s, 18 * s); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(-18 * s, -86 * s, 36 * s, 22 * s, 9 * s); ctx.fill(); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(0, -70 * s, 16 * s, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(-30 * s, -50 * s, 60 * s, 80 * s, 16 * s); ctx.fill(); ctx.stroke();
+      ctx.lineCap = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = C['hud-3'];
+      ctx.beginPath(); ctx.moveTo(-34 * s, -40 * s); ctx.lineTo(-56 * s, 20 * s); ctx.moveTo(34 * s, -40 * s); ctx.lineTo(56 * s, 20 * s);
+      ctx.moveTo(-14 * s, 32 * s); ctx.lineTo(-18 * s, 100 * s); ctx.moveTo(14 * s, 32 * s); ctx.lineTo(18 * s, 100 * s); ctx.stroke();
+    }
+    // Estado en el centro del cuerpo
+    var a = Tele.analyze(f);
+    text(a.walking ? 'CAMINA' : 'QUIETO', 0, 4 * s, { s: phone ? 14 : 13, w: 700, a: 'center', ls: 2, c: C['hud-2'] });
+    ctx.restore();
+    // Segmentos de motores
+    segs.forEach(function (sg) {
+      var m = byName[sg.name]; if (!m) return;
+      var col = semC(m.temperatura), hot = m.temperatura > 60, sel = st.sel === sg.name;
+      arc(cx, cy, R, sg.a0, sg.a1, 18, col, hot ? 0.75 + 0.25 * Math.sin(t * 6) * (RM ? 0 : 1) : 0.85);
+      if (hot && !RM) arc(cx, cy, R, sg.a0, sg.a1, 30, col, 0.12 + 0.1 * Math.sin(t * 6));
+      // Torque como arco interior
+      var tw = 2 + Math.min(1, m.torque / 20) * 8;
+      arc(cx, cy, R - 18, sg.a0, sg.a1, tw, C['hud-2'], 0.7);
+      if (sel) arc(cx, cy, R + 22, sg.a0, sg.a1, 2, C.hud, 1);
+    });
+    // Etiquetas de los grupos y de los motores calientes o elegidos
+    var labelled = segs.filter(function (sg) { var m = byName[sg.name]; return m && (m.temperatura > 60 || st.sel === sg.name); });
+    if (!labelled.length) { var hm = a.hottest; labelled = segs.filter(function (sg) { return sg.name === hm.nombre; }); }
+    if (phone) labelled = labelled.filter(function (sg) { return st.sel === sg.name; });
+    labelled.forEach(function (sg) {
+      var m = byName[sg.name], mid = (sg.a0 + sg.a1) / 2 * D2R, r1 = R + 26, r2 = R + (phone ? 40 : 64);
+      var x1 = cx + Math.cos(mid) * r1, y1 = cy + Math.sin(mid) * r1, x2 = cx + Math.cos(mid) * r2, y2 = cy + Math.sin(mid) * r2;
+      var right = Math.cos(mid) >= 0, x3 = x2 + (right ? 1 : -1) * (phone ? 6 : 24);
+      ctx.strokeStyle = semC(m.temperatura); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y2); ctx.stroke();
+      if (phone) { x3 = Math.min(Math.max(x3, right ? 0 : 110), W - (right ? 110 : 0)); }
+      text(fmt(m.temperatura, 1) + '°', x3 + (right ? 6 : -6), y2 + 2, { s: phone ? 20 : 26, w: 600, mono: true, a: right ? 'left' : 'right', c: semC(m.temperatura) });
+      text(sg.name, x3 + (right ? 6 : -6), y2 + (phone ? 20 : 22), { s: phone ? 14 : 13, w: 500, a: right ? 'left' : 'right', c: C['hud-2'] });
+    });
+    // Rótulos de cuadrante y pies
+    if (f.modelo === 'go2') {
+      [['FL', -135], ['FR', -45], ['RL', 135], ['RR', 45]].forEach(function (q) {
+        var ang = q[1] * D2R, rr = R + 40, x = cx + Math.cos(ang) * rr, y = cy + Math.sin(ang) * rr, down = fe[q[0]] === 1;
+        ctx.beginPath(); ctx.arc(x, y, 11, 0, 7);
+        if (down) { ctx.fillStyle = C.hud; ctx.fill(); } else { ctx.strokeStyle = C['hud-2']; ctx.lineWidth = 1.5; ctx.stroke(); }
+        var lx = cx + Math.cos(ang) * (R + 64), ly = cy + Math.sin(ang) * (R + 64);
+        text(q[0], lx, ly + 5, { s: phone ? 14 : 13, w: 700, a: 'center', mono: true, c: down ? C.hud : C['hud-3'] });
+      });
+    } else {
+      text('G1 · SIN DATOS DE PATAS', cx, cy + R + 56, { s: phone ? 14 : 12, w: 600, a: 'center', c: C['hud-3'], ls: 2 });
+    }
+    // Línea de estado debajo del anillo
+    var msg, col = C['hud-2'];
+    if (a.hot.length) { msg = a.hot.length === 1 ? a.hot[0].nombre + (phone ? ' ' + fmt(a.hot[0].temperatura, 1) + ' °C' : '') + ' SOBRE 60 °C' : a.hot.length + ' MOTORES SOBRE 60 °C'; col = C.hot; }
+    else msg = (a.walking ? 'TROTE · ' + a.feetDown.length + ' PATAS APOYADAS' : 'EN REPOSO · TODO EN RANGO');
+    if (!a.hasFeet && !a.hot.length) msg = a.walking ? 'MARCHA' : 'EN REPOSO';
+    text(msg, cx, cy + R + (phone ? 122 : 52), { s: 14, w: 700, a: 'center', c: col, ls: phone ? 1.5 : 3 });
+  }
+  function drawBattery(g, f, d) {
+    var x = g.tapeL, top = g.tapeTop, h = g.tapeH, w = phone ? 10 : 14;
+    text('BATERÍA', x, top - 46, { s: phone ? 14 : 12, w: 600, c: C['hud-2'], ls: 2 });
+    text(Math.round(d.soc) + '%', x, top - 14, { s: phone ? 26 : 34, w: 600, mono: true, c: f.bms.soc < 20 ? C.hot : C.hud });
+    ctx.strokeStyle = C['hud-3']; ctx.lineWidth = 1; ctx.strokeRect(x + .5, top + .5, w, h);
+    var fh = h * d.soc / 100; ctx.fillStyle = f.bms.soc < 20 ? C.hot : C.hud; ctx.globalAlpha = .85; ctx.fillRect(x + 2, top + h - fh + 2, w - 3, fh - 3); ctx.globalAlpha = 1;
+    for (var p = 0; p <= 100; p += 25) { var yy = top + h - h * p / 100; ctx.strokeStyle = C['hud-3']; ctx.beginPath(); ctx.moveTo(x + w + 2, yy); ctx.lineTo(x + w + 8, yy); ctx.stroke(); if (!phone) text(String(p), x + w + 12, yy + 4, { s: 12, mono: true, c: C['hud-3'] }); }
+    var by = top + h + 28;
+    if (phone) {
+      text(fmt(f.bms.corriente / 1000, 1) + ' A', x, by, { s: 14, mono: true, c: C['hud-2'] });
+      text(fmt(f.bms.temperatura, 0) + ' °C', x, by + 20, { s: 14, mono: true, c: C['hud-2'] });
+      return;
+    }
+    text((f.bms.corriente < 0 ? '−' : '') + Math.abs(f.bms.corriente).toLocaleString('es-AR') + ' mA', x, by, { s: 14, mono: true });
+    text(fmt(f.bms.temperatura, 1) + ' °C batería', x, by + 20, { s: 13, mono: true, c: C['hud-2'] });
+    var cells = f.bms.celdas, a = Tele.analyze(f), cw = 10;
+    cells.forEach(function (v, i) {
+      var ch = Math.max(3, (v - 3.3) / .9 * 26), cx = x + i * (cw + 3);
+      ctx.fillStyle = v === a.cellMin && a.cellDelta > .025 ? C.warn : C['hud-2']; ctx.fillRect(cx, by + 58 - ch, cw, ch);
+    });
+    text(cells.length + ' celdas · mín ' + fmt(a.cellMin, 2) + ' V', x, by + 76, { s: 12, mono: true, c: C['hud-2'] });
+  }
+  function drawTemps(g, f) {
+    var x = g.tapeR, top = g.tapeTop, h = g.tapeH, w = phone ? 10 : 14, lo = 25, hi = 75;
+    var Y = function (t) { return top + h - (Math.max(lo, Math.min(hi, t)) - lo) / (hi - lo) * h; };
+    var a = Tele.analyze(f);
+    text('MOTOR MÁS CALIENTE', x + w, top - 46, { s: phone ? 14 : 12, w: 600, a: 'right', c: C['hud-2'], ls: 2 });
+    text(fmt(a.hottest.temperatura, 1) + '°', x + w, top - 14, { s: phone ? 26 : 34, w: 600, a: 'right', mono: true, c: semC(a.hottest.temperatura) });
+    [[lo, 40, C.ok], [40, 60, C.warn], [60, hi, C.hot]].forEach(function (z) {
+      ctx.fillStyle = z[2]; ctx.globalAlpha = .75; ctx.fillRect(x, Y(z[1]), w, Y(z[0]) - Y(z[1])); ctx.globalAlpha = 1;
+    });
+    if (!phone) [30, 40, 50, 60, 70].forEach(function (t) { text(String(t), x - 30, Y(t) + 4, { s: 12, mono: true, a: 'right', c: C['hud-3'] }); });
+    // Cada motor es una marca sobre la escala
+    f.motores.forEach(function (m) {
+      var yy = Y(m.temperatura), sel = st.sel === m.nombre;
+      ctx.strokeStyle = sel ? C.accent : C.hud; ctx.globalAlpha = sel ? 1 : .7; ctx.lineWidth = sel ? 2 : 1.2;
+      ctx.beginPath(); ctx.moveTo(x - (phone ? 10 : 18), yy); ctx.lineTo(x - 3, yy); ctx.stroke(); ctx.globalAlpha = 1;
+    });
+    text(a.hottest.nombre, x + w, top + h + 28, { s: 14, a: 'right', w: 600 });
+    if (!phone) {
+      text(f.motores.length + ' motores · ' + a.warn.length + ' tibios · ' + a.hot.length + ' calientes', x + w, top + h + 48, { s: 12, a: 'right', c: C['hud-2'] });
+      text('torque máx ' + fmt(a.maxTorque.torque, 1) + ' N·m · ' + a.maxTorque.nombre, x + w, top + h + 68, { s: 12, a: 'right', c: C['hud-2'] });
+    }
+  }
+  function drawOsc(g) {
+    var h = st.hist, n = 120, x0 = phone ? 16 : W * 0.24, x1 = phone ? W - 16 : W * 0.76, top = g.oscTop, oh = g.oscH;
+    var Y = function (v) { return top + oh / 2 - v / 6 * (oh / 2); };
+    ctx.strokeStyle = C['hud-4']; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0, Y(0)); ctx.lineTo(x1, Y(0)); ctx.stroke();
+    ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(x0, top); ctx.lineTo(x1, top); ctx.moveTo(x0, top + oh); ctx.lineTo(x1, top + oh); ctx.stroke(); ctx.setLineDash([]);
+    [['roll', C.s1], ['pitch', C.s2]].forEach(function (s) {
+      ctx.strokeStyle = s[1]; ctx.lineWidth = 1.6; ctx.beginPath();
+      h.forEach(function (f, i) { var x = x0 + (n - h.length + i) / (n - 1) * (x1 - x0); if (i) ctx.lineTo(x, Y(f.imu[s[0]])); else ctx.moveTo(x, Y(f.imu[s[0]])); });
+      ctx.stroke();
+    });
+    var f = st.f;
+    text('ROLL', x0, top - 10, { s: phone ? 14 : 12, w: 600, c: C.s1, ls: 2 });
+    text(Tele.signed(f.imu.roll, 1) + '°', x0 + (phone ? 52 : 46), top - 10, { s: phone ? 16 : 16, w: 600, mono: true });
+    text('PITCH', x0 + (phone ? 140 : 140), top - 10, { s: phone ? 14 : 12, w: 600, c: C.s2, ls: 2 });
+    text(Tele.signed(f.imu.pitch, 1) + '°', x0 + (phone ? 200 : 194), top - 10, { s: 16, w: 600, mono: true });
+    if (!phone) text('120 MUESTRAS · 12 s · HORIZONTE ×4', x1, top - 10, { s: 12, a: 'right', c: C['hud-3'], ls: 1 });
+    // Marcas de captura sobre el osciloscopio
+    var tN = h.length ? h[h.length - 1].ts : 0;
+    st.samples.forEach(function (sm, i) {
+      var dt = (tN - sm.frame.ts) * 10; if (dt > n - 1) return;
+      var x = x0 + (n - 1 - dt) / (n - 1) * (x1 - x0);
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, top - 2); ctx.lineTo(x, top + oh + 2); ctx.stroke();
+      text(String(i + 1), x, top + oh + 16, { s: 12, mono: true, a: 'center', c: C.accent, w: 700 });
+    });
+  }
+  function loop() { draw(); requestAnimationFrame(loop); }
+
+  /* ---------- Sonido (Web Audio): pisadas suaves y alarma ---------- */
+  var actx = null;
+  function beep(freq, dur, vol, type) {
+    if (!st.sound || !actx) return;
+    var o = actx.createOscillator(), gn = actx.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq; gn.gain.value = 0;
+    gn.gain.setValueAtTime(0, actx.currentTime); gn.gain.linearRampToValueAtTime(vol, actx.currentTime + 0.005);
+    gn.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(gn).connect(actx.destination); o.start(); o.stop(actx.currentTime + dur + 0.02);
+  }
+  var FOOT_HZ = { FR: 220, FL: 247, RR: 196, RL: 175 }, lastAlarm = 0;
+
+  /* ---------- Datos ---------- */
+  var built = null;
+  function onFrame(f) {
+    if (built !== f.modelo) {
+      built = f.modelo; segs = ringLayout(f); st.hist = sim.history.slice(-120, -1); st.sel = null;
+      document.querySelectorAll('[data-model]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.model === f.modelo)); });
+    }
+    st.f = f;
+    st.hist.push(f); while (st.hist.length > 120) st.hist.shift();
+    var a = Tele.analyze(f);
+    $('frame').classList.toggle('on', a.hot.length > 0);
+    $('tsTxt').textContent = 'ts ' + fmt(f.ts, 2);
+    Object.keys(f.fuerzas || {}).forEach(function (l) {
+      if (f.fuerzas[l] === 1 && st.prevFeet[l] === 0) beep(FOOT_HZ[l], 0.06, 0.05, 'triangle');
+      st.prevFeet[l] = f.fuerzas[l];
+    });
+    if (a.hot.length && performance.now() - lastAlarm > 2500) { lastAlarm = performance.now(); beep(880, 0.12, 0.06); setTimeout(function () { beep(660, 0.16, 0.06); }, 150); }
+    if ($('sheet').classList.contains('open')) renderTable(f);
+  }
+  sim.on(onFrame);
+  function renderTable(f) {
+    $('tbody').innerHTML = f.motores.map(function (m) {
+      var s = Tele.semaforo(m.temperatura);
+      return '<tr class="' + s + '" data-n="' + m.nombre + '"><td><span class="lamp"></span>' + m.nombre + '</td><td>' + fmt(m.temperatura, 1) + '</td><td>' + fmt(m.angulo, 1) + '</td><td>' + fmt(m.velocidad, 2) + '</td><td>' + fmt(m.torque, 1) + '</td></tr>';
+    }).join('');
+  }
+  $('tbody').addEventListener('click', function (e) { var tr = e.target.closest('tr'); if (tr) { st.sel = tr.dataset.n; note('Marcado en el anillo: ' + st.sel); } });
+
+  /* ---------- Conexión ---------- */
+  sim.onStatus(function (s) {
+    $('led').className = 'led' + (s === 'paused' ? ' paused' : s === 'lost' || s === 'reconnecting' ? ' lost' : '');
+    linkTxt();
+  });
+  function linkTxt() {
+    var s = sim.status, tr = sim.transport === 'ws' ? 'WS' : 'POLL 500 ms';
+    $('linkTxt').textContent = s === 'lost' ? 'SIN ENLACE' : s === 'reconnecting' ? 'RECONECTANDO' : s === 'paused' ? 'PAUSA · ' + tr : (phone ? tr : tr + ' · ' + fmt(sim.hz(), 0) + ' Hz · ' + sim.latency() + ' ms');
+  }
+  setInterval(linkTxt, 1000);
+
+  /* ---------- Acciones ---------- */
+  var nt;
+  function note(t) { var n = $('note'); n.textContent = t; n.classList.add('show'); clearTimeout(nt); nt = setTimeout(function () { n.classList.remove('show'); }, 2000); }
+  function capture() {
+    if (!st.f) return;
+    st.samples.push({ at: new Date(), frame: JSON.parse(JSON.stringify(st.f)) });
+    $('cnt').textContent = $('cntP').textContent = st.samples.length;
+    var s = $('shutter'); s.classList.remove('go'); void s.offsetWidth; s.classList.add('go');
+    beep(1320, 0.05, 0.05, 'square');
+    note('Muestra ' + st.samples.length + ' · ts ' + fmt(st.f.ts, 2) + ' s');
+  }
+  function exportCsv() {
+    if (!st.samples.length) return note('Primero capturá con Espacio');
+    note('Exportado ' + Tele.download(st.samples) + ' · ' + st.samples.length + ' muestras');
+  }
+  function sound() {
+    st.sound = !st.sound;
+    if (st.sound && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; } }
+    $('sndBtn').setAttribute('aria-pressed', String(st.sound));
+    $('sndBtn').querySelector('use').setAttribute('href', st.sound ? '#i-volume-2' : '#i-volume-x');
+    note(st.sound ? 'Sonido: cada pata suena al apoyar · alarma doble si un motor pasa 60 °C' : 'Sonido apagado');
+  }
+  function sheet(o) { $('sheet').classList.toggle('open', o); if (o && st.f) renderTable(st.f); }
+  function setModel(m) { sim.setModel(m); built = null; st.samples = []; $('cnt').textContent = $('cntP').textContent = '0'; }
+  function toggleTr() { sim.setTransport(sim.transport === 'ws' ? 'poll' : 'ws'); linkTxt(); note(sim.transport === 'ws' ? 'WebSocket · push ~10 Hz' : 'Polling a /telemetria cada 500 ms'); }
+  function theme() { var t = Tele.toggleTheme(); readColors(); $('themeBtn').querySelector('use').setAttribute('href', t === 'light' ? '#i-moon' : '#i-sun'); note(t === 'light' ? 'Modo día' : 'Modo noche'); }
+  function help(o) { $('help').classList.toggle('open', o); }
+  // Tocar un segmento del anillo lo marca
+  cv.addEventListener('click', function (e) {
+    var g = geo(), dx = e.clientX - g.cx, dy = e.clientY - g.cy, r = Math.hypot(dx, dy);
+    if (Math.abs(r - g.R) > 22) { st.sel = null; return; }
+    var ang = Math.atan2(dy, dx) / D2R;
+    var hit = segs.filter(function (s) { return ang >= s.a0 - 1.5 && ang <= s.a1 + 1.5; })[0];
+    st.sel = hit ? hit.name : null;
+  });
+  $('sndBtn').onclick = sound; $('tblBtn').onclick = $('tblP').onclick = function () { sheet(!$('sheet').classList.contains('open')); };
+  $('sheetClose').onclick = function () { sheet(false); };
+  $('themeBtn').onclick = theme; $('helpBtn').onclick = function () { help(true); }; $('helpClose').onclick = function () { help(false); };
+  $('help').onclick = function (e) { if (e.target === this) help(false); };
+  $('capP').onclick = capture; $('expP').onclick = exportCsv;
+  document.querySelectorAll('[data-model]').forEach(function (b) { b.onclick = function () { setModel(b.dataset.model); }; });
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key.toLowerCase();
+    if (k === 'escape') { sheet(false); help(false); }
+    else if (k === ' ' || k === 'c') { e.preventDefault(); capture(); }
+    else if (k === 'e') exportCsv(); else if (k === 'p') sim.togglePaused();
+    else if (k === 'm') sheet(!$('sheet').classList.contains('open'));
+    else if (k === 's') sound(); else if (k === 'w') toggleTr();
+    else if (k === 'g') setModel(sim.modelo === 'go2' ? 'g1' : 'go2');
+    else if (k === 't') theme(); else if (k === 'd') sim.drop(4);
+    else if (e.key === '?') help(!$('help').classList.contains('open'));
+  });
+  if (document.documentElement.getAttribute('data-theme') === 'light') $('themeBtn').querySelector('use').setAttribute('href', '#i-moon');
+  var fl = document.fonts ? Promise.all([document.fonts.load('600 16px "Space Grotesk"'), document.fonts.load('600 16px "JetBrains Mono"')]).catch(function () {}) : Promise.resolve();
+  fl.then(function () { requestAnimationFrame(loop); });
+})();
+</script>
+</body>
+</html>

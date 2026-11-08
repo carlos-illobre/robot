@@ -1,0 +1,1416 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for js/views/manual/content.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../../../theme.js"></script>
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        
+        <label class="theme-select quiet">
+            Theme
+            <select id="themeSelect" autocomplete="off">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="legacy">Legacy</option>
+            </select>
+        </label>
+
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">js/views/manual</a> content.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>2/2</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>2/2</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a>
+<a name='L291'></a><a href='#L291'>291</a>
+<a name='L292'></a><a href='#L292'>292</a>
+<a name='L293'></a><a href='#L293'>293</a>
+<a name='L294'></a><a href='#L294'>294</a>
+<a name='L295'></a><a href='#L295'>295</a>
+<a name='L296'></a><a href='#L296'>296</a>
+<a name='L297'></a><a href='#L297'>297</a>
+<a name='L298'></a><a href='#L298'>298</a>
+<a name='L299'></a><a href='#L299'>299</a>
+<a name='L300'></a><a href='#L300'>300</a>
+<a name='L301'></a><a href='#L301'>301</a>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a>
+<a name='L304'></a><a href='#L304'>304</a>
+<a name='L305'></a><a href='#L305'>305</a>
+<a name='L306'></a><a href='#L306'>306</a>
+<a name='L307'></a><a href='#L307'>307</a>
+<a name='L308'></a><a href='#L308'>308</a>
+<a name='L309'></a><a href='#L309'>309</a>
+<a name='L310'></a><a href='#L310'>310</a>
+<a name='L311'></a><a href='#L311'>311</a>
+<a name='L312'></a><a href='#L312'>312</a>
+<a name='L313'></a><a href='#L313'>313</a>
+<a name='L314'></a><a href='#L314'>314</a>
+<a name='L315'></a><a href='#L315'>315</a>
+<a name='L316'></a><a href='#L316'>316</a>
+<a name='L317'></a><a href='#L317'>317</a>
+<a name='L318'></a><a href='#L318'>318</a>
+<a name='L319'></a><a href='#L319'>319</a>
+<a name='L320'></a><a href='#L320'>320</a>
+<a name='L321'></a><a href='#L321'>321</a>
+<a name='L322'></a><a href='#L322'>322</a>
+<a name='L323'></a><a href='#L323'>323</a>
+<a name='L324'></a><a href='#L324'>324</a>
+<a name='L325'></a><a href='#L325'>325</a>
+<a name='L326'></a><a href='#L326'>326</a>
+<a name='L327'></a><a href='#L327'>327</a>
+<a name='L328'></a><a href='#L328'>328</a>
+<a name='L329'></a><a href='#L329'>329</a>
+<a name='L330'></a><a href='#L330'>330</a>
+<a name='L331'></a><a href='#L331'>331</a>
+<a name='L332'></a><a href='#L332'>332</a>
+<a name='L333'></a><a href='#L333'>333</a>
+<a name='L334'></a><a href='#L334'>334</a>
+<a name='L335'></a><a href='#L335'>335</a>
+<a name='L336'></a><a href='#L336'>336</a>
+<a name='L337'></a><a href='#L337'>337</a>
+<a name='L338'></a><a href='#L338'>338</a>
+<a name='L339'></a><a href='#L339'>339</a>
+<a name='L340'></a><a href='#L340'>340</a>
+<a name='L341'></a><a href='#L341'>341</a>
+<a name='L342'></a><a href='#L342'>342</a>
+<a name='L343'></a><a href='#L343'>343</a>
+<a name='L344'></a><a href='#L344'>344</a>
+<a name='L345'></a><a href='#L345'>345</a>
+<a name='L346'></a><a href='#L346'>346</a>
+<a name='L347'></a><a href='#L347'>347</a>
+<a name='L348'></a><a href='#L348'>348</a>
+<a name='L349'></a><a href='#L349'>349</a>
+<a name='L350'></a><a href='#L350'>350</a>
+<a name='L351'></a><a href='#L351'>351</a>
+<a name='L352'></a><a href='#L352'>352</a>
+<a name='L353'></a><a href='#L353'>353</a>
+<a name='L354'></a><a href='#L354'>354</a>
+<a name='L355'></a><a href='#L355'>355</a>
+<a name='L356'></a><a href='#L356'>356</a>
+<a name='L357'></a><a href='#L357'>357</a>
+<a name='L358'></a><a href='#L358'>358</a>
+<a name='L359'></a><a href='#L359'>359</a>
+<a name='L360'></a><a href='#L360'>360</a>
+<a name='L361'></a><a href='#L361'>361</a>
+<a name='L362'></a><a href='#L362'>362</a>
+<a name='L363'></a><a href='#L363'>363</a>
+<a name='L364'></a><a href='#L364'>364</a>
+<a name='L365'></a><a href='#L365'>365</a>
+<a name='L366'></a><a href='#L366'>366</a>
+<a name='L367'></a><a href='#L367'>367</a>
+<a name='L368'></a><a href='#L368'>368</a>
+<a name='L369'></a><a href='#L369'>369</a>
+<a name='L370'></a><a href='#L370'>370</a>
+<a name='L371'></a><a href='#L371'>371</a>
+<a name='L372'></a><a href='#L372'>372</a>
+<a name='L373'></a><a href='#L373'>373</a>
+<a name='L374'></a><a href='#L374'>374</a>
+<a name='L375'></a><a href='#L375'>375</a>
+<a name='L376'></a><a href='#L376'>376</a>
+<a name='L377'></a><a href='#L377'>377</a>
+<a name='L378'></a><a href='#L378'>378</a>
+<a name='L379'></a><a href='#L379'>379</a>
+<a name='L380'></a><a href='#L380'>380</a>
+<a name='L381'></a><a href='#L381'>381</a>
+<a name='L382'></a><a href='#L382'>382</a>
+<a name='L383'></a><a href='#L383'>383</a>
+<a name='L384'></a><a href='#L384'>384</a>
+<a name='L385'></a><a href='#L385'>385</a>
+<a name='L386'></a><a href='#L386'>386</a>
+<a name='L387'></a><a href='#L387'>387</a>
+<a name='L388'></a><a href='#L388'>388</a>
+<a name='L389'></a><a href='#L389'>389</a>
+<a name='L390'></a><a href='#L390'>390</a>
+<a name='L391'></a><a href='#L391'>391</a>
+<a name='L392'></a><a href='#L392'>392</a>
+<a name='L393'></a><a href='#L393'>393</a>
+<a name='L394'></a><a href='#L394'>394</a>
+<a name='L395'></a><a href='#L395'>395</a>
+<a name='L396'></a><a href='#L396'>396</a>
+<a name='L397'></a><a href='#L397'>397</a>
+<a name='L398'></a><a href='#L398'>398</a>
+<a name='L399'></a><a href='#L399'>399</a>
+<a name='L400'></a><a href='#L400'>400</a>
+<a name='L401'></a><a href='#L401'>401</a>
+<a name='L402'></a><a href='#L402'>402</a>
+<a name='L403'></a><a href='#L403'>403</a>
+<a name='L404'></a><a href='#L404'>404</a>
+<a name='L405'></a><a href='#L405'>405</a>
+<a name='L406'></a><a href='#L406'>406</a>
+<a name='L407'></a><a href='#L407'>407</a>
+<a name='L408'></a><a href='#L408'>408</a>
+<a name='L409'></a><a href='#L409'>409</a>
+<a name='L410'></a><a href='#L410'>410</a>
+<a name='L411'></a><a href='#L411'>411</a>
+<a name='L412'></a><a href='#L412'>412</a>
+<a name='L413'></a><a href='#L413'>413</a>
+<a name='L414'></a><a href='#L414'>414</a>
+<a name='L415'></a><a href='#L415'>415</a>
+<a name='L416'></a><a href='#L416'>416</a>
+<a name='L417'></a><a href='#L417'>417</a>
+<a name='L418'></a><a href='#L418'>418</a>
+<a name='L419'></a><a href='#L419'>419</a>
+<a name='L420'></a><a href='#L420'>420</a>
+<a name='L421'></a><a href='#L421'>421</a>
+<a name='L422'></a><a href='#L422'>422</a>
+<a name='L423'></a><a href='#L423'>423</a>
+<a name='L424'></a><a href='#L424'>424</a>
+<a name='L425'></a><a href='#L425'>425</a>
+<a name='L426'></a><a href='#L426'>426</a>
+<a name='L427'></a><a href='#L427'>427</a>
+<a name='L428'></a><a href='#L428'>428</a>
+<a name='L429'></a><a href='#L429'>429</a>
+<a name='L430'></a><a href='#L430'>430</a>
+<a name='L431'></a><a href='#L431'>431</a>
+<a name='L432'></a><a href='#L432'>432</a>
+<a name='L433'></a><a href='#L433'>433</a>
+<a name='L434'></a><a href='#L434'>434</a>
+<a name='L435'></a><a href='#L435'>435</a>
+<a name='L436'></a><a href='#L436'>436</a>
+<a name='L437'></a><a href='#L437'>437</a>
+<a name='L438'></a><a href='#L438'>438</a>
+<a name='L439'></a><a href='#L439'>439</a>
+<a name='L440'></a><a href='#L440'>440</a>
+<a name='L441'></a><a href='#L441'>441</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">49x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">49x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * Contenido del manual, como datos.
+ *
+ * Cada sección: { id, title, toc?, kicker?, lead?, level? (1|2), blocks: [...] }
+ * Tipos de bloque: p · callout · list · steps · table · diagram · cards · figure · try
+ * Las figuras son capturas reales del dashboard (assets/manual/*.png) con
+ * marcas en coordenadas porcentuales [x, y] y una leyenda [título, texto].
+ */
+import * as D from "./diagrams.js";
+import { VIEW_SECTIONS } from "./views-content.js";
+&nbsp;
+const A = "assets/manual";
+&nbsp;
+export const SECTIONS = [
+  /* ---------------------------------------------------------------- */
+  {
+    id: "inicio",
+    toc: "Bienvenida",
+    kicker: "Manual de uso · TP05",
+    title: "Cómo leer y usar el dashboard de telemetría",
+    lead:
+      "Este dashboard muestra &lt;b&gt;en vivo&lt;/b&gt; lo que le pasa a un robot Unitree mientras se mueve: el estado de cada motor, hacia dónde está inclinado, cuánta batería le queda y qué patas tiene apoyadas. Llegan &lt;b&gt;10 muestras por segundo&lt;/b&gt; desde el servidor.",
+    blocks: [
+      {
+        type: "p",
+        html: "Hay &lt;b&gt;cuatro formas de mirar los mismos datos&lt;/b&gt;. Todas comparten la misma conexión, el mismo historial y las mismas capturas: cambiar de vista no pierde nada. Usá la que mejor sirva para lo que estás haciendo:",
+      },
+      {
+        type: "cards",
+        items: [
+          { view: "console", key: "1", title: "Consola", text: "Los cuatro paneles con todos los números. Para analizar y corregir.", img: `${A}/console-desktop.png` },
+          { view: "body", key: "2", title: "Cuerpo", text: "El robot es la interfaz: se entiende de un vistazo qué motor calienta y qué pata apoya.", img: `${A}/body-desktop.png` },
+          { view: "pilot", key: "3", title: "Piloto", text: "Instrumental de cabina a pantalla completa. Para proyectar en clase.", img: `${A}/pilot-desktop.png` },
+          { view: "twin", key: "4", title: "Gemelo 3D", text: "El robot en 3D, movido por los ángulos reales de sus motores.", img: `${A}/twin-desktop.png` },
+        ],
+      },
+      {
+        type: "callout",
+        kind: "tip",
+        html: "&lt;b&gt;Recorrido sugerido para aprender:&lt;/b&gt; leé &lt;a href='#man-conceptos'&gt;Conceptos&lt;/a&gt; (10 minutos), después abrí la &lt;b&gt;Consola&lt;/b&gt; con el robot caminando y buscá cada dato que se explica acá. Con las teclas &lt;kbd&gt;J&lt;/kbd&gt; y &lt;kbd&gt;K&lt;/kbd&gt; avanzás y retrocedés entre secciones.",
+      },
+    ],
+  },
+&nbsp;
+  /* ---------------------------------------------------------------- */
+  {
+    id: "robot-real",
+    toc: "★ Con el robot real",
+    kicker: "Lo más importante",
+    title: "Usar el dashboard con el robot real, paso a paso",
+    lead: "Hace falta el robot encendido, &lt;b&gt;una notebook con Linux conectada al robot por cable&lt;/b&gt; (corre el servidor) y, para mirar desde otras máquinas, solo un navegador.",
+    blocks: [
+      { type: "p", html: "&lt;b&gt;Antes del día&lt;/b&gt; (una sola vez, con internet), en la notebook que se va a conectar al robot:" },
+      {
+        type: "steps",
+        items: [
+          "&lt;b&gt;Instalar el proyecto:&lt;/b&gt; en la carpeta del proyecto, &lt;code&gt;python iniciar.py&lt;/code&gt;. Si se ve el robot paseando, está bien; cerrar con &lt;kbd&gt;Ctrl&lt;/kbd&gt;+&lt;kbd&gt;C&lt;/kbd&gt;.",
+          "&lt;b&gt;Instalar el SDK de Unitree&lt;/b&gt;, lo que permite leer el robot por el cable: &lt;code&gt;python iniciar.py --instalar-sdk&lt;/code&gt;. &lt;b&gt;Solo si hace falta:&lt;/b&gt; si la notebook ya lo tiene, se detecta solo (en el panel de fuentes, &lt;i&gt;Robot real&lt;/i&gt; no aparece gris). Si falla compilando CycloneDDS, usar Python 3.10.",
+        ],
+      },
+      { type: "p", html: "&lt;b&gt;El día del laboratorio:&lt;/b&gt;" },
+      {
+        type: "steps",
+        start: 3,
+        items: [
+          "&lt;b&gt;Conectar el cable&lt;/b&gt; entre la notebook y el robot, y encender el robot.",
+          "&lt;b&gt;Darle a la notebook una IP de la red del robot&lt;/b&gt;: la placa del cable con IP fija &lt;code&gt;192.168.123.222&lt;/code&gt;, máscara &lt;code&gt;255.255.255.0&lt;/code&gt; (Configuración → Red → Cableada → IPv4 → Manual). Comprobar con &lt;code&gt;ping 192.168.123.161&lt;/code&gt;.",
+          "&lt;b&gt;Arrancar:&lt;/b&gt; &lt;code&gt;python iniciar.py&lt;/code&gt;. Se abre el dashboard en modo demo: arriba dice &lt;b&gt;Simulado&lt;/b&gt;.",
+          "&lt;b&gt;Clic en «Simulado ▾»&lt;/b&gt; → elegir &lt;b&gt;Robot real&lt;/b&gt; → el modelo (&lt;b&gt;Go2&lt;/b&gt; o &lt;b&gt;G1&lt;/b&gt;, el que está conectado) → revisar la &lt;b&gt;placa de red&lt;/b&gt; (se detecta sola y aparece marcada &lt;i&gt;(red del robot)&lt;/i&gt;) → &lt;b&gt;Usar esta fuente&lt;/b&gt;. En unos segundos la etiqueta cambia a &lt;b&gt;Real&lt;/b&gt;, en verde.",
+          "&lt;b&gt;Desde otras computadoras:&lt;/b&gt; abrir la dirección que muestra la consola (&lt;i&gt;«desde otra maquina de la red: http://…:8001»&lt;/i&gt;). Tiene que ser la IP de la WiFi del aula, no la del cable del robot.",
+        ],
+      },
+      {
+        type: "figure",
+        src: `${A}/real-paso-1.png`,
+        alt: "La etiqueta Simulado en la barra",
+        strip: true,
+        caption: "Paso 6: la etiqueta junto al nombre del robot. Haciendo clic se abre el panel.",
+        markers: [[63, 50]],
+        legend: [["Fuente de datos", "Dice &lt;b&gt;Simulado&lt;/b&gt; (violeta) o &lt;b&gt;Real&lt;/b&gt; (verde). Hacé clic para elegir otra fuente."]],
+      },
+      {
+        type: "figure",
+        src: `${A}/real-paso-2.png`,
+        alt: "Panel de fuente de datos con Robot real elegido",
+        ratio: "570 / 855",
+        phone: true,
+        caption: "Captura ilustrativa: el nombre de la placa y su IP dependen de cada notebook.",
+        markers: [[4, 9], [4, 58.5], [4, 71], [4, 85.5]],
+        legend: [
+          ["Robot real", "La fuente que lee el robot por el cable. Si aparece gris, falta el SDK (paso 2)."],
+          ["Modelo", "Go2 o G1: tiene que ser el robot conectado."],
+          ["Placa de red", "Se detecta sola. La marcada &lt;i&gt;(red del robot)&lt;/i&gt; es la del cable."],
+          ["Usar esta fuente", "El servidor cambia solo si llegan datos en 5 s; si no, avisa y sigue con la fuente anterior."],
+        ],
+      },
+      {
+        type: "table",
+        head: ["Qué pasa", "Qué hacer"],
+        rows: [
+          ["&lt;b&gt;Robot real&lt;/b&gt; está gris", "Falta el SDK: paso 2."],
+          ["«La fuente no envió datos en 5 s»", "Revisar el cable, la IP (paso 4, &lt;code&gt;ping&lt;/code&gt;) y elegir la placa marcada &lt;i&gt;(red del robot)&lt;/i&gt;."],
+          ["Los números están quietos", "El robot está quieto: el dashboard es solo lectura, no lo mueve. Es normal."],
+          ["Los motores no coinciden", "Se eligió G1 con un Go2 conectado (o al revés)."],
+        ],
+      },
+      { type: "callout", kind: "info", html: "&lt;b&gt;¿Por qué algunas opciones del panel aparecen grises?&lt;/b&gt; Gris no quiere decir roto: en &lt;b&gt;esa máquina&lt;/b&gt; falta algo para usar esa fuente, y el motivo está escrito debajo del nombre. Robot real necesita el SDK de Unitree; Simulador MuJoCo, que el simulador de la cátedra esté abierto. La Demo siempre está disponible. Ver &lt;a href='#man-fuentes'&gt;Fuentes de datos&lt;/a&gt;." },
+    ],
+  },
+&nbsp;
+  /* ---------------------------------------------------------------- */
+  {
+    id: "primeros-pasos",
+    toc: "Primeros pasos",
+    kicker: "1",
+    title: "Primeros pasos",
+    blocks: [
+      { type: "p", html: "El dashboard necesita un &lt;b&gt;servidor de telemetría&lt;/b&gt; (el backend FastAPI de la cátedra) que le mande los datos. Sin robot, ese servidor puede inventar datos realistas: es el &lt;b&gt;modo demo&lt;/b&gt;." },
+      {
+        type: "steps",
+        items: [
+          "&lt;b&gt;Levantar el servidor.&lt;/b&gt; En una terminal, dentro de la carpeta del proyecto: &lt;code&gt;python iniciar.py&lt;/code&gt; (igual en Windows, macOS y Linux). La primera vez instala lo necesario; después arranca al instante.",
+          "&lt;b&gt;Abrir el navegador&lt;/b&gt; en &lt;code&gt;http://localhost:8001&lt;/code&gt; (el script lo abre solo).",
+          "&lt;b&gt;Mirar el indicador de conexión&lt;/b&gt; arriba a la derecha: tiene que decir &lt;i&gt;En vivo · WS · 10 Hz&lt;/i&gt; con un punto verde que late.",
+          "&lt;b&gt;Elegir una vista&lt;/b&gt; con los botones de arriba o las teclas &lt;kbd&gt;1&lt;/kbd&gt; a &lt;kbd&gt;4&lt;/kbd&gt;.",
+        ],
+      },
+      {
+        type: "figure",
+        src: `${A}/appbar.png`,
+        alt: "Barra superior del dashboard",
+        caption: "La barra superior es la misma en todas las vistas.",
+        strip: true,
+        markers: [[2.3, 50], [20.5, 50], [55.3, 50], [86.1, 50], [94.3, 50], [97.8, 50]],
+        legend: [
+          ["Marca", "Nombre del dashboard."],
+          ["Robot conectado", "Nombre y cantidad de motores, según &lt;code&gt;GET /info&lt;/code&gt;. La etiqueta &lt;b&gt;DEMO&lt;/b&gt; avisa que los datos son simulados."],
+          ["Selector de vistas", "Cuatro formas de ver los mismos datos, más este manual. Teclas &lt;kbd&gt;1&lt;/kbd&gt; a &lt;kbd&gt;5&lt;/kbd&gt;."],
+          ["Estado de la conexión", "Punto verde que late = llegan datos. Amarillo = reconectando o sin datos hace más de 2 s. Rojo = desconectado. Muestra el transporte (WS o Polling), la frecuencia real en Hz y, en polling, cuánto tarda cada pedido. &lt;b&gt;Hacé clic&lt;/b&gt; para cambiar de servidor o de transporte."],
+          ["Tema", "Claro u oscuro (tecla &lt;kbd&gt;T&lt;/kbd&gt;). Cada vista recuerda el suyo."],
+          ["Ayuda", "Todos los atajos de teclado (tecla &lt;kbd&gt;?&lt;/kbd&gt;)."],
+        ],
+      },
+      {
+        type: "callout",
+        kind: "info",
+        html: "&lt;b&gt;El día del robot real&lt;/b&gt; no cambia nada del dashboard: solo la dirección del servidor. Abrí &lt;code&gt;http://localhost:8001/?server=http://IP-DEL-ROBOT:8001&lt;/code&gt; o escribila en el panel de conexión. &lt;br&gt;&lt;b&gt;Ojo:&lt;/b&gt; la versión publicada en GitHub Pages solo puede usar la simulación del navegador. Como la página es &lt;code&gt;https&lt;/code&gt; y el robot está en &lt;code&gt;http&lt;/code&gt;, el navegador bloquea la conexión por seguridad. Con el robot real, el dashboard se abre localmente con &lt;code&gt;python iniciar.py&lt;/code&gt;.",
+      },
+      {
+        type: "callout",
+        kind: "tip",
+        html: "&lt;b&gt;¿Robot real o simulación?&lt;/b&gt; La etiqueta junto al nombre del robot lo dice siempre: &lt;b&gt;REAL&lt;/b&gt; en verde (datos medidos) o &lt;b&gt;SIMULADO&lt;/b&gt; en violeta. Haciendo clic se elige la &lt;b&gt;fuente de datos&lt;/b&gt;: &lt;i&gt;Robot real&lt;/i&gt; (por DDS, en el laboratorio), &lt;i&gt;Simulador MuJoCo&lt;/i&gt; de la cátedra o &lt;i&gt;Demo&lt;/i&gt; (el robot pasea solo). Una fuente no disponible aparece gris con el motivo, por ejemplo: «Falta el SDK de Unitree». También se elige ahí el robot: Go2 o G1.",
+      },
+      {
+        type: "callout",
+        kind: "info",
+        html: "&lt;b&gt;¿Verlo desde otra computadora o un celular?&lt;/b&gt; En la máquina del backend, la consola muestra una línea &lt;i&gt;«desde otra maquina de la red: http://192.168.0.23:8001»&lt;/i&gt;. Abrí esa dirección en el navegador de la otra máquina, y listo: ya viene conectado. Si no carga, casi siempre es el firewall o que no están en la misma red (ver «Si algo no anda»).",
+      },
+      { type: "p", html: "&lt;b&gt;WebSocket o polling.&lt;/b&gt; Son dos formas de recibir los datos. Con &lt;b&gt;WebSocket&lt;/b&gt; el servidor &lt;i&gt;empuja&lt;/i&gt; cada muestra apenas la tiene (10 por segundo, sin demora). Con &lt;b&gt;polling&lt;/b&gt; el dashboard &lt;i&gt;pregunta&lt;/i&gt; cada 100, 250 o 500 ms. WebSocket es mejor; polling sirve si una red bloquea WebSocket. Se cambia con &lt;kbd&gt;W&lt;/kbd&gt;." },
+    ],
+  },
+&nbsp;
+  /* ---------------------------------------------------------------- */
+  {
+    id: "fuentes",
+    level: 2,
+    toc: "Fuentes de datos (modos)",
+    title: "Fuentes de datos: ¿de dónde vienen los números?",
+    blocks: [
+      { type: "p", html: "El dashboard siempre muestra lo mismo, pero los datos pueden venir de tres &lt;b&gt;fuentes&lt;/b&gt;. La etiqueta junto al nombre del robot dice cuál se está usando: &lt;b&gt;REAL&lt;/b&gt; en verde (datos medidos) o &lt;b&gt;SIMULADO&lt;/b&gt; en violeta. Al hacer clic en el nombre del robot (o en esa etiqueta) se elige otra fuente y otro robot, sin reiniciar nada." },
+      {
+        type: "table",
+        head: ["Fuente", "Qué es", "Cuándo usarla", "Qué necesita"],
+        rows: [
+          ["&lt;b&gt;Robot real&lt;/b&gt; &lt;span style='color:var(--sem-ok)'&gt;● medido&lt;/span&gt;", "El servidor lee el robot por DDS, a través del cable de red.", "En el laboratorio, con el robot.", "Notebook conectada al robot por cable y el SDK de Unitree (&lt;code&gt;unitree_sdk2py&lt;/code&gt;)."],
+          ["&lt;b&gt;Simulador MuJoCo&lt;/b&gt;", "El simulador 3D de la cátedra, corriendo en la misma máquina que el servidor. Mueve el robot de verdad (sin física completa).", "Practicar con datos parecidos a los del robot.", "El simulador de la cátedra abierto (&lt;code&gt;INICIAR_TP05&lt;/code&gt;)."],
+          ["&lt;b&gt;Demo&lt;/b&gt;", "Simulación de este proyecto: el robot pasea (camina, trota, gira, frena) y los datos son coherentes entre sí: si trota, suben el torque y la temperatura. La calcula el servidor; si no hay servidor (por ejemplo, en GitHub Pages), la misma simulación corre en el navegador.", "Desarrollar, corregir y presentar.", "Nada."],
+        ],
+      },
+      {
+        type: "callout",
+        kind: "info",
+        html: "&lt;b&gt;¿Y la demo de la cátedra?&lt;/b&gt; No está en el panel porque hace lo mismo que la Demo, pero peor: cada motor oscila con una senoidal suelta, sin marcha, el semáforo nunca pasa de verde y el robot 3D queda en poses imposibles (todos los motores alrededor de 0°: patas estiradas y rodillas sin doblar). Sigue disponible para comparar: &lt;code&gt;python iniciar.py --demo-catedra&lt;/code&gt;.",
+      },
+      {
+        type: "list",
+        items: [
+          "Una fuente que &lt;b&gt;no está disponible&lt;/b&gt; aparece gris con el motivo (por ejemplo: «Falta el SDK de Unitree en la máquina del backend»).",
+          "El cambio es &lt;b&gt;seguro&lt;/b&gt;: el servidor solo pasa a la fuente nueva si entrega datos en 5 segundos; si no, sigue con la anterior.",
+          "Cambiar la fuente del servidor &lt;b&gt;afecta a todos los dashboards conectados&lt;/b&gt; a ese servidor. Para evitarlo en una clase, el servidor se puede arrancar con &lt;code&gt;--fuente-fija&lt;/code&gt;.",
+          "El &lt;b&gt;robot&lt;/b&gt; (Go2 o G1) se elige en el mismo panel. Con el robot real tiene que coincidir con el que está conectado.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "conceptos",
+    toc: "Conceptos",
+    kicker: "2",
+    title: "Conceptos para leer la telemetría",
+    lead: "Antes de mirar las vistas, conviene saber qué significa cada dato. Son siempre los mismos, en las cuatro vistas.",
+    blocks: [],
+  },
+  {
+    id: "motores",
+    level: 2,
+    toc: "Motores y articulaciones",
+    title: "Motores y articulaciones",
+    blocks: [
+      { type: "p", html: "Cada articulación del robot tiene un motor. El &lt;b&gt;Go2&lt;/b&gt; (perro) tiene &lt;b&gt;12&lt;/b&gt;: tres por pata. El &lt;b&gt;G1&lt;/b&gt; (humanoide) tiene &lt;b&gt;29&lt;/b&gt;. El nombre de cada motor dice &lt;b&gt;qué pata&lt;/b&gt; y &lt;b&gt;qué articulación&lt;/b&gt; es:" },
+      { type: "diagram", svg: D.LEG, caption: "Las tres articulaciones de una pata del Go2, vista de costado." },
+      {
+        type: "table",
+        head: ["Parte del nombre", "Significa", "Ejemplo"],
+        rows: [
+          ["&lt;code&gt;FR&lt;/code&gt; · &lt;code&gt;FL&lt;/code&gt;", "Front Right / Front Left: delantera derecha / izquierda", "&lt;code&gt;FR_calf&lt;/code&gt; = pantorrilla delantera derecha"],
+          ["&lt;code&gt;RR&lt;/code&gt; · &lt;code&gt;RL&lt;/code&gt;", "Rear Right / Rear Left: trasera derecha / izquierda", "&lt;code&gt;RL_thigh&lt;/code&gt; = muslo trasero izquierdo"],
+          ["&lt;code&gt;hip&lt;/code&gt;", "Cadera: abre y cierra la pata hacia el costado (abducción)", "se mueve poco"],
+          ["&lt;code&gt;thigh&lt;/code&gt;", "Muslo: lleva la pata hacia adelante y atrás", "el que más se mueve al caminar"],
+          ["&lt;code&gt;calf&lt;/code&gt;", "Pantorrilla (rodilla): dobla la pata", "el que más fuerza hace y más calienta"],
+          ["G1: &lt;code&gt;L_&lt;/code&gt; · &lt;code&gt;R_&lt;/code&gt;", "izquierda / derecha del humanoide", "&lt;code&gt;L_knee&lt;/code&gt; = rodilla izquierda"],
+        ],
+      },
+    ],
+  },
+  {
+    id: "magnitudes",
+    level: 2,
+    toc: "Los cuatro datos de cada motor",
+    title: "Los cuatro datos de cada motor",
+    blocks: [
+      {
+        type: "table",
+        head: ["Dato", "Unidad", "Qué es", "Cómo leerlo"],
+        rows: [
+          ["&lt;b&gt;Ángulo&lt;/b&gt;", "grados (°)", "Posición de la articulación. 0° es la posición de referencia del motor.", "Si oscila con un ritmo parejo, el robot camina. En el Go2 parado: muslo ≈ 45°, pantorrilla ≈ −88°."],
+          ["&lt;b&gt;Velocidad&lt;/b&gt;", "rad/s", "Qué tan rápido gira la articulación (1 rad/s ≈ 57°/s). El signo dice para qué lado.", "0 = quieta. Al trotar, los muslos llegan a 3–6 rad/s."],
+          ["&lt;b&gt;Torque&lt;/b&gt;", "N·m", "La fuerza de giro que hace el motor. El signo dice para qué lado empuja.", "Sube al caminar y cuando la pata está apoyada sosteniendo peso. La alarma salta si supera el umbral (por defecto 18 N·m)."],
+          ["&lt;b&gt;Temperatura&lt;/b&gt;", "°C", "Temperatura del motor.", "Sube mientras el motor trabaja y baja lentamente al frenar: &lt;b&gt;tiene inercia&lt;/b&gt;, tarda decenas de segundos en reaccionar."],
+        ],
+      },
+      { type: "diagram", svg: D.SEMAFORO, caption: "El semáforo de temperatura, igual al del monitor de escritorio electroSim." },
+      {
+        type: "callout",
+        kind: "warn",
+        html: "&lt;b&gt;Un motor en rojo&lt;/b&gt; (más de 60 °C) no es una falla del dashboard: es la señal de que conviene frenar el robot para que enfríe. En el modo demo pasa a propósito después de trotar un rato, para poder probar las alarmas.",
+      },
+    ],
+  },
+  {
+    id: "imu",
+    level: 2,
+    toc: "Inclinación (IMU)",
+    title: "Inclinación: roll, pitch y yaw (IMU)",
+    blocks: [
+      { type: "p", html: "La &lt;b&gt;IMU&lt;/b&gt; (unidad de medición inercial) es un sensor dentro del cuerpo del robot que mide su orientación con tres ángulos, como un avión:" },
+      { type: "diagram", svg: D.RPY, caption: "Los tres ángulos de orientación del cuerpo." },
+      {
+        type: "table",
+        head: ["Ángulo", "Gira alrededor de", "Ejemplo", "Valores normales"],
+        rows: [
+          ["&lt;b&gt;Roll&lt;/b&gt; (alabeo)", "el eje que va de la cola a la cabeza", "el robot se inclina hacia un costado", "±3° caminando; más de 15° es peligro de vuelco"],
+          ["&lt;b&gt;Pitch&lt;/b&gt; (cabeceo)", "el eje que va de costado a costado", "baja o levanta la cabeza", "±3° caminando; negativo al acelerar"],
+          ["&lt;b&gt;Yaw&lt;/b&gt; (guiñada o rumbo)", "el eje vertical", "hacia dónde mira, como una brújula", "de −180° a 180°; cambia cuando el robot dobla"],
+        ],
+      },
+      { type: "p", html: "Además trae la &lt;b&gt;aceleración&lt;/b&gt; en tres ejes (&lt;code&gt;ax&lt;/code&gt;, &lt;code&gt;ay&lt;/code&gt;, &lt;code&gt;az&lt;/code&gt;, en m/s²). Con el robot quieto, &lt;code&gt;az&lt;/code&gt; vale ≈ 9,8: es la gravedad." },
+      { type: "callout", kind: "tip", html: "&lt;b&gt;Para practicar:&lt;/b&gt; en el gráfico histórico, el &lt;b&gt;yaw&lt;/b&gt; hace escalones cuando el robot dobla, y &lt;b&gt;roll&lt;/b&gt; y &lt;b&gt;pitch&lt;/b&gt; se vuelven una onda pareja cuando trota." },
+    ],
+  },
+  {
+    id: "bateria",
+    level: 2,
+    toc: "Batería (BMS)",
+    title: "Batería (BMS)",
+    blocks: [
+      { type: "p", html: "El &lt;b&gt;BMS&lt;/b&gt; (sistema de gestión de batería) informa:" },
+      {
+        type: "table",
+        head: ["Dato", "Unidad", "Cómo leerlo"],
+        rows: [
+          ["&lt;b&gt;Carga (SOC)&lt;/b&gt;", "%", "State of Charge. Verde ≥ 50 %, amarillo 20–50 %, rojo &amp;lt; 20 % (alarma)."],
+          ["&lt;b&gt;Corriente&lt;/b&gt;", "mA", "Cuánta corriente sale de la batería. Sube al caminar: es el consumo. 1.000 mA = 1 A."],
+          ["&lt;b&gt;Temperatura&lt;/b&gt;", "°C", "De la batería. Sube despacio con consumos altos."],
+          ["&lt;b&gt;Celdas&lt;/b&gt;", "V", "La batería está hecha de varias celdas en serie, cada una de ~3,7 a 4,2 V. Deberían estar parejas."],
+          ["&lt;b&gt;Desbalance (Δ)&lt;/b&gt;", "mV", "Diferencia entre la celda más alta y la más baja. Menos de 30 mV es bueno; si crece, una celda se está degradando."],
+        ],
+      },
+      { type: "diagram", svg: D.CELLS, caption: "Celdas parejas, y una más baja: el Δ mide esa diferencia." },
+    ],
+  },
+  {
+    id: "patas",
+    level: 2,
+    toc: "Patas y marcha",
+    title: "Patas apoyadas y la marcha al trote",
+    blocks: [
+      { type: "p", html: "Cada pata informa si está &lt;b&gt;apoyada&lt;/b&gt; (1) o &lt;b&gt;en el aire&lt;/b&gt; (0). Mirando cuáles apoyan a lo largo del tiempo se reconoce &lt;b&gt;cómo camina&lt;/b&gt; el robot. El Go2 &lt;b&gt;trota&lt;/b&gt;: mueve juntas las patas en diagonal." },
+      { type: "diagram", svg: D.GAIT, caption: "Diagrama de marcha del trote: cada barra llena es una pata apoyada. FR y RL van juntas, y FL y RR también." },
+      { type: "list", items: ["&lt;b&gt;Quieto:&lt;/b&gt; las cuatro patas apoyadas todo el tiempo.", "&lt;b&gt;Trotando:&lt;/b&gt; se alternan las diagonales; casi siempre hay dos apoyadas.", "&lt;b&gt;G1:&lt;/b&gt; son dos pies (&lt;code&gt;R_foot&lt;/code&gt;, &lt;code&gt;L_foot&lt;/code&gt;) que se alternan al caminar."] },
+    ],
+  },
+  {
+    id: "real-derivado",
+    level: 2,
+    toc: "Qué es real y qué es simulado",
+    title: "Qué es real y qué es simulado",
+    blocks: [
+      { type: "p", html: "Con el robot real, todos los datos se miden. En el &lt;b&gt;simulador&lt;/b&gt; y en el &lt;b&gt;modo demo&lt;/b&gt;, algunos son medidos y otros se &lt;b&gt;calculan&lt;/b&gt; a partir de lo que hace el robot. Los calculados son &lt;b&gt;coherentes&lt;/b&gt; (si camina, sube el torque) pero no son mediciones." },
+      {
+        type: "table",
+        head: ["Dato", "Simulador MuJoCo", "Modo demo de este proyecto"],
+        rows: [
+          ["Ángulo y velocidad de motor", "real", "calculado de la marcha"],
+          ["Yaw", "real", "integrado del giro"],
+          ["Torque", "derivado del esfuerzo", "derivado de la carga de cada pata"],
+          ["Temperatura", "derivada: sube con el uso", "modelo térmico (ley de Newton + efecto Joule)"],
+          ["Roll / pitch", "oscilación al caminar", "oscilación al caminar"],
+          ["Patas apoyadas", "de la fase de la marcha", "de la fase del trote"],
+          ["Batería", "inventada (87 %, baja muy lento)", "baja con el consumo (acelerada para verse en clase)"],
+        ],
+      },
+    ],
+  },
+&nbsp;
+  /* ---------------------------------------------------------------- */
+  ...VIEW_SECTIONS,
+&nbsp;
+  /* ---------------------------------------------------------------- */
+  {
+    id: "capturas",
+    toc: "Capturar y exportar",
+    kicker: "4",
+    title: "Capturar muestras y exportar a CSV",
+    lead: "Como en electroSim: se guardan fotos del estado completo del robot para analizarlas después en Excel, LibreOffice, Python o MATLAB.",
+    blocks: [
+      {
+        type: "table",
+        head: ["Acción", "Tecla", "Qué hace"],
+        rows: [
+          ["&lt;b&gt;Capturar&lt;/b&gt;", "&lt;kbd&gt;C&lt;/kbd&gt;", "Guarda una copia completa del instante actual: los motores, la IMU, la batería y las patas."],
+          ["&lt;b&gt;Grabar&lt;/b&gt;", "&lt;kbd&gt;R&lt;/kbd&gt;", "Guarda &lt;b&gt;todas&lt;/b&gt; las muestras que llegan (10 por segundo) hasta que la vuelvas a apretar. Ideal para registrar una caminata entera."],
+          ["&lt;b&gt;Exportar CSV&lt;/b&gt;", "&lt;kbd&gt;E&lt;/kbd&gt;", "Descarga un archivo &lt;code&gt;telemetria_go2_AAAA-MM-DD_hh-mm-ss.csv&lt;/code&gt; con todas las muestras capturadas."],
+        ],
+      },
+      { type: "p", html: "El CSV tiene &lt;b&gt;una fila por muestra&lt;/b&gt; y &lt;b&gt;una columna por dato&lt;/b&gt;, con la unidad en el nombre: &lt;code&gt;FR_calf_temperatura_C&lt;/code&gt;, &lt;code&gt;imu_roll_deg&lt;/code&gt;, &lt;code&gt;bms_celda_3_V&lt;/code&gt;, &lt;code&gt;pata_RL_contacto&lt;/code&gt;… Para el Go2 son unas 80 columnas; para el G1, más de 130." },
+      { type: "callout", kind: "tip", html: "&lt;b&gt;¿Excel en castellano?&lt;/b&gt; Activá &lt;i&gt;Formato Excel&lt;/i&gt; antes de exportar: usa &lt;code&gt;;&lt;/code&gt; como separador y coma decimal, y se abre con doble clic con cada dato en su columna." },
+      { type: "callout", kind: "info", html: "Las capturas viven en la memoria del navegador: &lt;b&gt;si recargás la página se pierden&lt;/b&gt;. Exportá antes de cerrar." },
+    ],
+  },
+  {
+    id: "alarmas",
+    toc: "Alarmas",
+    kicker: "5",
+    title: "Alarmas",
+    blocks: [
+      {
+        type: "table",
+        head: ["Alarma", "Cuándo salta", "Qué hacer"],
+        rows: [
+          ["Temperatura de motor", "un motor supera 60 °C", "Frenar el robot y esperar a que enfríe. Mirar cuál es: suelen ser las pantorrillas."],
+          ["Torque", "un motor supera el umbral (18 N·m por defecto, configurable)", "El motor está haciendo mucha fuerza: el robot puede estar trabado o cargando de más."],
+          ["Batería baja", "la carga baja de 20 %", "Terminar la prueba y cargar."],
+          ["Conexión perdida", "no llegan datos hace más de 2 s", "No hace falta recargar: el dashboard &lt;b&gt;reconecta solo&lt;/b&gt;. Verificar que el servidor siga abierto."],
+        ],
+      },
+      { type: "p", html: "Una alarma avisa &lt;b&gt;una sola vez&lt;/b&gt; cuando empieza, y otra vez cuando se normaliza: no repite el aviso 10 veces por segundo." },
+    ],
+  },
+  {
+    id: "atajos",
+    toc: "Atajos de teclado",
+    kicker: "6",
+    title: "Atajos de teclado",
+    blocks: [
+      {
+        type: "table",
+        head: ["Tecla", "Acción"],
+        rows: [
+          ["&lt;kbd&gt;1&lt;/kbd&gt; &lt;kbd&gt;2&lt;/kbd&gt; &lt;kbd&gt;3&lt;/kbd&gt; &lt;kbd&gt;4&lt;/kbd&gt; &lt;kbd&gt;5&lt;/kbd&gt;", "Consola · Cuerpo · Piloto · Gemelo 3D · Manual"],
+          ["&lt;kbd&gt;C&lt;/kbd&gt;", "Capturar muestra"],
+          ["&lt;kbd&gt;R&lt;/kbd&gt;", "Grabar / detener"],
+          ["&lt;kbd&gt;E&lt;/kbd&gt;", "Exportar CSV"],
+          ["&lt;kbd&gt;Espacio&lt;/kbd&gt;", "Pausar la vista (los datos se siguen recibiendo)"],
+          ["&lt;kbd&gt;W&lt;/kbd&gt;", "Cambiar WebSocket ↔ polling"],
+          ["&lt;kbd&gt;T&lt;/kbd&gt;", "Tema claro / oscuro"],
+          ["&lt;kbd&gt;?&lt;/kbd&gt;", "Ayuda"],
+          ["&lt;kbd&gt;M&lt;/kbd&gt; · &lt;kbd&gt;S&lt;/kbd&gt;", "En Piloto: tabla de motores · sonido"],
+        ],
+      },
+    ],
+  },
+  {
+    id: "problemas",
+    toc: "Si algo no anda",
+    kicker: "7",
+    title: "Si algo no anda",
+    blocks: [
+      {
+        type: "table",
+        head: ["Síntoma", "Causa probable", "Solución"],
+        rows: [
+          ["Indicador amarillo, &lt;i&gt;Reconectando…&lt;/i&gt;", "El servidor se cerró o la dirección es otra", "Volver a levantar el servidor: el dashboard reconecta solo. Revisar la dirección en el panel de conexión."],
+          ["Todos los gráficos planos", "El robot está quieto", "En el demo hay tramos quietos de 5 a 7 segundos: esperar."],
+          ["No anda abriendo &lt;code&gt;index.html&lt;/code&gt; con doble clic", "Los navegadores no cargan módulos desde &lt;code&gt;file://&lt;/code&gt;", "Abrirlo desde el servidor: &lt;code&gt;http://localhost:8001&lt;/code&gt;."],
+          ["Error de CORS", "Dirección equivocada (otro puerto, https en vez de http)", "Abrir el dashboard desde el propio servidor."],
+          ["Desde otra máquina no carga", "Firewall de la máquina del backend, o redes distintas", "Permitir Python en el firewall (puerto 8001) y conectar las dos máquinas a la misma red. Detalle en el README: «Ver el dashboard desde otra computadora»."],
+          ["El Gemelo 3D no aparece", "El navegador no tiene WebGL", "Actualizar el navegador o activar la aceleración por hardware."],
+        ],
+      },
+    ],
+  },
+  {
+    id: "glosario",
+    toc: "Glosario",
+    kicker: "8",
+    title: "Glosario",
+    blocks: [
+      {
+        type: "table",
+        head: ["Término", "Significado"],
+        rows: [
+          ["Telemetría", "Mediciones que un equipo envía a distancia mientras funciona."],
+          ["Backend / frontend", "El servidor que provee los datos / la página que los muestra."],
+          ["API REST", "Forma de pedir datos al servidor por HTTP (por ejemplo, &lt;code&gt;GET /telemetria&lt;/code&gt;)."],
+          ["WebSocket", "Conexión que queda abierta para que el servidor mande datos sin que se los pidan."],
+          ["Polling", "Preguntar al servidor cada cierto intervalo si hay datos nuevos."],
+          ["Hz", "Veces por segundo. 10 Hz = 10 muestras por segundo."],
+          ["IMU", "Sensor de orientación y aceleración del cuerpo."],
+          ["BMS", "Sistema de gestión de la batería."],
+          ["SOC", "State of Charge: porcentaje de carga de la batería."],
+          ["Torque", "Fuerza de giro de un motor, en newton·metro (N·m)."],
+          ["Trote", "Marcha en la que las patas diagonales se mueven juntas."],
+          ["Gemelo digital", "Copia virtual de un equipo real que se mueve con sus datos."],
+          ["DDS", "Protocolo con el que el robot real publica sus datos en la red."],
+        ],
+      },
+    ],
+  },
+];
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-11-08T20:57:47.824Z
+            </div>
+        <script src="../../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../../sorter.js"></script>
+        <script src="../../../block-navigation.js"></script>
+    </body>
+</html>
+    
