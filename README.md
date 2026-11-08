@@ -15,12 +15,20 @@ cátedra y en **modo demo**.
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2022%20sin%20framework-F7DF1E?logo=javascript&logoColor=black)
 ![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?logo=chartdotjs&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-r169-000000?logo=threedotjs&logoColor=white)
-![Pruebas](https://img.shields.io/badge/pruebas-51-success)
+![Pruebas](https://img.shields.io/badge/pruebas-2000%2B-success)
+[![Cobertura](https://img.shields.io/badge/cobertura-100%25-brightgreen)](https://carlos-illobre.github.io/robot/coverage/)
+[![Mutación](https://img.shields.io/badge/pruebas%20de%20mutaci%C3%B3n-Stryker%20%2B%20mutmut-blueviolet)](https://carlos-illobre.github.io/robot/coverage/)
+![SDD](https://img.shields.io/badge/desarrollo-guiado%20por%20especificaciones-informational)
 ![Sin internet](https://img.shields.io/badge/funciona-sin%20internet-success)
 
 ### 👉 [**Probalo ahora, sin instalar nada**](https://carlos-illobre.github.io/robot/app/) 👈
 
 <sub>Versión publicada en GitHub Pages, con el robot simulado en el navegador.</sub>
+
+### 🧪 [**Reportes de cobertura y de pruebas de mutación**](https://carlos-illobre.github.io/robot/coverage/)
+
+<sub><code>https://carlos-illobre.github.io/robot/coverage/</code> · cobertura unitaria (100 %) y pruebas de mutación,
+de frontend y backend, navegables archivo por archivo. Se regeneran con cada merge a <code>main</code>.</sub>
 
 </div>
 
@@ -308,7 +316,7 @@ Cada requisito del enunciado ([`docs/consigna.md`](docs/consigna.md)) y dónde e
   incluidos).
 - **Tres errores del material de la cátedra** encontrados, corregidos y documentados
   ([Hallazgos](#-hallazgos-tres-errores-en-el-material-de-la-cátedra)).
-- **51 pruebas automáticas** (unitarias de Python y JavaScript + E2E con navegador real) y CI.
+- **Más de 2000 pruebas automáticas** con **cobertura unitaria del 100 %**, pruebas de mutación y CI ([reportes](https://carlos-illobre.github.io/robot/coverage/)).
 - Arranque en un paso multiplataforma (`python iniciar.py`) y versión **dockerizada** opcional
   con el SDK de Unitree incluido.
 
@@ -1020,26 +1028,80 @@ y entra a `main` con un merge sin fast-forward, así se ve en `git log --graph`.
 
 ## 🧪 Pruebas y calidad
 
-```bash
-python -m pytest backend/tests -q
-```
+> 📊 **Reportes navegables:** [carlos-illobre.github.io/robot/coverage](https://carlos-illobre.github.io/robot/coverage/)
+> — cobertura y pruebas de mutación de frontend y backend, archivo por archivo.
+
+### Cobertura unitaria: 100 % (especificación [007](specs/007-cobertura-100/spec.md))
+
+| | Pruebas | Líneas | Ramas | Funciones | Sentencias |
+|---|:-:|:-:|:-:|:-:|:-:|
+| **Frontend** (`frontend/tests/**`, Vitest + happy-dom) | 1765 | 100 % | 100 % | 100 % | 100 % |
+| **Backend + `iniciar.py`** (`backend/tests/**`, pytest + pytest-cov) | 312 | 100 % | 100 % | — | — |
+| **E2E** (`e2e/dashboard.e2e.js`, Playwright) | 7 | — | — | — | — |
+
+- **Todo es unitario**, incluso lo que parece imposible sin navegador: las vistas (con un DOM
+  simulado), Chart.js, el **gemelo 3D** (con los modelos `.glb` reales de Unitree, `OrbitControls`
+  real y WebGL falso), el sonido de la cabina (Web Audio falso), `main.js`, el lector DDS del
+  robot real (con un SDK de Unitree falso) y el arranque multiplataforma.
+- **Sin exclusiones**: no hay un solo `/* v8 ignore */` ni `# pragma: no cover`. El código que no
+  se podía cubrir se **rediseñó o se eliminó** (ramas defensivas imposibles, una función sin uso),
+  cada caso en su propio commit `refactor(...)` con la justificación.
+- **La CI falla** si cualquier línea, rama o función queda sin cubrir.
+- Las **E2E** cubren solo lo que una unitaria no puede: backend real ↔ navegador real (WebSocket
+  y polling), descarga del CSV, cambio de fuente, reconexión cuando el servidor se cae, que nada se
+  desborde a 390 px y que **en el celular la página se desplace con el dedo** (gestos táctiles reales).
+
+### Pruebas de mutación (especificación [008](specs/008-pruebas-de-mutacion/spec.md))
+
+La cobertura dice qué código **se ejecuta**; la mutación dice si las pruebas **detectarían un
+error**. La herramienta cambia el código a propósito (`>` por `>=`, `+` por `-`, borra una llamada)
+y corre las pruebas: si ninguna falla, el *mutante* sobrevive y hay un comportamiento sin vigilar.
+
+| | Herramienta | Mutantes | Comando |
+|---|---|:-:|---|
+| **Frontend** | [Stryker](https://stryker-mutator.io/) + corredor de Vitest (cada mutante corre solo las pruebas que lo alcanzan) | ~13 600 | `npm run mutation` |
+| **Backend** | [mutmut](https://github.com/boxed/mutmut) 3 + reporte HTML propio ([`tools/mutmut_html.py`](tools/mutmut_html.py)) | ~2 500 | `npm run mutation:backend` |
+
+### Lo que encontraron las pruebas
+
+Llevar la cobertura al 100 % obligó a ejercitar casos que nadie había probado y aparecieron
+**17 errores reales** (un panel que se abría y se cerraba en el mismo clic, dos ciclos de polling en
+paralelo, un 500 en `/fuentes`, un puerto ignorado en `iniciar.py`, plurales, `−0`, `NaN`…). Están
+documentados y corregidos, cada uno con una prueba que fallaba antes del arreglo, en la
+especificación [010](specs/010-errores-hallados-por-las-pruebas/spec.md).
+
+### Cómo correrlas
 
 ```bash
 npm test
 ```
 
 ```bash
+npm run coverage
+```
+
+```bash
+npm run coverage:backend
+```
+
+```bash
 npm run test:e2e
 ```
 
-| Suite | Cantidad | Qué verifica |
-|---|:-:|---|
-| **Backend** (`backend/tests/test_api.py`, pytest) | 21 | Todos los endpoints y el WebSocket respetan el contrato, con **Go2 y G1** · errores 400/409 · el paseo recorre los **tres colores del semáforo** · con el robot quieto apoya las **cuatro patas** y al trotar no · el yaw cambia al girar · cambio de fuente en caliente y fuente fija · `--real` sin SDK falla con un mensaje claro · los dos errores de la cátedra corregidos · detección de la placa de red del robot · el WebSocket sigue abierto (regresión del error de Python 3.10) |
-| **Frontend unitarias** (`frontend/tests/*.test.js`, Vitest + happy-dom) | 24 | Bordes del semáforo (40 y 60 °C) · normalización tolerante a datos rotos · buffer circular · EventBus aísla errores · CSV (columnas, RFC 4180, formato Excel) · las alarmas solo avisan cambios · backoff de reconexión · URLs `http→ws` / `https→wss` · el polling nunca supera 500 ms ni superpone pedidos y se recupera de errores · la Facade normaliza y detecta cuando dejan de llegar datos · la simulación del navegador cumple el contrato y la marcha · histéresis de alarmas |
-| **E2E** (`e2e/dashboard.e2e.js`, Playwright) | 7 | Solo lo que una unitaria no puede: backend real ↔ navegador real (WebSocket y polling), las cinco vistas sin errores conservando historial y capturas, la descarga del CSV, el cambio de fuente Go2 ↔ G1, **la reconexión cuando el servidor se cae y vuelve**, que nada se desborde a 390 px y que **en el celular la página se desplace con el dedo desde cualquier punto** (gestos táctiles reales). Comparten un único navegador: corren en ~35 s |
+```bash
+npm run mutation
+```
 
-**Integración continua:** cada push corre las tres suites en GitHub Actions (el backend, con Python 3.10 y 3.12)
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+```bash
+npm run mutation:backend
+```
+
+Requisitos de desarrollo: Node 22.12+ (`npm ci`) y `pip install -r requirements-dev.txt`. Los
+reportes quedan en `coverage/` y `reports/mutation/`.
+
+**Integración continua:** cada push corre la cobertura (frontend; backend con Python 3.10 y 3.12)
+y las E2E ([`ci.yml`](.github/workflows/ci.yml)). Cada merge a `main` publica el dashboard y los
+reportes en GitHub Pages ([`pages.yml`](.github/workflows/pages.yml)).
 
 ---
 
