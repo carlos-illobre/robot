@@ -45,7 +45,7 @@ export function temperaturas(raw, mapa = {}, resto = 30) {
 /**
  * Contexto 2D falso: cada método es un `vi.fn()` y cada asignación de
  * propiedad (strokeStyle, globalAlpha…) queda anotada en `sets`. `log` guarda
- * el orden de todo, para verificar secuencias.
+ * el orden de todo, para verificar secuencias. `reiniciar()` borra lo anotado.
  */
 export function contexto2d() {
   const log = [];
@@ -63,6 +63,13 @@ export function contexto2d() {
     get(target, prop) {
       if (prop === "log") return log;
       if (prop === "sets") return sets;
+      if (prop === "reiniciar") {
+        return () => {
+          log.length = 0;
+          sets.length = 0;
+          for (const m of metodos) target[m].mockClear();
+        };
+      }
       return target[prop];
     },
   });
