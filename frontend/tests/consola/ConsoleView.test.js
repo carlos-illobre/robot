@@ -728,6 +728,22 @@ describe("ConsoleView: capturas", () => {
     expect(animate).not.toHaveBeenCalled();
   });
 
+  test("FR-002: con capturas previas cuya última es manual, entrar a la vista no destella", () => {
+    const pre = crearCtx({ frames: go2 });
+    pre.captures.add(go2[0], "grabacion");
+    pre.captures.add(go2[1], "manual");
+    const animate = vi.spyOn(HTMLElement.prototype, "animate").mockImplementation(() => {});
+    ctx = pre;
+    view = new ConsoleView(pre);
+    container = document.createElement("div");
+    document.body.append(container);
+    view.mount(container);
+    expect(view.countEl.textContent).toBe("2");
+    expect(animate).not.toHaveBeenCalled();
+    pre.captures.add(go2[2], "manual");
+    expect(animate).toHaveBeenCalledTimes(2); // la captura nueva sí: destello y contador
+  });
+
   test("una captura manual hace el destello de foto y late el contador", () => {
     montar();
     const flash = vi.spyOn(view.flash, "animate").mockImplementation(() => {});

@@ -90,6 +90,8 @@ export default class ConsoleView {
     this.imu.init();
 
     this.#unsubscribe.push(this.ctx.captures.subscribe((store) => this.#onCaptures(store)));
+    // Las capturas que ya había no son "nuevas": sin destello al entrar (spec 010 · FR-002).
+    this.#lastCaptures = this.ctx.captures.size;
     this.#onCaptures(this.ctx.captures);
     this.#setEndpoint(this.ctx.state.connection);
   }
