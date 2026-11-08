@@ -22,12 +22,16 @@ Un workflow (`.github/workflows/pages.yml`) que corre **solo con `main`** genera
 Los reportes se **generan en la CI**, no se versionan. La caché guarda el estado incremental de
 Stryker y los mutantes de mutmut entre corridas.
 
+Las publicaciones se ponen **en cola** (`cancel-in-progress: false`): la que está corriendo
+termina y, de las pendientes, GitHub deja solo la más nueva.
+
 ## Alternativas consideradas
 
 | Alternativa | Por qué no |
 |---|---|
 | Commitear los reportes | Son derivados: ensucian el historial y quedan desactualizados |
 | Publicar desde cualquier branch | Un branch a medio hacer pisaba el sitio publicado (pasó) |
+| Cancelar la publicación en curso con cada push | La caché de mutación se guarda al terminar: con pushes seguidos la corrida completa (~2 h) nunca llegaba al final (pasó) |
 | Servicio externo (Codecov, Stryker Dashboard) | Cuentas y tokens extra; el docente tendría que salir del sitio del proyecto |
 
 ## Consecuencias

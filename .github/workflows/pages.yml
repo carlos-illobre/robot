@@ -12,9 +12,12 @@ on:
 permissions:
   contents: write
 
+# En cola, sin cancelar: la mutación tarda y su caché se guarda recién al terminar. Si se
+# cancelara con cada push a main, la primera corrida completa no terminaría nunca. Entre varias
+# publicaciones pendientes GitHub deja solo la más nueva (ADR-0007).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish:
