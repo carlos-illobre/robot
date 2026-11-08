@@ -1057,10 +1057,10 @@ La cobertura dice qué código **se ejecuta**; la mutación dice si las pruebas 
 error**. La herramienta cambia el código a propósito (`>` por `>=`, `+` por `-`, borra una llamada)
 y corre las pruebas: si ninguna falla, el *mutante* sobrevive y hay un comportamiento sin vigilar.
 
-| | Herramienta | Mutantes | Comando |
-|---|---|:-:|---|
-| **Frontend** | [Stryker](https://stryker-mutator.io/) + corredor de Vitest (cada mutante corre solo las pruebas que lo alcanzan) | ~13 600 | `npm run mutation` |
-| **Backend** | [mutmut](https://github.com/boxed/mutmut) 3 + reporte HTML propio ([`tools/mutmut_html.py`](tools/mutmut_html.py)) | ~2 500 | `npm run mutation:backend` |
+| | Herramienta | Mutantes | Puntaje (mínimo) | Comando |
+|---|---|:-:|:-:|---|
+| **Frontend** | [Stryker](https://stryker-mutator.io/) + corredor de Vitest (cada mutante corre solo las pruebas que lo alcanzan) | 13 591 | **76,1 %** (74 %) | `npm run mutation` |
+| **Backend** | [mutmut](https://github.com/boxed/mutmut) 3 + reporte HTML propio ([`tools/mutmut_html.py`](tools/mutmut_html.py)) | ~2 500 | **92,8 %** (90 %) | `npm run mutation:backend` |
 
 ### Lo que encontraron las pruebas
 
