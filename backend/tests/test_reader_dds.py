@@ -295,6 +295,15 @@ def test_esperar_primer_dato(sdk, monkeypatch, reloj):
     assert reloj.siestas == []
 
 
+def test_fr017_timeout_cero_con_dato_responde_true(sdk, monkeypatch, reloj):
+    monkeypatch.setattr(dds, "time", reloj)
+    r = TelemetryReader("go2")
+    assert r.esperar_primer_dato(timeout=0) is False
+    r._on_low_state(Campos())
+    assert r.esperar_primer_dato(timeout=0) is True
+    assert reloj.siestas == []
+
+
 def test_esperar_primer_dato_por_defecto_son_cinco_segundos(sdk, monkeypatch, reloj):
     monkeypatch.setattr(dds, "time", reloj)
     r = TelemetryReader("go2")

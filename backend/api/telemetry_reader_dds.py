@@ -187,11 +187,12 @@ class TelemetryReader:
 
     def esperar_primer_dato(self, timeout: float = 5.0) -> bool:
         limite = time.monotonic() + timeout
-        while time.monotonic() < limite:
+        while True:
             if self.obtener_snapshot() is not None:
                 return True
+            if time.monotonic() >= limite:
+                return False
             time.sleep(0.05)
-        return False
 
     @property
     def mensajes_leidos(self) -> int:

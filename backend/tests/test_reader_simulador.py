@@ -320,11 +320,19 @@ def test_esperar_primer_dato_que_llega_a_mitad_de_camino(lector, monkeypatch, re
     assert reloj.siestas == [0.1] * 3
 
 
-def test_esperar_primer_dato_con_timeout_cero_no_espera(lector, monkeypatch, reloj):
+def test_fr017_timeout_cero_con_dato_responde_true(lector, monkeypatch, reloj):
     r = lector()
     monkeypatch.setattr(telemetry_reader, "time", reloj)
     r._guardar({})
+    assert r.esperar_primer_dato(timeout=0) is True
+    assert reloj.siestas == []
+
+
+def test_fr017_timeout_cero_sin_dato_no_espera(lector, monkeypatch, reloj):
+    r = lector()
+    monkeypatch.setattr(telemetry_reader, "time", reloj)
     assert r.esperar_primer_dato(timeout=0) is False
+    assert reloj.siestas == []
 
 
 # ---------- DemoReader reexportado ----------
