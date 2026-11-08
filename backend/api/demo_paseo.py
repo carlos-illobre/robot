@@ -159,11 +159,14 @@ class PaseoDemoReader:
     def _tramo_actual(self) -> tuple[float, float, str]:
         total = sum(d for d, *_ in GUION)
         t = self._t % total
-        for duracion, vel, giro, etiqueta in GUION:
+        # t < total, asi que si no cae en ningun tramo anterior cae en el ultimo
+        # (tambien absorbe un posible error de redondeo en el borde).
+        for duracion, vel, giro, etiqueta in GUION[:-1]:
             if t < duracion:
                 return vel, giro, etiqueta
             t -= duracion
-        return 0.0, 0.0, "quieto"
+        _, vel, giro, etiqueta = GUION[-1]
+        return vel, giro, etiqueta
 
     # ------------------------------------------------------------------
     # Hilo de simulacion
