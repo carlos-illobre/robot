@@ -11,6 +11,11 @@ export default {
   // del tiempo. Se informan como ignorados (spec 008, plan).
   ignoreStatic: true,
   mutate: ["frontend/js/**/*.js"],
+  // Lo que no hace falta copiar al sandbox de Stryker (solo corre el frontend)
+  ignorePatterns: [
+    "/backend", "/docs", "/docker", "/e2e", "/tools", "/specs", "/mutants", "/coverage", "/reports",
+    "/.claude", "/.venv", "/venv",
+  ],
   reporters: ["html", "json", "clear-text", "progress"],
   htmlReporter: { fileName: "reports/mutation/frontend/index.html" },
   jsonReporter: { fileName: "reports/mutation/frontend/mutation.json" },
