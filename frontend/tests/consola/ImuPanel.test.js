@@ -141,10 +141,10 @@ describe("ImuPanel: con gráfico", () => {
     expect(panel.points.yaw.map((p) => p.y)).toEqual([179, null, -179]);
   });
 
-  test("con una sola muestra el eje X muestra al menos 1 s", () => {
+  test("FR-004: con una sola muestra dice «1 muestra» y el eje X muestra al menos 1 s", () => {
     panel.update(base, historial([base]));
     expect(panel.chart.options.scales.x.min).toBe(-1);
-    expect(panel.sub.textContent).toBe("1 muestras · 0 s");
+    expect(panel.sub.textContent).toBe("1 muestra · 0 s");
   });
 
   test("destroy destruye el gráfico y lo olvida", () => {
