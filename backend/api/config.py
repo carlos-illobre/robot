@@ -14,7 +14,7 @@ from typing import Optional
 
 try:
     import fcntl
-except ImportError:  # pragma: no cover - el laboratorio se ejecuta en Linux
+except ImportError:  # el laboratorio se ejecuta en Linux; en Windows no hay fcntl
     fcntl = None
 
 
