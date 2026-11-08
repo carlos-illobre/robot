@@ -13,6 +13,9 @@ import { s, setText, fmt } from "../../ui/dom.js";
 import { tempLevel, LEG_LABELS } from "../../core/telemetryModel.js";
 import { RING_R as R, layoutRing, layoutFeet, polar, arcPath } from "./ringLayout.js";
 
+/** Torque mínimo (N·m) que llena el arco: el mismo piso que el campo del umbral en la consola. */
+const MIN_TORQUE_SCALE = 1;
+
 /** Cuántas etiquetas de motor caliente se muestran a la vez (más, se pisan). */
 const MAX_CALLOUTS = 3;
 /** Distancia al centro de la silueta donde terminan las patas dibujadas. */
@@ -206,6 +209,8 @@ export class MotorRing {
    * @param {{ torqueRef: number }} opts  torque (N·m) que llena el arco: el umbral de alarma
    */
   update(frame, { torqueRef }) {
+    // Escala del arco: con un umbral 0 (p. ej. guardado a mano), 0/0 daba stroke-width="NaN" (spec 010 · FR-008).
+    const scale = Math.max(MIN_TORQUE_SCALE, torqueRef);
     for (const m of frame.motores) {
       const e = this.byName.get(m.nombre);
       if (!e) continue;
@@ -216,7 +221,7 @@ export class MotorRing {
         e.level = level;
       }
       const tau = Math.abs(m.torque);
-      const width = (2 + Math.min(1, tau / torqueRef) * 8).toFixed(1);
+      const width = (2 + Math.min(1, tau / scale) * 8).toFixed(1);
       if (width !== e.torqueW) {
         e.torque.setAttribute("stroke-width", width);
         e.torqueW = width;
