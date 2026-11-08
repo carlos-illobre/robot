@@ -2,7 +2,7 @@
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
-addopts = "-q --cov --cov-branch --cov-report=term-missing:skip-covered --cov-report=html --cov-report=xml"
+addopts = "-q --cov --cov-branch --cov-report=term-missing:skip-covered --cov-report=html --cov-report=xml --cov-report=json:coverage/backend/coverage.json"
 
 [tool.coverage.run]
 # Spec 007: todo el backend y el arranque multiplataforma.
