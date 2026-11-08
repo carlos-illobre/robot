@@ -2,11 +2,13 @@
 
 ## Fase 1 · Herramientas (`test/vitest-cobertura`)
 
-- [ ] T001 Especificación, plan y tareas
-- [ ] T002 Migrar las pruebas a Vitest sin cambiar lo que verifican
-- [ ] T003 Configurar cobertura V8 (HTML, texto, lcov) con umbral = cobertura actual
-- [ ] T004 `pytest-cov` con ramas, `requirements-dev.txt`, `pyproject.toml`
-- [ ] T005 CI corre la cobertura
+- [x] T001 Especificación, plan y tareas
+- [x] T002 Migrar las pruebas a Vitest sin cambiar lo que verifican
+- [x] T003 Configurar cobertura V8 (HTML, texto, lcov) con umbral = cobertura actual
+- [x] T004 `pytest-cov` con ramas, `requirements-dev.txt`, `pyproject.toml`
+- [x] T005 CI corre la cobertura
+
+Línea de base medida: **frontend 9,6 %** de líneas · **backend 58,1 %**. Esos son los primeros umbrales.
 
 ## Fase 2 · Backend (`test/coverage-backend`)
 
