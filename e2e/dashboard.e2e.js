@@ -75,7 +75,11 @@ before(async () => {
   port = await freePort();
   [server, browser] = await Promise.all([
     startServer(),
-    chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] }),
+    chromium.launch({
+      // PW_CHROMIUM: usar un Chromium ya instalado en vez del que descarga Playwright (opcional)
+      executablePath: process.env.PW_CHROMIUM || undefined,
+      args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"],
+    }),
   ]);
   const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, acceptDownloads: true });
   page = await context.newPage();
@@ -165,4 +169,66 @@ test("en el celular (390 px) ninguna vista se desborda a lo ancho", async () => 
     assert.ok(overflow <= 1, `vista ${key}: ${overflow}px de más a lo ancho`);
   }
   await page.setViewportSize({ width: 1366, height: 768 });
+});
+
+/** Arrastra con el dedo de (x, y) a (x + dx, y + dy), como en un teléfono (CDP: eventos táctiles reales). */
+async function swipe(cdp, p, x, y, dx, dy) {
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+  for (let i = 1; i <= 10; i++) {
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + (dx * i) / 10, y: y + (dy * i) / 10 }] });
+    await p.waitForTimeout(16);
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await p.waitForTimeout(250);
+}
+
+// Spec 006 · FR-001, FR-002, FR-003, FR-005. La rueda del mouse no reproduce el error: hace falta el dedo.
+test("en el celular se desplaza con el dedo desde cualquier punto, también sobre la tabla de motores", async () => {
+  const phone = await browser.newContext({ viewport: { width: 390, height: 664 }, hasTouch: true, isMobile: true, deviceScaleFactor: 1 });
+  const p = await phone.newPage();
+  const cdp = await phone.newCDPSession(p);
+  try {
+    for (const [view, table] of [["console", ".cv-tablewrap"], ["body", ".bd-motors__scroll"]]) {
+      await p.goto(`${base()}/dashboard/?view=${view}`);
+      await p.waitForFunction(() => window.tp05?.state.latest, undefined, { timeout: 8000 });
+      await p.waitForTimeout(300);
+      // La tabla, a la altura del centro de la pantalla
+      const box = await p.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 200);
+        const r = el.getBoundingClientRect();
+        return { x: Math.round(r.left + r.width / 2), y: Math.round(Math.min(r.bottom, innerHeight) - 120) };
+      }, table);
+      await p.waitForTimeout(100);
+      const before = await p.evaluate(() => window.scrollY);
+      await swipe(cdp, p, box.x, box.y, 0, -150);
+      const after = await p.evaluate(() => window.scrollY);
+      assert.ok(after > before + 50, `${view}: arrastrar sobre la tabla no desplazó la página (${before} → ${after})`);
+
+      // FR-003: de costado, la tabla se sigue desplazando a lo ancho si es más ancha que la pantalla
+      const wide = await p.evaluate((sel) => { const el = document.querySelector(sel); return el.scrollWidth > el.clientWidth + 2; }, table);
+      if (wide) {
+        const y = await p.evaluate(() => window.scrollY);
+        await swipe(cdp, p, box.x + 100, box.y, -150, 0);
+        const left = await p.evaluate((sel) => document.querySelector(sel).scrollLeft, table);
+        assert.ok(left > 0, `${view}: la tabla no se desplaza a lo ancho`);
+        assert.equal(await p.evaluate(() => window.scrollY), y);
+      }
+    }
+
+    // FR-005: con el robot en 3D (Cuerpo), un dedo sobre el modelo desplaza la página
+    await p.evaluate(() => localStorage.setItem("tp05-dashboard", JSON.stringify({ figure: "3d" })));
+    await p.goto(`${base()}/dashboard/?view=body`);
+    await p.waitForSelector(".r3d-canvas", { timeout: 15000 });
+    await p.waitForTimeout(500);
+    const c = await p.evaluate(() => {
+      window.scrollTo(0, 0);
+      const r = document.querySelector(".r3d-canvas").getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+    });
+    await swipe(cdp, p, c.x, c.y, 0, -150);
+    assert.ok((await p.evaluate(() => window.scrollY)) > 50, "body 3D: arrastrar sobre el modelo no desplazó la página");
+  } finally {
+    await phone.close();
+  }
 });
