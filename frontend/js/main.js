@@ -402,7 +402,7 @@ bus.on("info", (info) => {
 });
 
 bus.on("frame", (frame) => {
-  if (!state.info || state.info.modelo !== frame.modelo) setInfo(state.info?.modelo === frame.modelo ? state.info : infoFromFrame(frame));
+  if (!state.info || state.info.modelo !== frame.modelo) setInfo(infoFromFrame(frame));
 
   state.latest = frame;
   history.push(frame);
