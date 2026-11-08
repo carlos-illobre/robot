@@ -7,9 +7,6 @@ import { fmt } from "../../ui/dom.js";
 /** Lleva cualquier ángulo a [0, 360): el yaw puede llegar como −180…180. */
 export const wrap360 = (deg) => ((deg % 360) + 360) % 360;
 
-/** Diferencia angular más corta de `from` a `to`, en (−180, 180]. */
-export const angleDelta = (from, to) => ((to - from + 540) % 360) - 180;
-
 /** Grados con signo explícito: −2.1° / +0.4°. Así el cero no "salta" de ancho. */
 export const signedDeg = (v, decimals = 1) => `${fmt(v, decimals, { sign: true }).trim()}°`;
 
