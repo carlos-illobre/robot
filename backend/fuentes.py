@@ -138,9 +138,10 @@ def crear_router(crear_lector, configurar, estado: dict, cambiable: bool = True)
         if not ok:
             raise HTTPException(409, motivo)
 
+        interfaz = pedido.interfaz or None  # "" = automática, como en servidor.py
         with candado:  # dos dashboards cambiando a la vez no se pisan
             try:
-                nuevo = crear_lector(pedido.modo, pedido.robot, pedido.interfaz)
+                nuevo = crear_lector(pedido.modo, pedido.robot, interfaz)
             except Exception as exc:  # noqa: BLE001 - se informa tal cual al usuario
                 raise HTTPException(409, str(exc)) from exc
             if not nuevo.esperar_primer_dato(timeout=5.0):
@@ -149,7 +150,7 @@ def crear_router(crear_lector, configurar, estado: dict, cambiable: bool = True)
 
             viejo = estado.get("lector")
             configurar(nuevo, pedido.robot, "demo" if pedido.modo.startswith("demo") else pedido.modo)
-            estado.update(lector=nuevo, modo=pedido.modo, robot=pedido.robot, interfaz=pedido.interfaz)
+            estado.update(lector=nuevo, modo=pedido.modo, robot=pedido.robot, interfaz=interfaz)
             if viejo is not None and viejo is not nuevo:
                 viejo.cerrar()
         print(f"[FUENTE] Ahora: {FUENTES[pedido.modo]['nombre']} · {pedido.robot}")

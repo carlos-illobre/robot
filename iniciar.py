@@ -95,12 +95,18 @@ def preparar_entorno() -> Path:
 
 
 def opcion(args: list[str], nombre: str, defecto: str) -> str:
-    """Valor de una opción tipo `--puerto 8001` dentro de la lista de argumentos."""
-    if nombre in args:
-        i = args.index(nombre)
-        if i + 1 < len(args):
+    """Valor de una opción tipo `--puerto 8001` o `--puerto=8001` dentro de la lista de argumentos."""
+    for i, arg in enumerate(args):
+        if arg == nombre and i + 1 < len(args):
             return args[i + 1]
+        if arg.startswith(nombre + "="):
+            return arg[len(nombre) + 1:]
     return defecto
+
+
+def tiene_opcion(args: list[str], nombre: str) -> bool:
+    """¿Vino la opción, como `--puerto 8001` o como `--puerto=8001`?"""
+    return any(arg == nombre or arg.startswith(nombre + "=") for arg in args)
 
 
 def abrir_navegador_cuando_responda(url: str) -> None:
@@ -155,7 +161,7 @@ def main() -> int:
         return 1
 
     puerto = opcion(args, "--puerto", "8001")
-    if "--puerto" not in args:
+    if not tiene_opcion(args, "--puerto"):
         args += ["--puerto", puerto]
     if abrir:
         abrir_navegador_cuando_responda(f"http://localhost:{puerto}")

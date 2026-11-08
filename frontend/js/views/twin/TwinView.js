@@ -240,11 +240,11 @@ export default class TwinView {
   }
 
   #syncToggles() {
-    this.followBtn?.setAttribute("aria-pressed", String(this.follow));
-    this.jointsBtn?.setAttribute("aria-pressed", String(this.showJoints));
-    this.panelBtn?.setAttribute("aria-expanded", String(this.panelOpen));
-    if (this.panel) this.panel.dataset.open = String(this.panelOpen);
-    for (const b of this.presetBtns ?? []) b.setAttribute("aria-pressed", String(b.dataset.preset === PRESETS[this.presetIndex][0]));
+    this.followBtn.setAttribute("aria-pressed", String(this.follow));
+    this.jointsBtn.setAttribute("aria-pressed", String(this.showJoints));
+    this.panelBtn.setAttribute("aria-expanded", String(this.panelOpen));
+    this.panel.dataset.open = String(this.panelOpen);
+    for (const b of this.presetBtns) b.setAttribute("aria-pressed", String(b.dataset.preset === PRESETS[this.presetIndex][0]));
   }
 
   /* ================================================================ */
@@ -448,7 +448,6 @@ export default class TwinView {
   }
 
   #paintMotorList(frame) {
-    if (!this.motorChips) return;
     frame.motores.forEach((m, i) => {
       const chip = this.motorChips[i];
       if (!chip) return;
