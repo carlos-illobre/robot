@@ -1,5 +1,5 @@
 // Pruebas de la capa de servicios (red) con un fetch simulado: sin servidor.
-import { test, afterEach } from "node:test";
+import { test, afterEach } from "vitest";
 import assert from "node:assert/strict";
 
 import { ApiClient } from "../js/services/ApiClient.js";

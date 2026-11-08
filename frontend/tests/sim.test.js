@@ -1,6 +1,6 @@
 // El simulador del navegador (usado en GitHub Pages) cumple el mismo contrato
 // y las mismas propiedades físicas que el demo "paseo" del backend.
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { PaseoSim, GUION } from "../js/core/paseoSim.js";
 import { normalizeFrame, tempLevel } from "../js/core/telemetryModel.js";

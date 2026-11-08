@@ -1,5 +1,5 @@
-// Pruebas del núcleo del frontend. Correr con:  npm test   (Node 18+, sin dependencias)
-import { test } from "node:test";
+// Pruebas del núcleo del frontend. Correr con:  npm test   (Vitest, Node 22.12+)
+import { test } from "vitest";
 import assert from "node:assert/strict";
 
 import { EventBus } from "../js/core/EventBus.js";
