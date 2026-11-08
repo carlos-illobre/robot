@@ -320,6 +320,16 @@ describe("línea de estado", () => {
     expect(view.status.dataset.level).toBe("ok");
   });
 
+  test("FR-006: con un solo motor tibio la línea de estado dice «1 tibio»", () => {
+    const { view } = vista("go2");
+    view.update(muestra("go2", (raw) => {
+      quieto(raw);
+      temperaturas(raw, { FR_hip: 45 });
+      raw.fuerzas = { FR: 1, FL: 1, RR: 1, RL: 1 };
+    }));
+    expect(view.status.textContent).toBe("En reposo · 4 patas apoyadas · 1 tibio");
+  });
+
   test("el Go2 quieto, con una sola pata, en singular y todo en rango", () => {
     const { view } = vista("go2");
     view.update(muestra("go2", (raw) => {
@@ -343,7 +353,7 @@ describe("línea de estado", () => {
       temperaturas(raw, { L_knee: 41 });
       raw.fuerzas = { R_foot: 1, L_foot: 1 };
     }));
-    expect(view.status.textContent).toBe("En reposo · 2 pies apoyados · 1 tibios");
+    expect(view.status.textContent).toBe("En reposo · 2 pies apoyados · 1 tibio");
   });
 
   test("sin datos de patas solo dice si se mueve", () => {

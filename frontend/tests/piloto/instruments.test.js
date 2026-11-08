@@ -260,9 +260,18 @@ describe("ThermalScale", () => {
     th.update(f);
     expect(th.value.textContent).toBe("62.4°");
     expect(th.name.textContent).toBe("RL_calf");
-    expect(th.counts.textContent).toBe("12 motores · 2 tibios · 1 calientes");
+    expect(th.counts.textContent).toBe("12 motores · 2 tibios · 1 caliente");
     expect(th.torque.textContent).toBe("torque máx 12.3 N·m · FL_thigh");
     expect(th.el.getAttribute("data-level")).toBe("crit");
+  });
+
+  test("FR-006: con un motor tibio y uno caliente, la escala dice «1 tibio · 1 caliente»", () => {
+    const th = new ThermalScale();
+    th.build(infoDe("go2"));
+    th.update(muestra("go2", (raw) => temperaturas(raw, { RL_calf: 62, FR_hip: 45 })));
+    expect(th.counts.textContent).toBe("12 motores · 1 tibio · 1 caliente");
+    th.update(muestra("go2", (raw) => temperaturas(raw, { RL_calf: 62, FL_calf: 63, FR_hip: 45, FL_hip: 41 })));
+    expect(th.counts.textContent).toBe("12 motores · 2 tibios · 2 calientes");
   });
 
   test("cambia el nivel solo cuando cambia el motor más caliente de zona", () => {
@@ -275,7 +284,7 @@ describe("ThermalScale", () => {
     expect(spy).toHaveBeenCalledTimes(1);
     th.update(muestra("g1", (raw) => temperaturas(raw, { L_knee: 40 })));
     expect(th.el.getAttribute("data-level")).toBe("warn");
-    expect(th.counts.textContent).toBe("29 motores · 1 tibios · 0 calientes");
+    expect(th.counts.textContent).toBe("29 motores · 1 tibio · 0 calientes");
   });
 
   test("ignora motores que no estaban en /info", () => {

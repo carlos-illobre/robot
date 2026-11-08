@@ -271,7 +271,7 @@ export default class PilotView {
     } else if (derived.legs) {
       const what = quad ? (derived.contacts === 1 ? "pata apoyada" : "patas apoyadas") : derived.contacts === 1 ? "pie apoyado" : "pies apoyados";
       const doing = derived.isMoving ? (quad ? "Trote" : "Marcha") : "En reposo";
-      const temps = derived.tempLevels.warn ? `${derived.tempLevels.warn} tibios` : "todo en rango";
+      const temps = derived.tempLevels.warn ? `${derived.tempLevels.warn} ${derived.tempLevels.warn === 1 ? "tibio" : "tibios"}` : "todo en rango";
       text = `${doing} · ${derived.contacts} ${what} · ${temps}`;
     } else {
       text = derived.isMoving ? "Marcha" : "En reposo";
