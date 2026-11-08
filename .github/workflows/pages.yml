@@ -1,11 +1,12 @@
-name: GitHub Pages (dashboard + visor de maquetas)
+name: GitHub Pages (dashboard, maquetas y reportes de calidad)
 
-# Publica en la rama gh-pages:
-#   /       visor de maquetas (docs/design)
-#   /app/   el dashboard real, con la simulación del navegador (sin servidor)
+# Publica en la rama gh-pages, solo desde main (spec 009 · FR-004):
+#   /           visor de maquetas (docs/design)
+#   /app/       el dashboard real, con la simulación del navegador (sin servidor)
+#   /coverage/  cobertura y pruebas de mutación, frontend y backend (specs 007, 008, 009)
 on:
   push:
-    paths: ["docs/design/**", "frontend/**", ".github/workflows/pages.yml"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -18,8 +19,38 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci --no-audit --no-fund
+      - run: pip install -r requirements-dev.txt
+
+      - name: Cobertura (frontend y backend)
+        run: |
+          npm run coverage
+          npm run coverage:backend
+
+      # Caché de las corridas de mutación anteriores: solo se re-evalúa lo que cambió
+      - uses: actions/cache@v4
+        with:
+          path: |
+            reports/mutation/frontend/stryker-incremental.json
+            mutants
+          key: mutation-${{ github.sha }}
+          restore-keys: mutation-
+
+      - name: Mutación del frontend (Stryker)
+        run: npm run mutation
+      - name: Mutación del backend (mutmut)
+        run: npm run mutation:backend
+
       - name: Armar el sitio
         run: |
           mkdir -p _site
@@ -27,6 +58,14 @@ jobs:
           mkdir -p _site/app
           cp -r frontend/. _site/app/
           rm -rf _site/app/tests
+          mkdir -p _site/coverage/mutation
+          cp docs/coverage/index.html _site/coverage/
+          cp -r coverage/frontend _site/coverage/frontend
+          cp -r coverage/backend _site/coverage/backend
+          cp -r reports/mutation/frontend _site/coverage/mutation/frontend
+          cp -r reports/mutation/backend _site/coverage/mutation/backend
+          rm -f _site/coverage/mutation/frontend/stryker-incremental.json
+          printf '{"sha":"%s","fecha":"%s"}' "$GITHUB_SHA" "$(date -u '+%Y-%m-%d %H:%M UTC')" > _site/coverage/commit.json
           touch _site/.nojekyll
       - name: Publicar en gh-pages
         run: |
