@@ -82,6 +82,25 @@ def test_opcion_lee_el_valor_que_sigue(args, esperado):
     assert iniciar.opcion(args, "--puerto", "8001") == esperado
 
 
+@pytest.mark.parametrize("args, esperado", [
+    (["--puerto=9000"], "9000"),
+    (["--demo", "--puerto=9000", "--robot", "g1"], "9000"),
+    (["--puertos=9000"], "8001"),
+])
+def test_fr014_opcion_lee_la_forma_con_igual(args, esperado):
+    assert iniciar.opcion(args, "--puerto", "8001") == esperado
+
+
+@pytest.mark.parametrize("args, esperado", [
+    (["--puerto", "9000"], True),
+    (["--puerto=9000"], True),
+    (["--puertos=9000", "--demo"], False),
+    ([], False),
+])
+def test_fr014_tiene_opcion_reconoce_las_dos_formas(args, esperado):
+    assert iniciar.tiene_opcion(args, "--puerto") is esperado
+
+
 # ---------- pyvenv.cfg ----------
 @pytest.fixture
 def venv_tmp(monkeypatch, tmp_path):
@@ -359,6 +378,12 @@ def test_respeta_el_puerto_pedido(monkeypatch, arranque):
     _main(monkeypatch, "--real", "--interfaz", "eth0", "--puerto", "9100")
     assert arranque.herramientas.call == [_backend(arranque.py, "--real", "--interfaz", "eth0", "--puerto", "9100")]
     assert arranque.navegador == ["http://localhost:9100"]
+
+
+def test_fr014_respeta_el_puerto_pedido_con_igual(monkeypatch, arranque):
+    _main(monkeypatch, "--real", "--puerto=9000")
+    assert arranque.herramientas.call == [_backend(arranque.py, "--real", "--puerto=9000")]
+    assert arranque.navegador == ["http://localhost:9000"]
 
 
 def test_devuelve_el_codigo_del_backend(monkeypatch, arranque):
