@@ -9,7 +9,7 @@ const DIRS = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
 /** Lleva cualquier ángulo a [0, 360). El yaw puede llegar como −180…180. */
 export const wrap360 = (deg) => ((deg % 360) + 360) % 360;
 
-/** Punto cardinal más cercano a un rumbo: 338° → "NO". */
+/** Punto cardinal más cercano a un rumbo: 337° → "NO", 338° → "N". */
 export const cardinal = (deg) => DIRS[Math.round(wrap360(deg) / 45) % 8];
 
 /**
