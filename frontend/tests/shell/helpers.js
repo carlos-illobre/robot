@@ -1,8 +1,9 @@
 // Ayudantes compartidos por las pruebas del área shell (barra, ayuda, ui/ y main.js).
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
-const INDEX = fileURLToPath(new URL("../../index.html", import.meta.url));
+// Vitest corre desde la raíz del repositorio (donde está vitest.config.js).
+const INDEX = resolve(process.cwd(), "frontend/index.html");
 
 /** Arma en happy-dom el <body> real de index.html (appbar, view-root, help, toasts). */
 export function montarIndex() {
