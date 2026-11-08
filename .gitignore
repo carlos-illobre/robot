@@ -12,3 +12,4 @@ reports/
 coverage.xml
 .stryker-tmp/
 mutants/
+.claude/worktrees/
