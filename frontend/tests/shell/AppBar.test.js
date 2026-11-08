@@ -294,13 +294,12 @@ describe("menú del robot", () => {
     expect(actions.setSource).toHaveBeenCalledExactlyOnceWith({ modo: "demo", robot: "go2", interfaz: undefined });
   });
 
-  test("«Fuente de datos…» cierra el menú y abre el panel en la fuente", () => {
+  test("FR-001: «Fuente de datos…» cierra el menú y deja abierto el panel en la fuente", () => {
     crear();
     const scroll = vi.spyOn(bar.sourceSection, "scrollIntoView");
     bar.toggleRobotMenu(true);
-    // Sin burbujeo: con burbujeo, el listener de «clic fuera» del documento cierra
-    // el panel recién abierto (posible bug, reportado en la spec 007).
-    bar.robotMenu.querySelector(".robot-menu__more").dispatchEvent(new MouseEvent("click", { bubbles: false }));
+    // Con burbujeo, como un clic real: el «clic afuera» del documento no lo cierra.
+    clickEn(bar.robotMenu.querySelector(".robot-menu__more"));
     expect(bar.robotMenu.hidden).toBe(true);
     expect(bar.popover.hidden).toBe(false);
     expect(scroll).toHaveBeenCalledTimes(1);
