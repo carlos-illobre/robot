@@ -19,7 +19,8 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # La primera mutación completa del frontend tarda ~1,5 h; después es incremental
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
