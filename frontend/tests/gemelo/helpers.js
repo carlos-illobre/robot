@@ -34,7 +34,11 @@ export class FakeRenderer {
     this.setSize = vi.fn();
     this.setClearColor = vi.fn();
     this.setRenderTarget = vi.fn();
-    this.render = vi.fn();
+    // Como WebGLRenderer.render: actualiza las matrices de la escena y de la cámara.
+    this.render = vi.fn((scene, camera) => {
+      scene.updateMatrixWorld();
+      if (camera.parent === null) camera.updateMatrixWorld();
+    });
     this.dispose = vi.fn();
     this.forceContextLoss = vi.fn();
     FakeRenderer.instances.push(this);
