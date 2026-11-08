@@ -6,9 +6,9 @@
 __pycache__/
 node_modules/
 venv/
-coverage/
-reports/
+/coverage/
+/reports/
 .coverage
 coverage.xml
 .stryker-tmp/
-mutants/
+/mutants/
