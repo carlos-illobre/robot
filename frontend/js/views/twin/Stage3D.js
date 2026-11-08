@@ -173,6 +173,13 @@ export class Stage3D {
       controls.screenSpacePanning = true;
       controls.addEventListener("start", () => (this._tween = null)); // el usuario manda
       controls.addEventListener("change", () => (this._dirty = true));
+      if (transparent) {
+        // Embebida en una página que se desplaza (spec 006 · FR-005): un dedo es de la página
+        // (y un toque sigue eligiendo el motor); dos dedos giran y acercan la cámara.
+        // OrbitControls escribe touch-action: none en línea, que le gana al CSS: se corrige acá.
+        controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE };
+        renderer.domElement.style.touchAction = "pan-y";
+      }
       this.controls = controls;
     } else {
       // Sin controles: un "objetivo" mínimo con la misma forma que OrbitControls.target.

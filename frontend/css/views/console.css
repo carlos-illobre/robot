@@ -374,7 +374,8 @@
   .view-console .cv-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
   .view-console .cv-panel { flex: none; }
   .view-console .cv-motors { grid-row: auto; }
-  .view-console .cv-tablewrap { overflow: visible; }
+  /* Spec 006: la página se desplaza entera; la tabla no retiene el gesto del dedo */
+  .view-console .cv-tablewrap { overflow: visible; overscroll-behavior: auto; }
   .view-console .cv-imu { height: 300px; }
   .view-console .cv-right2 { min-height: 280px; }
   .view-console .cv-mchart { height: 200px; }
@@ -404,7 +405,7 @@
   .view-console .cv-sub, .view-console .cv-tools { font-size: 13px; }
   .view-console .cv-tools { flex-wrap: wrap; row-gap: 6px; }
   .view-console .cv-table { font-size: 14px; }
-  .view-console .cv-tablewrap { overflow-x: auto; padding: 0 4px; }
+  .view-console .cv-tablewrap { overflow-x: auto; overflow-y: hidden; overscroll-behavior: auto; padding: 0 4px; }
   .view-console .cv-table td, .view-console .cv-table tbody th, .view-console .cv-table thead th { padding-left: 5px; padding-right: 5px; }
   .view-console .cv-long { display: none; }
   .view-console .cv-pick { font-size: 14px; }
