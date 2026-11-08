@@ -47,22 +47,27 @@ def servidor_limpio():
 
 
 class EventoFalso:
-    """Reemplazo de `threading.Event` que responde `is_set()`/`wait()` según un guion."""
+    """Reemplazo de `threading.Event`: `is_set()` y `wait()` responden según dos guiones.
 
-    def __init__(self, respuestas):
-        self._respuestas = list(respuestas)
+    Cuando un guion se agota responde True (cortado), así ningún bucle queda colgado.
+    """
+
+    def __init__(self, is_set=(), wait=()):
+        self._is_set = list(is_set)
+        self._wait = list(wait)
         self.esperas = []
         self.seteado = False
 
-    def _siguiente(self):
-        return self._respuestas.pop(0) if self._respuestas else True
+    @staticmethod
+    def _siguiente(guion):
+        return guion.pop(0) if guion else True
 
     def is_set(self):
-        return self._siguiente()
+        return self._siguiente(self._is_set)
 
     def wait(self, timeout=None):
         self.esperas.append(timeout)
-        return self._siguiente()
+        return self._siguiente(self._wait)
 
     def set(self):
         self.seteado = True
