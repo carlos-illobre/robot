@@ -48,14 +48,15 @@ cátedra y en **modo demo**.
 12. [Formato del CSV exportado](#-formato-del-csv-exportado)
 13. [Hallazgos: tres errores en el material de la cátedra](#-hallazgos-tres-errores-en-el-material-de-la-cátedra)
 14. [Decisiones técnicas y sus porqués](#-decisiones-técnicas-y-sus-porqués)
-15. [Pruebas y calidad](#-pruebas-y-calidad)
-16. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
-17. [Estructura del repositorio](#-estructura-del-repositorio)
+15. [**Desarrollo guiado por especificaciones (SDD)**](#-desarrollo-guiado-por-especificaciones-sdd)
+16. [Pruebas y calidad](#-pruebas-y-calidad)
+17. [Proceso de diseño de la interfaz](#-proceso-de-diseño-de-la-interfaz)
+18. [Estructura del repositorio](#-estructura-del-repositorio)
 
 **Ayuda y créditos**
 
-18. [Problemas frecuentes](#-problemas-frecuentes)
-19. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
+19. [Problemas frecuentes](#-problemas-frecuentes)
+20. [Roles del equipo y créditos](#-roles-del-equipo-y-créditos)
 
 ---
 
@@ -981,6 +982,42 @@ Docker y la que recomienda Unitree).
 
 ---
 
+## 📐 Desarrollo guiado por especificaciones (SDD)
+
+El proyecto se desarrolla con **Spec-Driven Development**: cada tarea empieza por una
+**especificación** que dice *qué* se construye, *por qué* y *cómo se verifica*, y recién después
+se escribe el código. La especificación es la fuente de verdad. Las pruebas y los commits la
+referencian por sus identificadores de requisito (`FR-…`).
+
+```
+specs/
+├── constitution.md        ← principios no negociables (contrato de la API, 100 % de cobertura, celular, historial…)
+├── README.md              ← el proceso y el índice de especificaciones
+├── _plantillas/           ← spec.md · plan.md · tasks.md
+└── NNN-nombre/            ← una carpeta por funcionalidad o corrección
+    ├── spec.md            ← qué y por qué: historias de usuario, criterios Dado/Cuando/Entonces, requisitos
+    ├── plan.md            ← cómo: archivos, decisiones, estrategia de pruebas
+    └── tasks.md           ← pasos verificables, tildados al terminar
+```
+
+| Paso | Qué se produce | En git |
+|---|---|---|
+| 1. Especificar | `spec.md` | primer commit del branch: `docs(spec): …` |
+| 2. Planificar | `plan.md` + `tasks.md` | mismo commit o el siguiente |
+| 3. Probar | pruebas que fallan | `test(…): …` |
+| 4. Implementar | código | `feat(…)` / `fix(…)` con `Spec: NNN · FR-…` |
+| 5. Verificar e integrar | CI en verde, cobertura 100 % | `git merge --no-ff` a `main` |
+
+- **Proceso e índice:** [`specs/README.md`](specs/README.md)
+- **Constitución:** [`specs/constitution.md`](specs/constitution.md)
+- **Branches, commits y definición de terminado:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+
+Las especificaciones 001 a 005 describen *a posteriori* lo construido antes de adoptar SDD; desde la
+006 se escriben antes del código. Cada tarea vive en su propio branch (`fix/…`, `test/…`, `docs/…`)
+y entra a `main` con un merge sin fast-forward, así se ve en `git log --graph`.
+
+---
+
 ## 🧪 Pruebas y calidad
 
 ```bash
@@ -1065,6 +1102,8 @@ robot/
 │   ├── vendor/                  ← Chart.js 4.4.1 y Three.js r169 (MIT), para funcionar sin internet
 │   └── tests/                   ← pruebas unitarias (node:test)
 ├── e2e/                         ← pruebas de punta a punta (Playwright)
+├── specs/                       ← SDD: constitución, plantillas y una especificación por tarea
+├── CONTRIBUTING.md              ← branches, commits y definición de terminado
 ├── tools/                       ← conversión de modelos 3D y capturas del manual (Node, solo desarrollo)
 ├── docs/
 │   ├── consigna.md              ← el enunciado
