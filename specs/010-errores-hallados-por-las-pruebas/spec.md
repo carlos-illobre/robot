@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Branch** | `fix/hallazgos-frontend` · `fix/hallazgos-backend` |
-| **Estado** | 🔄 En curso |
+| **Estado** | ✅ Implementada (16 de 17; FR-007 descartado) |
 | **Creada** | 2026-11-08 |
 | **Relacionada con** | Especificación 007 |
 
@@ -26,7 +26,7 @@ corregirlos (las pruebas de cobertura no cambian comportamiento). Esta especific
 | FR-004 | Consola (IMU) | «1 muestras» | «1 muestra» |
 | FR-005 | Consola, Cuerpo, Piloto | `−0` y `−0 mA` cuando el valor redondea a cero | `0` y `0 mA`, sin signo |
 | FR-006 | Piloto | «1 tibios», «1 calientes» | singular con 1 |
-| FR-007 | Piloto | Sin dato de corriente, la batería dice «— en reposo» | «—» sin sentido de la corriente |
+| FR-007 | Piloto | ~~Sin dato de corriente, la batería dice «— en reposo»~~ | **Descartado:** no es un error real. Las vistas reciben muestras ya normalizadas por `normalizeFrame`, que convierte una corriente no numérica en 0; un dato faltante se ve «0 mA · en reposo». Solo ocurre llamando a `update()` a mano con datos crudos |
 | FR-008 | Piloto | Con umbral de torque 0 el anillo escribe `stroke-width="NaN"` | Ancho válido (umbral mínimo para la escala) |
 | FR-009 | Cuerpo | «undefined muestras» si la línea de tiempo todavía no tiene tamaño | Cuenta real de muestras |
 | FR-010 | Cuerpo | `onTheme()` después de `destroy()` lanza una excepción | No hace nada |
@@ -54,3 +54,11 @@ sigue en 100 % y el puntaje de mutación no baja.
 - Detalles sin efecto observable en el uso real (p. ej. la franja de temperatura de la última
   muestra, que se pinta con la muestra siguiente; o `performance.now() === 0`, que no ocurre en un
   navegador).
+
+## Resultado
+
+- Frontend: [`tasks-frontend.md`](tasks-frontend.md) · branch `fix/hallazgos-frontend`
+- Backend: [`tasks-backend.md`](tasks-backend.md) · branch `fix/hallazgos-backend`
+
+Cada FR tiene una prueba cuyo nombre lo cita y que falló antes del arreglo. La cobertura siguió en
+100 % y las 7 pruebas E2E pasan.
