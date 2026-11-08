@@ -22,8 +22,8 @@ export default defineConfig({
       include: ["frontend/js/**/*.js"],
       reportsDirectory: "coverage/frontend",
       reporter: ["text-summary", "text", "html", "lcov", "json-summary"],
-      // Ratchet (spec 007): sube con cada branch de pruebas hasta 100.
-      thresholds: { lines: 9, branches: 10, functions: 11, statements: 9 },
+      // Spec 007: 100 % o la CI falla.
+      thresholds: { lines: 100, branches: 100, functions: 100, statements: 100 },
     },
   },
 });
