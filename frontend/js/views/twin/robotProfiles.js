@@ -7,7 +7,10 @@
  * `info.motores_nombres` (nada de "12 motores" fijos).
  */
 
-const asset = (rel) => new URL(`../../../assets/robots/${rel}`, import.meta.url).href;
+// Concatenado a propósito (no plantilla `…${rel}`): Vite/Vitest reescribe
+// `new URL(\`…${x}\`, import.meta.url)` como un glob de assets y en las pruebas
+// la URL quedaba "undefined". En el navegador (sin build) es la misma URL.
+const asset = (rel) => new URL("../../../assets/robots/" + rel, import.meta.url).href;
 
 /**
  * Nombre del contrato de la API → joint del MJCF.

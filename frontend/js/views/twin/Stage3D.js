@@ -226,7 +226,6 @@ export class Stage3D {
 
   /** Una celda de 1 m: líneas finas cada 25 cm y una marcada en el borde. */
   _paintGrid({ floor, minor, major }) {
-    if (!this.gridCanvas) return;
     const g = this.gridCanvas.getContext("2d");
     const n = this.gridCanvas.width;
     g.fillStyle = floor;
