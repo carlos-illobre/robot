@@ -6,6 +6,10 @@ export default {
   testRunner: "vitest",
   vitest: { configFile: "vitest.config.js" },
   coverageAnalysis: "perTest",
+  // Los mutantes "estáticos" (constantes que se evalúan una vez al cargar el módulo, como el
+  // texto del manual) obligan a correr TODA la suite por cada uno: ~18 % de los mutantes y ~80 %
+  // del tiempo. Se informan como ignorados (spec 008, plan).
+  ignoreStatic: true,
   mutate: ["frontend/js/**/*.js"],
   reporters: ["html", "json", "clear-text", "progress"],
   htmlReporter: { fileName: "reports/mutation/frontend/index.html" },
