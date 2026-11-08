@@ -141,5 +141,5 @@ class TelemetryReader:
 # El modo --demo no depende del transporte: se reusa el del laboratorio.
 try:
     from telemetry_reader_dds import DemoReader          # noqa: F401
-except ImportError:                                      # pragma: no cover
+except ImportError:                                      # sin el lector del laboratorio no hay demo
     DemoReader = None
