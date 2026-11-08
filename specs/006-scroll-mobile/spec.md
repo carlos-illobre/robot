@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Branch** | `fix/scroll-mobile` |
-| **Estado** | En revisión |
+| **Estado** | ✅ Implementada |
 | **Creada** | 2026-11-08 |
 | **Relacionada con** | Constitución, principio V · Especificación 004 (FR-004) |
 

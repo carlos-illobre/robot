@@ -57,7 +57,7 @@ pruebas). Desde la 006 se escriben **antes** del código.
 | 003 | [Captura de muestras y exportación CSV](003-captura-exportacion-csv/spec.md) | ✅ Implementada | Retroactiva |
 | 004 | [Vistas múltiples y gemelo 3D](004-vistas-y-gemelo-3d/spec.md) | ✅ Implementada | Retroactiva |
 | 005 | [Fuentes de datos intercambiables](005-fuentes-de-datos/spec.md) | ✅ Implementada | Retroactiva |
-| 006 | [Desplazamiento en el celular](006-scroll-mobile/spec.md) | 🔄 En revisión | `fix/scroll-mobile` |
+| 006 | [Desplazamiento en el celular](006-scroll-mobile/spec.md) | ✅ Implementada | `fix/scroll-mobile` |
 
 Las especificaciones nuevas se agregan a esta tabla en el mismo commit que las crea.
 
