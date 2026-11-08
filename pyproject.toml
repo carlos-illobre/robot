@@ -22,3 +22,12 @@ title = "Cobertura del backend · TP05"
 
 [tool.coverage.xml]
 output = "coverage/backend/coverage.xml"
+
+[tool.mutmut]
+# Pruebas de mutación del backend (spec 008). `npm run mutation:backend`
+source_paths = ["backend/", "iniciar.py"]
+do_not_mutate = ["backend/tests/*"]
+# servidor.py sirve el dashboard si existe frontend/: hace falta en la copia que muta mutmut
+also_copy = ["frontend/"]
+pytest_add_cli_args = ["-p", "no:cacheprovider", "--no-cov", "-q"]
+pytest_add_cli_args_test_selection = ["backend/tests/"]
